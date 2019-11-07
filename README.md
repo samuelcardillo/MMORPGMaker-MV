@@ -10,6 +10,8 @@ With the release of RPG MAKER MV which allows usage of JavaScript and its HTML5 
 
 ## How to use ? 
 
+Video : [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/TcAmU2bdKv/0.jpg)](https://www.youtube.com/watch?v=TcAmU2bdKv)
+
 ### Plugins requirement 
 
 **Disclaimer :** *All the files are already contained in the project.*
