@@ -1,4 +1,4 @@
-var express       = require("express")
+const express       = require("express")
   , bodyParser    = require('body-parser')
   , path          = require('path')
   , fs            = require('fs')
@@ -27,15 +27,23 @@ app.use(function(req,res,next){ // CORS (read : https://developer.mozilla.org/en
 server.listen(8097);
 
 console.log("######################################");
-console.log("# RPG Maker MV - MMORPG TEST");
+console.log("# MMORPG Maker MV - Samuel Lespes Cardillo");
+console.log("# Check GitHub for updates");
 console.log("######################################");
 console.log("[I] Socket.IO server started on port 8097 ...");
 
-// DEBUG 
-var offlineMap = {
-  'map-3':true
+// PARAMETERS 
+const registrationOnTheFly = true;
+const newPlayerDetails = { 
+  mapId: 1,
+  skin: 1,
+  x: 5,
+  y: 5
+}
+const offlineMap = {
+  'map-3': true
 };
-// DEBUG
+// PARAMETERS
 
 // CORE INTEGRATIONS
 MMO_Core = {
@@ -46,13 +54,18 @@ MMO_Core["database"].initialize(); // Initializing the database
 
 io.on("connect",function(client){
   client.on("login",function(data){
-    MMO_Core["database"].findUser(data["username"],function(output){
-      if(output[0] == undefined) return false;
+    MMO_Core["database"].findUser(data["username"], function(output){
+      if(output[0] == undefined) {
+        if(!registrationOnTheFly) return false;
+        MMO_Core["database"].registerUser(data["username"], newPlayerDetails, function(output){
+          MMO_Core["database"].findUser(data["username"], function(output){
+            loginPlayer(client,output[0]);
+          });
+        });
+        return;
+      }
 
-      client.emit("login",{msg:output[0]})
-      client.playerData = output[0];
-
-      console.log(client.id + " connected to the game");
+      loginPlayer(client,output[0]);
     })
   });
 
@@ -118,3 +131,10 @@ io.on("connect",function(client){
   })
 })
 
+// Connecting the player and storing datas locally
+function loginPlayer(client, details) { 
+  console.dir(details);
+  client.emit("login",{msg: details})
+  client.playerData = details;
+  console.log(client.id + " connected to the game");
+}

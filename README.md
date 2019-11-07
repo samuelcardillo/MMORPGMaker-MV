@@ -12,11 +12,10 @@ With the release of RPG MAKER MV which allows usage of JavaScript and its HTML5 
 
 ### Plugins requirement 
 
-**Disclaimer :** *It seems Event Mini Label now costs 1 USD (which was not the case in the past) so a "internal" solution will be developed.*
+**Disclaimer :** *All the files are already contained in the project.*
 
 - Orange Custom Events : http://download.hudell.com/OrangeCustomEvents.js
 - Orange Custom Event Creator : http://download.hudell.com/OrangeCustomEventCreator.js
-- Event Mini Label : http://www.yanfly.moe/wiki/Event_Mini_Label_(YEP)
 - QuasiMovement : https://github.com/quxios/Quasi-MV-Master-Demo/blob/master/js/plugins/QuasiMovement.js
 
 ### Launch steps
@@ -24,17 +23,20 @@ With the release of RPG MAKER MV which allows usage of JavaScript and its HTML5 
 2. Install [NodeJS](https://nodejs.org/en/) and `npm i` in the `server` folder
 3. Install [RethinkDB](https://rethinkdb.com/docs/install/) and `rethinkdb` in the `server` folder
 4. `node mmo.js` in the `server` folder
-5. Add the files from `libs` in your project libs
-6. Replace the `index.html` from your project by the one from the repo
+5. Start the RPG Maker MV project.
 
 Congratulations! Your game is now an MMORPG. 
 
 ### Current functionalities
-- Sync movements
+- Sync player movements
 - Sync skins
 - Persistance of position & skin
 - Instanced & global map
 - Tchat functionalities
 
-### Known bugs
- - When moving, the other players seems to be flying away.
+### Improvements to do :
+- Enhance sync of players movements
+- Improve in-game chat UX with keybindings and so on
+- Better server management
+- Inventory system
+- Quest system

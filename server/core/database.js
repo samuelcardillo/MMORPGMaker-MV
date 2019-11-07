@@ -68,6 +68,18 @@ exports.findUser = function(username,callback) {
   })
 }
 
+exports.registerUser = function(username, details, callback) {
+  r.connect({ db: "mmorpg", host: "localhost", port: 28015 }).then(function(conn){
+   r.table('users')
+    .insert({"mapId": details["mapId"], "skin": details["skin"], "username": username,"x": details["x"],"y": details["y"]})
+    .run(conn)
+    .then(function(output) {
+      return callback(output);
+    })
+    .finally(function() { conn.close(); });  
+  })
+}
+
 exports.savePlayer = function(playerData,callback) {
   r.connect({ db: "mmorpg", host: "localhost", port: 28015 }).then(function(conn){
    r.table('users')
