@@ -12,7 +12,19 @@
  var ChatBox = undefined;
 
 (function() {
-  ChatBox = function() {
+  function ChatBox() { 
+    this.initialize.apply(this, arguments);
+  }
+
+  ChatBox.isGenerated = false;
+
+  ChatBox.SceneMapLoaded = Scene_Map.prototype.onMapLoaded;
+  Scene_Map.prototype.onMapLoaded = function() {
+    ChatBox.SceneMapLoaded.call(this);
+
+    if(!ChatBox.isGenerated) ChatBox.generate();
+
+    ChatBox.isGenerated = true;
   }
 
   ChatBox.generate = function() {
@@ -76,4 +88,8 @@
     document.querySelector("#textBox1").appendChild(span);
     document.querySelector("#textBox1").scrollTop = document.querySelector("#textBox1").scrollHeight;
   })
+
+  TouchInput._onTouchStart = function(event) {
+    return true;
+  };
 })();

@@ -103,18 +103,20 @@ io.on("connect",function(client){
     client.broadcast.to(data["id"]).emit("map_joined",{id:client.id,playerData:data["playerData"]});
   })
 
-  client.on("player_start_moving",function(keyCode){
-    if(offlineMap[client.lastMap] != undefined) return false;
-
-    client.broadcast.to(client.lastMap).emit("player_start_moving",{id:client.id,keyCode:keyCode});
+  client.on("player_update_switches", function(payload) {
+    client.playerData["switches"] = payload;
   })
 
-  client.on("player_stop_moving",function(data){
+  client.on("player_moving",function(payload){
     if(offlineMap[client.lastMap] != undefined) return false;
-    client.playerData["x"] = data["x"];
-    client.playerData["y"] = data["y"];
-    client.playerData["mapId"] = data["mapId"];
-    client.broadcast.to(client.lastMap).emit("player_stop_moving",{id:client.id,playerData:data});
+
+    payload.id = client.id;
+
+    client.playerData["x"] = payload["x"];
+    client.playerData["y"] = payload["y"];
+    client.playerData["mapId"] = payload["mapId"];
+
+    client.broadcast.to(client.lastMap).emit("player_moving", payload);
   })
 
   client.on("new_message",function(message){
@@ -132,8 +134,7 @@ io.on("connect",function(client){
 })
 
 // Connecting the player and storing datas locally
-function loginPlayer(client, details) { 
-  console.dir(details);
+function loginPlayer(client, details) {
   client.emit("login",{msg: details})
   client.playerData = details;
   console.log(client.id + " connected to the game");

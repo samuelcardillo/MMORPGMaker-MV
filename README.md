@@ -35,10 +35,15 @@ Congratulations! Your game is now an MMORPG.
 - Persistance of position & skin
 - Instanced & global map
 - Tchat functionalities
+- Saved switches
 
 ### Improvements to do :
-- Enhance sync of players movements
+- Refactore server code
+- Refactore Core plugin code
+- Add possibility to add text over NPC and players heads
 - Improve in-game chat UX with keybindings and so on
-- Better server management
+- Stats system (proper XP and so on)
 - Inventory system
 - Quest system
+- Improve instanced map
+- Global switches system

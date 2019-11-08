@@ -101,7 +101,7 @@
 
       $("#ErrorPrinter").fadeOut({duration: 1000}).html("");
       that.fadeOutAll();
-      isLogged = data["msg"];
+      MMO_Core_Players.Player = data["msg"];
       DataManager.setupNewGame();
       SceneManager.goto(Scene_Map);
       return true;
