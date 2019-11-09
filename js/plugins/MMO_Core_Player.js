@@ -215,6 +215,7 @@ function MMO_Core_Players() {
 
   socket.on('player_moving', function(data){
     if(!SceneManager._scene._spriteset || SceneManager._scene instanceof Scene_Battle) return;
+    if(MMO_Core_Players.Players[data.id] === undefined) return;
 
     // Update movement speed and frequenzy
     MMO_Core_Players.Players[data.id].setMoveSpeed(data.moveSpeed);

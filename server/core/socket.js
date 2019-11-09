@@ -28,6 +28,8 @@ exports.initialize = function(socketConfig, serverConfig) {
     });
   
     client.on("map_joined",function(playerData) {
+      if(client.playerData === undefined) return;
+      
       if(client.lastMap != undefined && client.lastMap != "map-" + playerData.mapId) {
         if(SERVER_CONFIG["offlineMaps"][client.lastMap] == undefined) client.broadcast.to(client.lastMap).emit('map_exited',client.id);
         client.leave(client.lastMap);
@@ -62,6 +64,8 @@ exports.initialize = function(socketConfig, serverConfig) {
     })
   
     client.on("refresh_players_position", function(data){
+      if(client.playerData === undefined) return;
+
       if(SERVER_CONFIG["offlineMaps"][client.lastMap] != undefined) return false;
   
       console.log(client.id + " transmit position to " + data.id);
@@ -73,15 +77,20 @@ exports.initialize = function(socketConfig, serverConfig) {
     })
 
     client.on("refresh_player_on_map", function() {
+      if(client.playerData === undefined) return;
+
       client.broadcast.to("map-" + client.playerData["mapId"]).emit("refresh_player_on_map", {playerId: client.id, playerData: client.playerData});   
     })
   
     client.on("player_update_switches", function(payload) {
       if(client.playerData === undefined) return;
+
       client.playerData["switches"] = payload;
     })
 
     client.on("player_global_switch_check", function(payload) {
+      if(client.playerData === undefined) return;
+
       if(SERVER_CONFIG["globalSwitches"][payload["switchId"]] === undefined) return;
 
       SERVER_CONFIG["globalSwitches"][payload["switchId"]] = payload["value"];
@@ -91,10 +100,14 @@ exports.initialize = function(socketConfig, serverConfig) {
     })
   
     client.on("player_update_stats", function(payload) {
+      if(client.playerData === undefined) return;
+
       client.playerData["stats"] = payload;
     })
 
     client.on("player_update_skin", function(payload) {
+      if(client.playerData === undefined) return;
+
       switch (payload["type"]) {
         case "sprite":
           client.playerData["skin"]["characterName"] = payload["characterName"];
@@ -112,6 +125,7 @@ exports.initialize = function(socketConfig, serverConfig) {
   
     client.on("player_moving",function(payload){
       if(client.playerData === undefined) return;
+
       if(SERVER_CONFIG["offlineMaps"][client.lastMap] != undefined) return false;
   
       payload.id = client.id;
@@ -124,10 +138,14 @@ exports.initialize = function(socketConfig, serverConfig) {
     })
   
     client.on("new_message",function(message){
+      if(client.playerData === undefined) return;
+
       io.in(client.lastMap).emit("new_message",{username:client.playerData["username"],msg:message});
     })
 
     client.on("player_dead", function() {
+      if(client.playerData === undefined) return;
+      
       client.emit("player_respawn", {mapId: SERVER_CONFIG["newPlayerDetails"]["mapId"], x: SERVER_CONFIG["newPlayerDetails"]["x"], y: SERVER_CONFIG["newPlayerDetails"]["y"]})
     })
   
