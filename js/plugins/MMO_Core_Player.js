@@ -54,27 +54,24 @@ function MMO_Core_Players() {
     var actor = $dataActors[actorId];
     var hasLoaded = false;
 
-    if(MMO_Core_Players.Player["stats"] !== undefined) {
-      actor.initialLevel = MMO_Core_Players.Player["stats"]["level"];
-      actor.name = MMO_Core_Players.Player["username"];
-      actor.equips = MMO_Core_Players.Player["stats"]["equips"];
-      hasLoaded = true;
-    }
+    if(MMO_Core_Players.Player["stats"] !== undefined) hasLoaded = true;
 
     this._actorId = actorId;
-    this._name = actor.name;
+    this._name = MMO_Core_Players.Player["username"] || actor.name;
     this._nickname = actor.nickname;
     this._profile = actor.profile;
     this._classId = actor.classId;
-    this._level = actor.initialLevel;
-    this.initEquips(actor.equips);
     this.clearParamPlus();
     if(hasLoaded) {
       this._exp =  MMO_Core_Players.Player["stats"]["exp"];
       this._skills = MMO_Core_Players.Player["stats"]["skills"];
       this._hp = MMO_Core_Players.Player["stats"]["hp"];
       this._mp = MMO_Core_Players.Player["stats"]["mp"];
+      this._level =  MMO_Core_Players.Player["stats"]["level"];
+      this.initEquips(MMO_Core_Players.Player["stats"]["equips"]);
     } else {
+      this._level = actor.initialLevel;
+      this.initEquips(actor.equips);
       this.initExp();
       this.initSkills();
       this.recoverAll();
