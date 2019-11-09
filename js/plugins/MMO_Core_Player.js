@@ -189,6 +189,8 @@ function MMO_Core_Players() {
   // ---------- Socket Handling
   // ---------------------------------------
   socket.on("map_joined",function(data){
+    if(MMO_Core_Players.Players[data.id] !== undefined && $gameMap._events[MMO_Core_Players.Players[data.id]["_eventId"]] !== undefined) $gameMap.eraseEvent(MMO_Core_Players.Players[data.id]["_eventId"]);
+
     MMO_Core_Players.Players[data.id] = $gameMap.createNormalEventAt(data["playerData"]["skin"]["characterName"], data["playerData"]["skin"]["characterIndex"], data["playerData"]["x"], data["playerData"]["y"], 2, 0, true);
     MMO_Core_Players.Players[data.id].headDisplay = MMO_Core_Players.Players[data.id].list().push({"code":108,"indent":0,"parameters":["<Name: " + data["playerData"]["username"] + ">"]});
     MMO_Core_Players.Players[data.id]._priorityType = 0;
@@ -197,6 +199,8 @@ function MMO_Core_Players() {
   })
 
   socket.on("map_exited",function(data){
+    if($gameMap._events[MMO_Core_Players.Players[data.id]["_eventId"]] === undefined) return;
+    
     $gameMap.eraseEvent(MMO_Core_Players.Players[data]["_eventId"]);
   })
 

@@ -28,7 +28,7 @@ exports.initialize = function(socketConfig, serverConfig) {
     });
   
     client.on("map_joined",function(playerData){
-      if(client.lastMap != undefined) {
+      if(client.lastMap != undefined && client.lastMap != "map-" + playerData.mapId) {
         if(SERVER_CONFIG["offlineMaps"][client.lastMap] == undefined) {
           client.broadcast.to(client.lastMap).emit('map_exited',client.id);
         }
@@ -53,11 +53,11 @@ exports.initialize = function(socketConfig, serverConfig) {
       client.lastMap = "map-" + playerData["mapId"];
       
       if(SERVER_CONFIG["offlineMaps"][client.lastMap] == undefined) {
-        client.broadcast.to("map-" + playerData["mapId"]).emit("map_joined",{id:client.id,playerData:playerData});
+        if(client.lastMap != "map-" + playerData.mapId) client.broadcast.to("map-" + playerData["mapId"]).emit("map_joined",{id:client.id,playerData:playerData});
         client.broadcast.to("map-" + playerData["mapId"]).emit("refresh_players_position", client.id);
       }
     
-      console.log(client.id + " joined map-" + client.lastMap);
+      console.log(client.id + " joined " + client.lastMap);
     })
   
     client.on("refresh_players_position", function(data){

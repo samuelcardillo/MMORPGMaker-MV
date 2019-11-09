@@ -96,12 +96,12 @@
       return this.displayError("You must provide a username!");
 
     socket.on("login", function(data){
-      if (data.err)
-        return that.displayError("Error : "+data.err);
-
+      if (data.err) return that.displayError("Error : "+data.err);
       $("#ErrorPrinter").fadeOut({duration: 1000}).html("");
-      that.fadeOutAll();
+
       MMO_Core_Players.Player = data["msg"];
+
+      that.fadeOutAll();
       DataManager.setupNewGame();
       SceneManager.goto(Scene_Map);
       return true;
