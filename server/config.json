@@ -5,7 +5,10 @@
     "mapId": 1,
     "skin": {
       "characterIndex": 0,
-      "characterName": "Actor1"
+      "characterName": "Actor1",
+      "battlerName": "Actor1_1",
+      "faceName": "Actor1",
+      "faceIndex": 0
     },
     "x": 5,
     "y": 5

@@ -37,11 +37,14 @@ Congratulations! Your game is now an MMORPG.
 - Persistance of local switches
 - Persistance of global switches
 - Global and local map system
+- Respawn system
 - In-game chat
 
 ### Improvements to do :
 - Improve in-game chat UX with keybindings and so on
 - Add RESTFUL API for outside game interactions
-- Create inter-players interactivity (trades, pvp, ...)
+- Create inter-players interactivity (visual notification when in menu or combat, trades, pvp, ...)
 - (Continuous) Refactore entire codebase
 - (MUCH LATER) Server-side anti-cheat
+
+**Join us on Discord : https://discord.gg/GVqyAwp**

@@ -39,6 +39,11 @@ exports.initialize = function(socketConfig, serverConfig) {
       playerData.username = client.playerData.username; // Temporary way to pass the username
       playerData.skin     = client.playerData.skin;
 
+      // Storing the new location (in case of disconnecting on a local map)
+      client.playerData.x     = playerData.x;
+      client.playerData.y     = playerData.y;
+      client.playerData.mapId = playerData.mapId;
+
       // Update global switches
       for(var key in SERVER_CONFIG["globalSwitches"]) {
         client.emit("player_update_switch", {switchId: key, value: SERVER_CONFIG["globalSwitches"][key]});
@@ -89,7 +94,19 @@ exports.initialize = function(socketConfig, serverConfig) {
     })
 
     client.on("player_update_skin", function(payload) {
-      client.playerData["skin"] = payload;
+      switch (payload["type"]) {
+        case "sprite":
+          client.playerData["skin"]["characterName"] = payload["characterName"];
+          client.playerData["skin"]["characterIndex"] = payload["characterIndex"];
+          break;
+        case "face": 
+          client.playerData["skin"]["faceName"] = payload["faceName"];
+          client.playerData["skin"]["faceIndex"] = payload["faceIndex"];      
+          break;
+        case "battler": 
+          client.playerData["skin"]["battlerName"] = payload["battlerName"];
+          break;
+      }
     })
   
     client.on("player_moving",function(payload){
@@ -107,6 +124,10 @@ exports.initialize = function(socketConfig, serverConfig) {
   
     client.on("new_message",function(message){
       io.in(client.lastMap).emit("new_message",{username:client.playerData["username"],msg:message});
+    })
+
+    client.on("player_dead", function() {
+      client.emit("player_respawn", {mapId: SERVER_CONFIG["newPlayerDetails"]["mapId"], x: SERVER_CONFIG["newPlayerDetails"]["x"], y: SERVER_CONFIG["newPlayerDetails"]["y"]})
     })
   
     client.on("disconnect",function(){
