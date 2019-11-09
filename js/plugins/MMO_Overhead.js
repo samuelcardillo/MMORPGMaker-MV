@@ -27,12 +27,6 @@ function MMO_Overhead() {
   this.initialize.apply(this, arguments);
 }
 
-MMO_Overhead.Parameters = PluginManager.parameters('MMO_Overhead');
-
-MMO_Overhead.Parameters.EMWFontSize = Number(MMO_Overhead.Parameters['Font Size']);
-MMO_Overhead.Parameters.EMWBufferX = Number(MMO_Overhead.Parameters['X Buffer']);
-MMO_Overhead.Parameters.EMWBufferY = Number(MMO_Overhead.Parameters['Y Buffer']);
-
 MMO_Overhead.Game_Interpreter = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
   MMO_Overhead.Game_Interpreter.call(this, command, args)
@@ -54,9 +48,9 @@ MMO_Overhead.Windows.prototype = Object.create(Window_Base.prototype);
 MMO_Overhead.Windows.prototype.constructor = MMO_Overhead.Windows;
 
 MMO_Overhead.Windows.prototype.initialize = function() {
-    this._bufferX = MMO_Overhead.Parameters.EMWBufferX;
-    this._bufferY = MMO_Overhead.Parameters.EMWBufferY;
-    this._fontSize = MMO_Overhead.Parameters.EMWFontSize;
+    this._bufferX = 0;
+    this._bufferY = 36;
+    this._fontSize = 14;
     this._alwaysShow = false;
     var width = 136;
     var height = this.windowHeight();
@@ -71,7 +65,7 @@ MMO_Overhead.Windows.prototype.initialize = function() {
 
 MMO_Overhead.Windows.prototype.standardFontSize = function() {
     if (this._fontSize !== undefined) return this._fontSize;
-    return MMO_Overhead.Parameters.EMWFontSize;
+    return 14;
 };
 
 MMO_Overhead.Windows.prototype.windowHeight = function() {
@@ -86,12 +80,12 @@ MMO_Overhead.Windows.prototype.lineHeight = function() {
 
 MMO_Overhead.Windows.prototype.bufferX = function() {
     if (this._bufferX !== undefined) return this._bufferX;
-    return MMO_Overhead.Parameters.EMWBufferX;
+    return 0;
 };
 
 MMO_Overhead.Windows.prototype.bufferY = function() {
     if (this._bufferY !== undefined) return this._bufferY;
-    return MMO_Overhead.Parameters.EMWBufferY;
+    return 36;
 };
 
 MMO_Overhead.Windows.prototype.setCharacter = function(character) {
@@ -104,8 +98,8 @@ MMO_Overhead.Windows.prototype.gatherDisplayData = function() {
     this._page = this._character.page();
     this._pageIndex = this._character._pageIndex;
     this._range = 5;
-    this._bufferY = MMO_Overhead.Parameters.EMWBufferY;
-    this._fontSize = MMO_Overhead.Parameters.EMWFontSize;
+    this._bufferY = 36;
+    this._fontSize = 14;
     this._alwaysShow = false;
     if (!this._character.page()) {
       return this.visible = false;
