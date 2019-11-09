@@ -1,0 +1,13 @@
+{
+  "port": 8097,
+  "registrationOnTheFly": true,
+  "newPlayerDetails": { 
+    "mapId": 1,
+    "skin": 1,
+    "x": 5,
+    "y": 5
+  },
+  "offlineMaps": {
+    "map-3": true
+  }
+}
