@@ -199,7 +199,7 @@ function MMO_Core_Players() {
   })
 
   socket.on("map_exited",function(data){
-    if($gameMap._events[MMO_Core_Players.Players[data.id]["_eventId"]] === undefined) return;
+    if($gameMap._events[MMO_Core_Players.Players[data]["_eventId"]] === undefined) return;
     
     $gameMap.eraseEvent(MMO_Core_Players.Players[data]["_eventId"]);
   })

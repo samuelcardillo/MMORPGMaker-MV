@@ -27,12 +27,11 @@ exports.initialize = function(socketConfig, serverConfig) {
       })
     });
   
-    client.on("map_joined",function(playerData){
+    client.on("map_joined",function(playerData) {
       if(client.lastMap != undefined && client.lastMap != "map-" + playerData.mapId) {
-        if(SERVER_CONFIG["offlineMaps"][client.lastMap] == undefined) {
-          client.broadcast.to(client.lastMap).emit('map_exited',client.id);
-        }
+        if(SERVER_CONFIG["offlineMaps"][client.lastMap] == undefined) client.broadcast.to(client.lastMap).emit('map_exited',client.id);
         client.leave(client.lastMap);
+
         console.log(client.id + " left " + client.lastMap);
       }
   
@@ -48,14 +47,16 @@ exports.initialize = function(socketConfig, serverConfig) {
       for(var key in SERVER_CONFIG["globalSwitches"]) {
         client.emit("player_update_switch", {switchId: key, value: SERVER_CONFIG["globalSwitches"][key]});
       }
-  
-      client.join("map-" + playerData["mapId"]);
-      client.lastMap = "map-" + playerData["mapId"];
-      
+
       if(SERVER_CONFIG["offlineMaps"][client.lastMap] == undefined) {
         if(client.lastMap != "map-" + playerData.mapId) client.broadcast.to("map-" + playerData["mapId"]).emit("map_joined",{id:client.id,playerData:playerData});
         client.broadcast.to("map-" + playerData["mapId"]).emit("refresh_players_position", client.id);
       }
+  
+      client.join("map-" + playerData["mapId"]);
+      client.lastMap = "map-" + playerData["mapId"];
+      
+      
     
       console.log(client.id + " joined " + client.lastMap);
     })
