@@ -22,4 +22,11 @@ var socket = undefined;
   let serverAddress = String(MMO.Parameters['Server Location']);
 
   socket = socket || io.connect('http://' + serverAddress + '/');
+
+  // Clean up the menu
+  Window_MenuCommand.prototype.makeCommandList = function() {
+    this.addMainCommands();
+    this.addOriginalCommands();
+    this.addOptionsCommand();
+  };
 })();

@@ -107,6 +107,10 @@ io.on("connect",function(client){
     client.playerData["switches"] = payload;
   })
 
+  client.on("player_update_stats", function(payload) {
+    client.playerData["stats"] = payload;
+  })
+
   client.on("player_moving",function(payload){
     if(offlineMap[client.lastMap] != undefined) return false;
 

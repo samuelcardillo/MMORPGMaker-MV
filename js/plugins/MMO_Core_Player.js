@@ -33,8 +33,53 @@ function MMO_Core_Players() {
     this.selectSavefileForNewGame();
     $gameParty.setupStartingMembers();
     $gamePlayer.reserveTransfer(MMO_Core_Players.Player["mapId"],MMO_Core_Players.Player["x"],MMO_Core_Players.Player["y"]);
-    $gameSystem.disableMenu();
+    $gameSystem.disableSave();
     Graphics.frameCount = 0;
+  };
+
+  // Handle the initialization of the player with the proper stats and items
+  MMO_Core_Players.partyInit = Game_Party.prototype.initialize;
+  Game_Party.prototype.initialize = function() { 
+    MMO_Core_Players.partyInit.call(this);
+    if(MMO_Core_Players.Player["stats"] !== undefined) { 
+      this._gold = MMO_Core_Players.Player["stats"]["gold"];
+      this._items = MMO_Core_Players.Player["stats"]["items"];
+      this._weapons = MMO_Core_Players.Player["stats"]["weapons"];
+      this._armors = MMO_Core_Players.Player["stats"]["armors"];
+    }
+  }
+
+  // Handle the initialization of the player with the proper stats and items
+  Game_Actor.prototype.setup = function(actorId) {
+    var actor = $dataActors[actorId];
+    var hasLoaded = false;
+
+    if(MMO_Core_Players.Player["stats"] !== undefined) {
+      actor.initialLevel = MMO_Core_Players.Player["stats"]["level"];
+      actor.name = MMO_Core_Players.Player["username"];
+      actor.equips = MMO_Core_Players.Player["stats"]["equips"];
+      hasLoaded = true;
+    }
+
+    this._actorId = actorId;
+    this._name = actor.name;
+    this._nickname = actor.nickname;
+    this._profile = actor.profile;
+    this._classId = actor.classId;
+    this._level = actor.initialLevel;
+    this.initEquips(actor.equips);
+    this.clearParamPlus();
+    if(hasLoaded) {
+      this._exp =  MMO_Core_Players.Player["stats"]["exp"];
+      this._skills = MMO_Core_Players.Player["stats"]["skills"];
+      this._hp = MMO_Core_Players.Player["stats"]["hp"];
+      this._mp = MMO_Core_Players.Player["stats"]["mp"];
+    } else {
+      this.initExp();
+      this.initSkills();
+      this.recoverAll();
+    }
+    this.initImages();
   };
 
   // Handle the proper player spawn when map load
@@ -51,6 +96,8 @@ function MMO_Core_Players() {
       $dataActors[1].characterIndex = MMO_Core_Players.Player["skin"];
       MMO_Core_Players.Player["logged"] = true;
     }
+    
+    MMO_Core_Players.savePlayerStats();
     
     socket.emit("map_joined", MMO_Core_Players.getPlayerPos());
   }
@@ -122,7 +169,27 @@ function MMO_Core_Players() {
     MMO_Core_Players.Players[data.id].setMoveFrequency(data.moveFrequency);
     MMO_Core_Players.Players[data.id].moveStraight(data.direction);
     if (MMO_Core_Players.Players[data.id].x !== data.x || MMO_Core_Players.Players[data.id].y !== data.y) MMO_Core_Players.Players[data.id].setPosition(data.x, data.y);
-	});
+  });
+  
+  MMO_Core_Players.savePlayerStats = function() {
+    let equips = [];
+    for(var i = 0; i < $gameActors["_data"][1]["_equips"].length; i++) {
+      equips.push($gameActors["_data"][1]["_equips"][i]["_itemId"])
+    }
+
+    socket.emit("player_update_stats", {
+      hp: $gameActors["_data"][1]["_hp"],
+      mp: $gameActors["_data"][1]["_mp"],
+      equips: equips,
+      skills: $gameActors["_data"][1]["_skills"],
+      level: $gameActors["_data"][1]["_level"],
+      exp: $gameActors["_data"][1]["_exp"],
+      gold: $gameParty["_gold"],
+      items: $gameParty["_items"],
+      armors: $gameParty["_armors"],
+      weapons: $gameParty["_weapons"],
+    });
+  }
 
   MMO_Core_Players.getPlayerPos = function() {
     return {

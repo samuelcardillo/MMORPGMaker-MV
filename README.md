@@ -18,7 +18,6 @@ Video : [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/TcAmU2bdKvE/0.jpg)](h
 
 - Orange Custom Events : http://download.hudell.com/OrangeCustomEvents.js
 - Orange Custom Event Creator : http://download.hudell.com/OrangeCustomEventCreator.js
-- QuasiMovement : https://github.com/quxios/Quasi-MV-Master-Demo/blob/master/js/plugins/QuasiMovement.js
 
 ### Launch steps
 1. `git clone` the repo
@@ -30,20 +29,20 @@ Video : [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/TcAmU2bdKvE/0.jpg)](h
 Congratulations! Your game is now an MMORPG. 
 
 ### Current functionalities
-- Sync player movements
-- Sync skins
+- Synchronised player movements
+- Synchronised skins
 - Persistance of position & skin
 - Instanced & global map
 - Tchat functionalities
 - Saved switches
+- Inventory system
+- Player stats (gold, level, experience, equipment, inventory, ...)
 
 ### Improvements to do :
 - Refactore server code
 - Refactore Core plugin code
 - Add possibility to add text over NPC and players heads
 - Improve in-game chat UX with keybindings and so on
-- Stats system (proper XP and so on)
-- Inventory system
-- Quest system
-- Improve instanced map
+- Add agility etc... to player stats
+- Improve instanced map system
 - Global switches system
