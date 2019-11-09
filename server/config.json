@@ -1,1 +1,19 @@
-{"port":8097,"registrationOnTheFly":true,"newPlayerDetails":{"mapId":1,"skin":1,"x":5,"y":5},"globalSwitches":{"2":false},"offlineMaps":{"map-2":true}}
+{
+  "port": 8097,
+  "registrationOnTheFly": true,
+  "newPlayerDetails": {
+    "mapId": 1,
+    "skin": {
+      "characterIndex": 0,
+      "characterName": "Actor1"
+    },
+    "x": 5,
+    "y": 5
+  },
+  "globalSwitches": {
+    "2": false
+  },
+  "offlineMaps": {
+    "map-2": true
+  }
+}

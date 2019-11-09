@@ -1,5 +1,3 @@
-
-var async   = require("async");
 var exports = module.exports = {};
 
 /*****************************
@@ -51,7 +49,7 @@ exports.initialize = function(socketConfig, serverConfig) {
       
       if(SERVER_CONFIG["offlineMaps"][client.lastMap] == undefined) {
         client.broadcast.to("map-" + playerData["mapId"]).emit("map_joined",{id:client.id,playerData:playerData});
-        client.broadcast.to("map-" + playerData["mapId"]).emit("refresh_players_position",client.id);
+        client.broadcast.to("map-" + playerData["mapId"]).emit("refresh_players_position", client.id);
       }
     
       console.log(client.id + " joined map-" + client.lastMap);
@@ -66,6 +64,10 @@ exports.initialize = function(socketConfig, serverConfig) {
       data["playerData"].skin     = client.playerData.skin;
   
       client.broadcast.to(data["id"]).emit("map_joined",{id:client.id,playerData:data["playerData"]});
+    })
+
+    client.on("refresh_player_on_map", function() {
+      client.broadcast.to("map-" + client.playerData["mapId"]).emit("refresh_player_on_map", {playerId: client.id, playerData: client.playerData});   
     })
   
     client.on("player_update_switches", function(payload) {
@@ -84,6 +86,10 @@ exports.initialize = function(socketConfig, serverConfig) {
   
     client.on("player_update_stats", function(payload) {
       client.playerData["stats"] = payload;
+    })
+
+    client.on("player_update_skin", function(payload) {
+      client.playerData["skin"] = payload;
     })
   
     client.on("player_moving",function(payload){

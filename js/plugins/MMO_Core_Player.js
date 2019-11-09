@@ -32,7 +32,7 @@ function MMO_Core_Players() {
     this.createGameObjects();
     this.selectSavefileForNewGame();
     $gameParty.setupStartingMembers();
-    $gamePlayer.reserveTransfer(MMO_Core_Players.Player["mapId"],MMO_Core_Players.Player["x"],MMO_Core_Players.Player["y"]);
+    $gamePlayer.reserveTransfer(MMO_Core_Players.Player["mapId"], MMO_Core_Players.Player["x"], MMO_Core_Players.Player["y"]);
     $gameSystem.disableSave();
     Graphics.frameCount = 0;
   };
@@ -89,11 +89,15 @@ function MMO_Core_Players() {
     }
     this.createDisplayObjects();
 
-    $gamePlayer._characterIndex = MMO_Core_Players.Player["skin"];
+    if(MMO_Core_Players.Player["skin"]["characterIndex"] === undefined) MMO_Core_Players.Player["skin"]["characterIndex"] = 1;
+
+    $gamePlayer._characterIndex = MMO_Core_Players.Player["skin"]["characterIndex"];
+    $gamePlayer._characterName = MMO_Core_Players.Player["skin"]["characterName"];
 
     players = {}; // Reinit the player variable
     if(MMO_Core_Players.Player["logged"] == undefined) {
-      $dataActors[1].characterIndex = MMO_Core_Players.Player["skin"];
+      $dataActors[1].characterIndex = MMO_Core_Players.Player["skin"]["characterIndex"];
+      $dataActors[1].characterName = MMO_Core_Players.Player["skin"]["characterName"];
       MMO_Core_Players.Player["logged"] = true;
     }
     
@@ -131,9 +135,21 @@ function MMO_Core_Players() {
     }
   };
 
+  // Handle player skin change
+  MMO_Core_Players.setCharacterImage = Game_Actor.prototype.setCharacterImage;
+  Game_Actor.prototype.setCharacterImage = function(characterName, characterIndex) {
+    MMO_Core_Players.setCharacterImage.call(this, characterName, characterIndex);
+
+    MMO_Core_Players.Player["skin"]["characterName"] = characterName;
+    MMO_Core_Players.Player["skin"]["characterIndex"] = characterIndex;
+
+    socket.emit("player_update_skin", {characterName: characterName, characterIndex: characterIndex});    
+    socket.emit("refresh_player_on_map");    
+  };
+
   // Handle player state of the world (switches)
   Game_Switches.prototype.onChange = function() {
-    socket.emit("player_update_switches",$gameSwitches["_data"]);
+    socket.emit("player_update_switches", $gameSwitches["_data"]);
     $gameMap.requestRefresh();
   };
 
@@ -154,7 +170,7 @@ function MMO_Core_Players() {
   // ---------- Socket Handling
   // ---------------------------------------
   socket.on("map_joined",function(data){
-    MMO_Core_Players.Players[data.id] = $gameMap.createNormalEventAt("Actor1", data["playerData"]["skin"], data["playerData"]["x"], data["playerData"]["y"], 2, 0, true);
+    MMO_Core_Players.Players[data.id] = $gameMap.createNormalEventAt(data["playerData"]["skin"]["characterName"], data["playerData"]["skin"]["characterIndex"], data["playerData"]["x"], data["playerData"]["y"], 2, 0, true);
     MMO_Core_Players.Players[data.id].headDisplay = MMO_Core_Players.Players[data.id].list().push({"code":108,"indent":0,"parameters":["<Name: " + data["playerData"]["username"] + ">"]});
     MMO_Core_Players.Players[data.id]._priorityType = 0;
     MMO_Core_Players.Players[data.id]._stepAnime = false;
@@ -168,6 +184,12 @@ function MMO_Core_Players() {
   socket.on("refresh_players_position",function(data){
     socket.emit("refresh_players_position",{id: data, playerData: MMO_Core_Players.getPlayerPos()});
   })
+
+  socket.on("refresh_player_on_map", function(payload) {
+    console.log("test");
+    MMO_Core_Players.Players[payload.playerId]._characterName = payload.playerData["skin"]["characterName"];
+    MMO_Core_Players.Players[payload.playerId]._characterIndex = payload.playerData["skin"]["characterIndex"];
+  });
 
   socket.on('player_moving', function(data){
     if(!SceneManager._scene._spriteset || SceneManager._scene instanceof Scene_Battle) return;
