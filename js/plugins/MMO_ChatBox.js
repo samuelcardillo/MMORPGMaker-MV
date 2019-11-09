@@ -9,33 +9,73 @@
  * @help This plugin does not provide plugin commands.
  */
 
- var ChatBox = undefined;
+function ChatBox() { 
+  this.initialize.apply(this, arguments);
+}
 
 (function() {
-  function ChatBox() { 
-    this.initialize.apply(this, arguments);
-  }
-
   ChatBox.isGenerated = false;
+  ChatBox.isVisible = false;
+  ChatBox.isFocused = false;
 
-  ChatBox.SceneMapLoaded = Scene_Map.prototype.onMapLoaded;
+  // Handling the window resizing
+  window.addEventListener('resize', function(){
+    if(!ChatBox.isGenerated || !ChatBox.isVisible) return;
+
+    ChatBox.resize();
+  }, true);
+
+  
+  ChatBox.onMapLoaded = Scene_Map.prototype.onMapLoaded;
   Scene_Map.prototype.onMapLoaded = function() {
-    ChatBox.SceneMapLoaded.call(this);
+    ChatBox.onMapLoaded.call(this);
 
-    if(!ChatBox.isGenerated) ChatBox.generate();
-
-    ChatBox.isGenerated = true;
+    if(!ChatBox.isGenerated) return ChatBox.generate();
+    if(!ChatBox.isVisible) return ChatBox.toggle();
   }
+
+  ChatBox.Scene_Map_Terminate = SceneManager.isSceneChanging;
+  Scene_Map.prototype.terminate = function() {
+    ChatBox.Scene_Map_Terminate.call(this);
+    ChatBox.toggle();
+    $gameScreen.clearZoom();
+  };
 
   ChatBox.generate = function() {
     generateTextField();
     generateTextBox();
+    this.resize();
+    this.isGenerated = true;
+    this.isVisible = true;
+  };
+
+  ChatBox.toggle = function() {
+    let state = (this.isVisible) ? "hidden" : "visible";
+    let chatboxInput = document.querySelector("#chatbox_input");
+    let chatboxBox = document.querySelector("#chatbox_box");
+    chatboxInput.style.visibility = state;
+    chatboxBox.style.visibility = state;
+    this.isVisible = !this.isVisible;
+  }
+
+  ChatBox.resize = function() {
+    let canvas = document.querySelector("canvas");
+    let offsetTop     = canvas.offsetTop;
+    let offsetLeft  = canvas.offsetLeft;
+
+    let chatboxInput = document.querySelector("#chatbox_input");
+    let chatboxBox = document.querySelector("#chatbox_box");
+    chatboxInput.style.left = (offsetLeft + 8) + "px";
+    chatboxInput.style.bottom = (offsetTop + 8) + "px";
+
+    chatboxBox.style.left = (offsetLeft + 8) + "px";
+    chatboxBox.style.bottom = (offsetTop + 36) + "px";
   }
 
   // Private function
   function generateTextField() {
     var textField = document.createElement('input');
-    textField.id                    = 'input1';
+    textField.id                    = 'chatbox_input';
     textField.type                  = 'text';
     textField.style.position        = 'absolute';
     textField.style.left            = '8px';
@@ -48,12 +88,14 @@
     textField.style.backgroundColor = 'rgba(0,0,0,0.6)';
     textField.style.borderColor     = textField.style.backgroundColor;
     textField.addEventListener('keydown', function(e){sendMessage(e)});
+    textField.addEventListener('focus', function(e){handleFocus(e)});
+    textField.addEventListener('focusout', function(e){handleFocus(e)});
     document.body.appendChild(textField);
   }
 
   function generateTextBox() {
     var textBox = document.createElement('div');
-    textBox.id                    = 'textBox1';
+    textBox.id                    = 'chatbox_box';
     textBox.style.position        = 'absolute';
     textBox.style.left            = '8px';
     textBox.style.bottom          = '36px';
@@ -67,13 +109,25 @@
     document.body.appendChild(textBox);
   }
 
+  // Handle sending message
   function sendMessage(e) {
     if(e.keyCode != 13) return;
 
-    socket.emit("new_message",document.querySelector("#input1").value);
-    document.querySelector("#input1").value = "";
+    let message = document.querySelector("#chatbox_input").value;
+    if(message.length <= 0) return;
+
+    socket.emit("new_message", message);
+    document.querySelector("#chatbox_input").value = "";
   }
 
+  // Handle focus on the chatbox
+  function handleFocus(e) {
+    ChatBox.isFocused = !ChatBox.isFocused;
+
+    (ChatBox.isFocused) ? $gameSystem.disableMenu() : $gameSystem.enableMenu();
+  }
+
+  // Handle new messages
   socket.on("new_message",function(messageData){
     var span = document.createElement("span");
         span.style.display     = "block";
@@ -85,8 +139,8 @@
     var message = document.createTextNode(messageData["username"] + ": " + messageData["msg"]);
 
     span.appendChild(message); 
-    document.querySelector("#textBox1").appendChild(span);
-    document.querySelector("#textBox1").scrollTop = document.querySelector("#textBox1").scrollHeight;
+    document.querySelector("#chatbox_box").appendChild(span);
+    document.querySelector("#chatbox_box").scrollTop = document.querySelector("#chatbox_box").scrollHeight;
   })
 
   TouchInput._onTouchStart = function(event) {
