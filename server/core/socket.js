@@ -50,24 +50,22 @@ exports.initialize = function(socketConfig, serverConfig) {
         client.emit("player_update_switch", {switchId: key, value: SERVER_CONFIG["globalSwitches"][key]});
       }
 
-      if(SERVER_CONFIG["offlineMaps"][client.lastMap] == undefined) {
-        if(client.lastMap != "map-" + playerData.mapId) client.broadcast.to("map-" + playerData["mapId"]).emit("map_joined",{id:client.id,playerData:playerData});
-        client.broadcast.to("map-" + playerData["mapId"]).emit("refresh_players_position", client.id);
-      }
-  
       client.join("map-" + playerData["mapId"]);
       client.lastMap = "map-" + playerData["mapId"];
+
+      if(SERVER_CONFIG["offlineMaps"][client.lastMap] == undefined) {
+        client.broadcast.to("map-" + playerData["mapId"]).emit("map_joined",{id:client.id,playerData:playerData});
+        client.broadcast.to("map-" + playerData["mapId"]).emit("refresh_players_position", client.id);
+      }
       
-      
-    
       console.log(client.id + " joined " + client.lastMap);
     })
   
     client.on("refresh_players_position", function(data){
       if(client.playerData === undefined) return;
-
+      
       if(SERVER_CONFIG["offlineMaps"][client.lastMap] != undefined) return false;
-  
+
       console.log(client.id + " transmit position to " + data.id);
   
       data["playerData"].username = client.playerData.username; // Temporary way to pass the username
