@@ -146,8 +146,7 @@ function MMO_Core_Players() {
   // ---------------------------------------
   socket.on("map_joined",function(data){
     MMO_Core_Players.Players[data.id] = $gameMap.createNormalEventAt("Actor1", data["playerData"]["skin"], data["playerData"]["x"], data["playerData"]["y"], 2, 0, true);
-    MMO_Core_Players.Players[data.id].headDisplay = MMO_Core_Players.Players[data.id].list().push({"code":108,"indent":0,"parameters":["<Mini Label: " + data["playerData"]["username"] + ">"]});
-    MMO_Core_Players.Players[data.id].list().push({"code":408,"indent":0,"parameters":["<Mini Label Range: 5>"]});
+    MMO_Core_Players.Players[data.id].headDisplay = MMO_Core_Players.Players[data.id].list().push({"code":108,"indent":0,"parameters":["<Name: " + data["playerData"]["username"] + ">"]});
     MMO_Core_Players.Players[data.id]._priorityType = 0;
     MMO_Core_Players.Players[data.id]._stepAnime = false;
     MMO_Core_Players.Players[data.id]._moveSpeed = 4;

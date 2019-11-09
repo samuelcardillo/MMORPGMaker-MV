@@ -36,13 +36,14 @@ Congratulations! Your game is now an MMORPG.
 - Tchat functionalities
 - Saved switches
 - Inventory system
+- Overhead names (including quest styling)
 - Player stats (gold, level, experience, equipment, inventory, ...)
 
 ### Improvements to do :
 - Refactore server code
 - Refactore Core plugin code
-- Add possibility to add text over NPC and players heads
 - Improve in-game chat UX with keybindings and so on
 - Add agility etc... to player stats
 - Improve instanced map system
 - Global switches system
+- Add PvP and interactibility between players

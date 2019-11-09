@@ -9,5 +9,6 @@ var $plugins =
 {"name":"MMO_Core","status":true,"description":"MMORPG Maker MV - Core","parameters":{"Server Location":"127.0.0.1:8097"}},
 {"name":"MMO_Core_Player","status":true,"description":"MMORPG Maker MV - Core Handling Player","parameters":{"Mouse Movements":"false"}},
 {"name":"MMO_ChatBox","status":true,"description":"Chatbox form","parameters":{}},
-{"name":"MMO_LoginForm","status":true,"description":"Login form","parameters":{}}
+{"name":"MMO_LoginForm","status":true,"description":"Login form","parameters":{}},
+{"name":"MMO_Overhead","status":true,"description":"Add name over actors name","parameters":{"Font Size":"20","X Buffer":"0","Y Buffer":"36"}}
 ];
