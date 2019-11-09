@@ -40,6 +40,11 @@ exports.initialize = function(socketConfig, serverConfig) {
   
       playerData.username = client.playerData.username; // Temporary way to pass the username
       playerData.skin     = client.playerData.skin;
+
+      // Update global switches
+      for(var key in SERVER_CONFIG["globalSwitches"]) {
+        client.emit("player_update_switch", {switchId: key, value: SERVER_CONFIG["globalSwitches"][key]});
+      }
   
       client.join("map-" + playerData["mapId"]);
       client.lastMap = "map-" + playerData["mapId"];
@@ -52,7 +57,7 @@ exports.initialize = function(socketConfig, serverConfig) {
       console.log(client.id + " joined map-" + client.lastMap);
     })
   
-    client.on("refresh_players_position",function(data){
+    client.on("refresh_players_position", function(data){
       if(SERVER_CONFIG["offlineMaps"][client.lastMap] != undefined) return false;
   
       console.log(client.id + " transmit position to " + data.id);
@@ -64,7 +69,17 @@ exports.initialize = function(socketConfig, serverConfig) {
     })
   
     client.on("player_update_switches", function(payload) {
+      if(client.playerData === undefined) return;
       client.playerData["switches"] = payload;
+    })
+
+    client.on("player_global_switch_check", function(payload) {
+      if(SERVER_CONFIG["globalSwitches"][payload["switchId"]] === undefined) return;
+
+      SERVER_CONFIG["globalSwitches"][payload["switchId"]] = payload["value"];
+      MMO_Core["database"].saveConfig(SERVER_CONFIG);
+
+      client.broadcast.emit("player_update_switch", payload);
     })
   
     client.on("player_update_stats", function(payload) {
@@ -72,6 +87,7 @@ exports.initialize = function(socketConfig, serverConfig) {
     })
   
     client.on("player_moving",function(payload){
+      if(client.playerData === undefined) return;
       if(SERVER_CONFIG["offlineMaps"][client.lastMap] != undefined) return false;
   
       payload.id = client.id;
@@ -90,16 +106,13 @@ exports.initialize = function(socketConfig, serverConfig) {
     client.on("disconnect",function(){
       if(client.lastMap == undefined) return;
   
-      MMO_Core["database"].savePlayer(client.playerData,function(output){
+      MMO_Core["database"].savePlayer(client.playerData, function(output){
         client.broadcast.to(client.lastMap).emit('map_exited',client.id);
         client.leave(client.lastMap);
       });
     })
   })
 };
-
-
-
 
 // Connecting the player and storing datas locally
 function loginPlayer(client, details) {

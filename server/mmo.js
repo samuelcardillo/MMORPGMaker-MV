@@ -39,3 +39,4 @@ MMO_Core = {
 
 MMO_Core["database"].initialize(); // Initializing the database
 MMO_Core["socket"].initialize(io, SERVER_CONFIG); // Initalizing the socket-side of the server
+

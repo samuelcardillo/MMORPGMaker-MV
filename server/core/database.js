@@ -1,5 +1,6 @@
-var r       = require("rethinkdb");
-var async   = require("async");
+const r       = require("rethinkdb")
+  ,   async   = require("async")
+  ,   fs      = require('fs');
 var exports = module.exports = {};
 
 /*****************************
@@ -94,6 +95,13 @@ exports.savePlayer = function(playerData,callback) {
     })
     .finally(function() { conn.close(); });  
   })
+}
+
+exports.saveConfig = function(serverConfig) {
+  fs.writeFile("config.json", JSON.stringify(serverConfig), function(err) {
+    if(err) return console.log(err);
+    console.log("[O] Server config updated and saved.");
+  }); 
 }
 
 onConnect = function(callback) {

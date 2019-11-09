@@ -32,18 +32,16 @@ Congratulations! Your game is now an MMORPG.
 - Synchronised player movements
 - Synchronised skins
 - Persistance of position & skin
-- Instanced & global map
-- Tchat functionalities
-- Saved switches
-- Inventory system
-- Overhead names (including quest styling)
-- Player stats (gold, level, experience, equipment, inventory, ...)
+- Persistance of player stats
+- Persistance of inventory & equipments
+- Persistance of local switches
+- Persistance of global switches
+- Global and local map system
+- In-game chat
 
 ### Improvements to do :
-- Refactore server code
-- Refactore Core plugin code
 - Improve in-game chat UX with keybindings and so on
-- Add agility etc... to player stats
-- Improve instanced map system
-- Global switches system
-- Add PvP and interactibility between players
+- Add RESTFUL API for outside game interactions
+- Create inter-players interactivity (trades, pvp, ...)
+- (Continuous) Refactore entire codebase
+- (MUCH LATER) Server-side anti-cheat

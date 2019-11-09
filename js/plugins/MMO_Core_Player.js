@@ -141,6 +141,15 @@ function MMO_Core_Players() {
     this._data = MMO_Core_Players.Player["switches"] || [];
   };
 
+  // Handle the global switch system
+  Game_Switches.prototype.setValue = function(switchId, value) {
+    if (switchId > 0 && switchId < $dataSystem.switches.length) {
+      socket.emit("player_global_switch_check",{switchId: switchId, value: value});
+      this._data[switchId] = value;
+      this.onChange();
+    }
+  };
+
   // ---------------------------------------
   // ---------- Socket Handling
   // ---------------------------------------
@@ -169,6 +178,15 @@ function MMO_Core_Players() {
     MMO_Core_Players.Players[data.id].moveStraight(data.direction);
     if (MMO_Core_Players.Players[data.id].x !== data.x || MMO_Core_Players.Players[data.id].y !== data.y) MMO_Core_Players.Players[data.id].setPosition(data.x, data.y);
   });
+
+  socket.on("player_update_switch", function(data){
+    $gameSwitches["_data"][data["switchId"]] = data["value"]; // Bypass the setValue function.
+    Game_Switches.prototype.onChange();
+  });
+
+  // ---------------------------------------
+  // ---------- Exposed Functions
+  // ---------------------------------------
   
   MMO_Core_Players.savePlayerStats = function() {
     let equips = [];
