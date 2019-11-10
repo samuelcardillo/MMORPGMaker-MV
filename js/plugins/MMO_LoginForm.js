@@ -9,10 +9,21 @@
  * @help This plugin does not provide plugin commands.
  */
 
-(function() {
-  function LoginForm() {
-      this.initialize.apply(this, arguments);
-  }
+function LoginForm() {
+  this.initialize.apply(this, arguments);
+}
+
+(function() {  
+  LoginForm.connectionLost = false;
+
+  document.addEventListener("mmorpg_core_lost_connection", function() {
+    let wasLogged = (MMO_Core_Players.Player.id !== undefined) ? true : false;
+    LoginForm.connectionLost = true;
+
+    if(wasLogged) SceneManager.goto(LoginForm);
+    
+    LoginForm.prototype.disableForm();
+  })
 
   LoginForm.prototype = Object.create(Scene_Base.prototype);
   LoginForm.prototype.constructor = LoginForm;
@@ -29,8 +40,6 @@
       Scene_Base.prototype.create.call(this);
       this.createBackground();
       this.createForeground();
-      // this.createWindowLayer();
-      // this.createCommandWindow();
   };
 
   LoginForm.prototype.start = function() {
@@ -58,17 +67,18 @@
 
   LoginForm.prototype.createLoginForm = function() {
     $("#ErrorPrinter").append(
-      '<div id="LoginForm" class="panel panel-primary" style="width:'+(Graphics.boxWidth - (Graphics.boxWidth / 3))+'px">'+
-        '<div class="panel-heading">Login</div>'+
-        '<div class="panel-body">'+
+      '<div id="LoginForm" style="background-color: rgba(0,0,0,0.4); border-radius: 8px; margin: 0 auto; width: 400px; padding: 8px;">'+
+        '<div style="color: white;">Login</div>'+
+        '<div>'+
           '<div id="loginErrBox"></div>'+
-          '<div class="input-group">'+
-            '<span class="input-group-addon" id="username-addon"><i class="fa fa-user"></i></span>'+
-            '<input type="text" class="form-control login-input" id="inputUsername" placeholder="Username" aria-describedby="username-addon">'+
+          '<div>'+
+            '<input type="text" id="inputUsername" placeholder="Username">'+
           '</div><br>'+
-          '<button id="btnConnect" class="btn btn-primary">Connect</button>'+
+          '<button id="btnConnect">Connect</button>'+
         '</div>'+
       '</div>');
+
+    if(LoginForm.connectionLost) this.disableForm();
 
     //Bind commands
     var that = this;
@@ -78,25 +88,31 @@
       }; 
     })
     $("#btnConnect").click(function(){that.connectAttempt()})
+    $("#ErrorPrinter").fadeIn({duration: 1000});
   }
 
-  LoginForm.prototype.displayError = function(msg) {
-    $("#loginErrBox").html('<div class="alert alert-danger fade in">'+msg+'</div>')
+  LoginForm.prototype.displayError = function(message) {
+    $("#loginErrBox").html(`<div style="color: red;">${message}</div>`)
   }
 
-  LoginForm.prototype.displayInfo = function(msg) {
-    $("#loginErrBox").html('<div class="alert alert-info fade in">'+msg+'</div>')
+  LoginForm.prototype.disableForm = function() {
+    console.log("e")
+    if(document.querySelector("input#inputUsername") === null) return;
+    console.log("e")
+    
+    document.querySelector("input#inputUsername").disabled = true;
+    document.querySelector("button#btnConnect").disabled = true;
+    this.displayError("Connection with server was lost.")
   }
 
   LoginForm.prototype.connectAttempt = function(){
     var that = this;
     var username = $("#inputUsername").val();
 
-    if (username.length == 0)
-      return this.displayError("You must provide a username!");
+    if (username.length == 0) return this.displayError("You must provide a username!");
 
     socket.on("login", function(data){
-      if (data.err) return that.displayError("Error : "+data.err);
+      if (data.err) return that.displayError("Error : " + data.err);
       $("#ErrorPrinter").fadeOut({duration: 1000}).html("");
 
       MMO_Core_Players.Player = data["msg"];
@@ -161,6 +177,8 @@
   // Overriding Input._shouldPreventDefault to allow the use of the 'backspace key'
   // in input forms.
   Input._shouldPreventDefault = function(e) {
+    if(e === undefined) return;
+
     switch (e.keyCode) {
       case 8:     // backspace
         if ($(e.target).is("input, textarea"))

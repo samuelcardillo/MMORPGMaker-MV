@@ -10,7 +10,7 @@
  * 
  * @param Server Location
  * @desc Server address (+ port)
- * @default 127.0.0.1:8097
+ * @default http://127.0.0.1:8097/
  */
 
 
@@ -21,7 +21,12 @@ var socket = undefined;
   MMO.Parameters = PluginManager.parameters('MMO_Core');
   let serverAddress = String(MMO.Parameters['Server Location']);
 
-  socket = socket || io.connect('http://' + serverAddress + '/');
+  socket = socket || io.connect(serverAddress);
+
+  socket.on('connect_error', function() {
+    document.dispatchEvent(new Event('mmorpg_core_lost_connection')); // Dispatch event for connection lost.
+    socket.close();
+  })
 
   // Clean up the menu
   Window_MenuCommand.prototype.makeCommandList = function() {
