@@ -39,7 +39,7 @@ function MMO_Core_Players() {
 
   // Handle the initialization of the player with the proper stats and items
   MMO_Core_Players.partyInit = Game_Party.prototype.initialize;
-  Game_Party.prototype.initialize = function() { 
+  Game_Party.prototype.initialize = function() {
     MMO_Core_Players.partyInit.call(this);
     if(MMO_Core_Players.Player["stats"] !== undefined) { 
       this._gold = MMO_Core_Players.Player["stats"]["gold"];
@@ -47,6 +47,24 @@ function MMO_Core_Players() {
       this._weapons = MMO_Core_Players.Player["stats"]["weapons"];
       this._armors = MMO_Core_Players.Player["stats"]["armors"];
     }
+  }
+
+  // Handle change of scenes
+  MMO_Core_Players.changeScene = SceneManager.changeScene;
+  SceneManager.changeScene = function() {
+    if (this.isSceneChanging() && !this.isCurrentSceneBusy()) {
+      if(SceneManager._nextScene instanceof Scene_Menu) {
+        socket.emit("player_update_busy", "menu");
+      } 
+      if(SceneManager._nextScene instanceof Scene_Battle) {
+        socket.emit("player_update_busy", "combat");
+      }
+      if(SceneManager._nextScene instanceof Scene_Map) {
+        socket.emit("player_update_busy", false);        
+      }
+    }
+
+    MMO_Core_Players.changeScene.call(this);
   }
 
   // Handle the initialization of the player with the proper stats and items
@@ -166,6 +184,7 @@ function MMO_Core_Players() {
     $gameMap.requestRefresh();
   };
 
+  // Handle player state of the world (switches)
   Game_Switches.prototype.initialize = function() {
     this._data = MMO_Core_Players.Player["switches"] || [];
   };
@@ -184,6 +203,13 @@ function MMO_Core_Players() {
     DataManager.setupNewGame();
     socket.emit("player_dead");
   };
+
+  // Handle adding custom parameters to characters
+  MMO_Core_Players.initMembers = Game_CharacterBase.prototype.initMembers;
+  Game_CharacterBase.prototype.initMembers = function() {
+    MMO_Core_Players.initMembers.call(this);
+    this._isBusy = false;
+  }
 
   // ---------------------------------------
   // ---------- Socket Handling
@@ -209,8 +235,13 @@ function MMO_Core_Players() {
   })
 
   socket.on("refresh_player_on_map", function(payload) {
+    if(MMO_Core_Players.Players[payload.playerId] === undefined) return;
+
     MMO_Core_Players.Players[payload.playerId]._characterName = payload.playerData["skin"]["characterName"];
     MMO_Core_Players.Players[payload.playerId]._characterIndex = payload.playerData["skin"]["characterIndex"];
+    MMO_Core_Players.Players[payload.playerId]._isBusy = payload.playerData["isBusy"] || false;
+
+    document.dispatchEvent(new Event('refresh_player_on_map', {'detail': payload})); // Dispatch DOM event for external plugins
   });
 
   socket.on('player_moving', function(data){

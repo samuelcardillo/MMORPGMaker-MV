@@ -50,12 +50,19 @@ function ChatBox() {
   }
 
   // Handle the toggle of the chatbox in case of battle or menu
-  ChatBox.Scene_Map_Terminate = SceneManager.isSceneChanging;
-  Scene_Map.prototype.terminate = function() {
-    ChatBox.Scene_Map_Terminate.call(this);
-    ChatBox.toggle();
-    $gameScreen.clearZoom();
-  };
+  ChatBox.changeScene = SceneManager.changeScene;
+  SceneManager.changeScene = function() {
+    if (this.isSceneChanging() && !this.isCurrentSceneBusy()) {
+      if(SceneManager._nextScene instanceof Scene_Map) {
+        ChatBox.isVisible = false;
+        ChatBox.toggle();
+      } else {
+        ChatBox.isVisible = true;
+        ChatBox.toggle();
+      }
+    }
+    ChatBox.changeScene.call(this);
+  }
 
   // Handle the toggle of the chatbox in case of dialogue with NPC
   ChatBox.startMessage = Window_Message.prototype.startMessage;
@@ -86,6 +93,8 @@ function ChatBox() {
 
   // Toggle the chatbox
   ChatBox.toggle = function() {
+    if(document.querySelector("#chatbox_box") === null) return;
+
     let state = (this.isVisible) ? "hidden" : "visible";
     let chatboxInput = document.querySelector("#chatbox_input");
     let chatboxBox = document.querySelector("#chatbox_box");
@@ -188,6 +197,7 @@ function ChatBox() {
     ChatBox.isFocused = !ChatBox.isFocused;
 
     (ChatBox.isFocused) ? $gameSystem.disableMenu() : $gameSystem.enableMenu();
+    socket.emit("player_update_busy", (ChatBox.isFocused) ? "writing" : false)
   }
 
   // ---------------------------------------
@@ -207,7 +217,6 @@ function ChatBox() {
 
     span.appendChild(message); 
     document.querySelector("#chatbox_box").insertBefore(span, document.querySelector("#chatbox_box").firstChild);
-    // document.querySelector("#chatbox_box").appendChild(span);
     document.querySelector("#chatbox_box").scrollTop = 0;
   })
 

@@ -120,6 +120,12 @@ exports.initialize = function(socketConfig, serverConfig) {
           break;
       }
     })
+
+    client.on("player_update_busy", function(payload) {
+      client.playerData.isBusy = payload;
+
+      client.broadcast.to("map-" + client.playerData["mapId"]).emit("refresh_player_on_map", {playerId: client.id, playerData: client.playerData});  
+    })
   
     client.on("player_moving",function(payload){
       if(client.playerData === undefined) return;
@@ -149,6 +155,8 @@ exports.initialize = function(socketConfig, serverConfig) {
   
     client.on("disconnect",function(){
       if(client.lastMap == undefined) return;
+
+      client.playerData.isBusy = false; // Putting isBusy back to false to prevent false player state
   
       MMO_Core["database"].savePlayer(client.playerData, function(output){
         client.broadcast.to(client.lastMap).emit('map_exited',client.id);

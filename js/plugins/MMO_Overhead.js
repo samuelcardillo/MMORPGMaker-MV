@@ -27,11 +27,9 @@ function MMO_Overhead() {
   this.initialize.apply(this, arguments);
 }
 
-MMO_Overhead.Game_Interpreter = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
-  MMO_Overhead.Game_Interpreter.call(this, command, args)
-  if (command === 'RefreshMiniLabel') this.refreshEventMiniLabel();
-};
+document.addEventListener("refresh_player_on_map", function(){
+  Game_Interpreter.prototype.refreshEventMiniLabel();
+})
 
 Game_Interpreter.prototype.refreshEventMiniLabel = function() {
     if ($gameParty.inBattle()) return;
@@ -44,6 +42,7 @@ Game_Interpreter.prototype.refreshEventMiniLabel = function() {
 MMO_Overhead.Windows = function() {
     this.initialize.apply(this, arguments);
 }
+
 MMO_Overhead.Windows.prototype = Object.create(Window_Base.prototype);
 MMO_Overhead.Windows.prototype.constructor = MMO_Overhead.Windows;
 
@@ -61,6 +60,7 @@ MMO_Overhead.Windows.prototype.initialize = function() {
     this._character = null;
     this._page = 0;
     this._text = '';
+    this._initialText = '';
 };
 
 MMO_Overhead.Windows.prototype.standardFontSize = function() {
@@ -129,6 +129,7 @@ MMO_Overhead.Windows.prototype.extractNotedata = function(comment) {
     }
   }
   this.setText(text);
+  this._initialText = text;
   if (this._text === '') {
     this.visible = false;
     this.contentsOpacity = 0;
@@ -252,6 +253,10 @@ Scene_Map.prototype.refreshAllMiniLabels = function() {
     var length = this._spriteset._characterSprites.length;
     for (var i = 0; i < length; ++i) {
       var sp = this._spriteset._characterSprites[i];
+
+      if(sp._character._isBusy && sp._miniLabel._text.length > 0) sp._miniLabel._text = `(${sp._character._isBusy}) ${sp._miniLabel._text}`;
+      if(!sp._character._isBusy  && sp._miniLabel._text.length > 0) sp._miniLabel._text = `${sp._miniLabel._initialText}`; 
+
       sp.refreshMiniLabel();
     }
 };
