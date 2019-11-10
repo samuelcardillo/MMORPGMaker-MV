@@ -3,10 +3,19 @@
 //=============================================================================
 
 /*:
- * @plugindesc Chatbox form
+ * @plugindesc MMORPG Maker MV - ChatBox
  * @author Samuel LESPES CARDILLO
  *
  * @help This plugin does not provide plugin commands.
+ * 
+ * @param chatPosition
+ * @text Position of the chat
+ * @type combo
+ * @option TOP LEFT
+ * @option TOP RIGHT
+ * @option BOTTOM LEFT
+ * @option BOTTOM RIGHT
+ * @default TOP LEFT
  */
 
 function ChatBox() { 
@@ -14,9 +23,13 @@ function ChatBox() {
 }
 
 (function() {
+  ChatBox.Parameters = PluginManager.parameters('MMO_ChatBox');
+
   ChatBox.isGenerated = false;
   ChatBox.isVisible = false;
   ChatBox.isFocused = false;
+
+  console.dir(ChatBox.Parameters);
 
   // Handling the window resizing
   window.addEventListener('resize', function(){
@@ -65,11 +78,35 @@ function ChatBox() {
 
     let chatboxInput = document.querySelector("#chatbox_input");
     let chatboxBox = document.querySelector("#chatbox_box");
-    chatboxInput.style.left = (offsetLeft + 8) + "px";
-    chatboxInput.style.bottom = (offsetTop + 8) + "px";
+    
+    switch (this.Parameters["chatPosition"]) {
+      case "TOP LEFT":
+        chatboxInput.style.left = (offsetLeft + 8) + "px";
+        chatboxInput.style.top = (offsetTop + 116) + "px";
+        chatboxBox.style.left = (offsetLeft + 8) + "px";
+        chatboxBox.style.top = (offsetTop + 8) + "px";
+        break;
+      case "TOP RIGHT":
+        chatboxInput.style.right = (offsetLeft + 8) + "px";
+        chatboxInput.style.top = (offsetTop + 116) + "px";
+        chatboxBox.style.right = (offsetLeft + 8) + "px";
+        chatboxBox.style.top = (offsetTop + 8) + "px";
+        break;
+      case "BOTTOM LEFT":
+        chatboxInput.style.left = (offsetLeft + 8) + "px";
+        chatboxInput.style.bottom = (offsetTop + 8) + "px";
+        chatboxBox.style.left = (offsetLeft + 8) + "px";
+        chatboxBox.style.bottom = (offsetTop + 36) + "px";
+        break;
+      case "BOTTOM RIGHT":
+        chatboxInput.style.right = (offsetLeft + 8) + "px";
+        chatboxInput.style.bottom = (offsetTop + 8) + "px";
+        chatboxBox.style.right = (offsetLeft + 8) + "px";
+        chatboxBox.style.bottom = (offsetTop + 36) + "px";
+        break;
+    }
 
-    chatboxBox.style.left = (offsetLeft + 8) + "px";
-    chatboxBox.style.bottom = (offsetTop + 36) + "px";
+    
   }
 
   // Private function
@@ -78,8 +115,6 @@ function ChatBox() {
     textField.id                    = 'chatbox_input';
     textField.type                  = 'text';
     textField.style.position        = 'absolute';
-    textField.style.left            = '8px';
-    textField.style.bottom          = '8px';
     textField.style.width           = '287px';
     textField.style.height          = '20px';
     textField.style.zIndex          = "1000";
@@ -97,14 +132,13 @@ function ChatBox() {
     var textBox = document.createElement('div');
     textBox.id                    = 'chatbox_box';
     textBox.style.position        = 'absolute';
-    textBox.style.left            = '8px';
-    textBox.style.bottom          = '36px';
     textBox.style.width           = '300px';
     textBox.style.height          = '100px';
     textBox.style.zIndex          = "1000";
-    textBox.style.overflowY       = "scroll";
+    textBox.style.overflowY       = "hidden";
+    textBox.style.borderRadius    = "8px";
     textBox.style.color           = "#fafafa";
-    textBox.style.backgroundColor = 'rgba(0,0,0,0.6)';
+    textBox.style.backgroundColor = 'rgba(0,0,0,0.4)';
     textBox.style.borderColor     = textBox.style.backgroundColor;
     document.body.appendChild(textBox);
   }
@@ -139,8 +173,9 @@ function ChatBox() {
     var message = document.createTextNode(messageData["username"] + ": " + messageData["msg"]);
 
     span.appendChild(message); 
-    document.querySelector("#chatbox_box").appendChild(span);
-    document.querySelector("#chatbox_box").scrollTop = document.querySelector("#chatbox_box").scrollHeight;
+    document.querySelector("#chatbox_box").insertBefore(span, document.querySelector("#chatbox_box").firstChild);
+    // document.querySelector("#chatbox_box").appendChild(span);
+    document.querySelector("#chatbox_box").scrollTop = 0;
   })
 
   TouchInput._onTouchStart = function(event) {

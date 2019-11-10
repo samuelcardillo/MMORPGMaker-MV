@@ -29,6 +29,8 @@
       Scene_Base.prototype.create.call(this);
       this.createBackground();
       this.createForeground();
+      // this.createWindowLayer();
+      // this.createCommandWindow();
   };
 
   LoginForm.prototype.start = function() {
@@ -155,4 +157,22 @@
       SceneManager.clearStack();
       SceneManager.goto(LoginForm);
   };
+
+  // Overriding Input._shouldPreventDefault to allow the use of the 'backspace key'
+  // in input forms.
+  Input._shouldPreventDefault = function(e) {
+    switch (e.keyCode) {
+      case 8:     // backspace
+        if ($(e.target).is("input, textarea"))
+          break;
+      case 33:    // pageup
+      case 34:    // pagedown
+      case 37:    // left arrow
+      case 38:    // up arrow
+      case 39:    // right arrow
+      case 40:    // down arrow
+          return true;
+    }
+    return false;
+  }
 })();
