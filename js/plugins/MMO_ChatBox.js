@@ -213,7 +213,7 @@ function ChatBox() {
 
   document.addEventListener('keydown', function(e) {
     if(!ChatBox.isGenerated) return;
-    if(e.keyCode !== 123) return;
+    if(e.keyCode !== 119) return;
 
     ChatBox.toggle();
   })
