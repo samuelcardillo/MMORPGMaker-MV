@@ -18,6 +18,30 @@ exports.initialize = function(callback) {
 
   // We check if the database exist
   onConnect(function(err, conn) {
+    var initialServerConfig = {
+      "port": 8097,
+      "passwordRequired": true,
+      "newPlayerDetails": {
+        "permission": 0,
+        "mapId": 1,
+        "skin": {
+          "characterIndex": 0,
+          "characterName": "Actor1",
+          "battlerName": "Actor1_1",
+          "faceName": "Actor1",
+          "faceIndex": 0
+        },
+        "x": 5,
+        "y": 5
+      },
+      "globalSwitches": {
+        "2": false
+      },
+      "offlineMaps": {
+        "map-2": true
+      }
+    }
+    
     r.dbList().run(conn, function(err, results){
       // If the database exist, we have nothing to do
       if(results.indexOf("mmorpg") !== -1) {
@@ -37,32 +61,19 @@ exports.initialize = function(callback) {
           r.db("mmorpg").tableCreate(item).run(conn, function(err, result){
             console.log("[I] Table " + item + " was created with success");
 
-            if(item === "config") {
-              let initialServerConfig = {
-                "port": 8097,
-                "passwordRequired": true,
-                "newPlayerDetails": {
-                  "mapId": 1,
-                  "skin": {
-                    "characterIndex": 0,
-                    "characterName": "Actor1",
-                    "battlerName": "Actor1_1",
-                    "faceName": "Actor1",
-                    "faceIndex": 0
-                  },
-                  "x": 5,
-                  "y": 5
-                },
-                "globalSwitches": {
-                  "2": false
-                },
-                "offlineMaps": {
-                  "map-2": true
-                }
-              }
+            if(item === "users") {
+              let user = initialServerConfig["newPlayerDetails"];
+              user.username   = "admin";
+              user.password   = MMO_Core["security"].hashPassword("admin");
+              user.permission = 100;
 
+              r.db("mmorpg").table("users").insert([user]).run(conn, (err, result) => {
+                 console.log("[I] Initial admin account created.");
+                 return callback();
+              })
+            } else if(item === "config") {
               r.db("mmorpg").table("config").insert([initialServerConfig]).run(conn, (err, result) => {
-                 console.log("[I] Initial server configuration was created with success");
+                 console.log("[I] Initial server configuration was created with success.");
                  return callback();
               })
             } else { return callback(); }

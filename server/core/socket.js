@@ -167,6 +167,9 @@ exports.initialize = function(socketConfig, serverConfig) {
     client.on("disconnect",function(){
       if(client.lastMap == undefined) return;
 
+      // ANTI-CHEAT : Deleting "permission" before saving player to avoid permission elevation exploit.
+      delete(client.playerData.permission);
+
       client.playerData.isBusy = false; // Putting isBusy back to false to prevent false player state
   
       MMO_Core["database"].savePlayer(client.playerData, function(output){
