@@ -29,16 +29,18 @@ function ChatBox() {
   ChatBox.isVisible = false;
   ChatBox.isFocused = false;
 
-  console.dir(ChatBox.Parameters);
+  // ---------------------------------------
+  // ---------- Native Functions Extending
+  // ---------------------------------------
 
   // Handling the window resizing
   window.addEventListener('resize', function(){
     if(!ChatBox.isGenerated || !ChatBox.isVisible) return;
 
-    ChatBox.resize();
+    ChatBox.resize(); // Resize the chatbox
   }, true);
 
-  
+  // Handle the first generation of the chatbox & when reentering a map scene
   ChatBox.onMapLoaded = Scene_Map.prototype.onMapLoaded;
   Scene_Map.prototype.onMapLoaded = function() {
     ChatBox.onMapLoaded.call(this);
@@ -47,6 +49,7 @@ function ChatBox() {
     if(!ChatBox.isVisible) return ChatBox.toggle();
   }
 
+  // Handle the toggle of the chatbox in case of battle or menu
   ChatBox.Scene_Map_Terminate = SceneManager.isSceneChanging;
   Scene_Map.prototype.terminate = function() {
     ChatBox.Scene_Map_Terminate.call(this);
@@ -54,6 +57,25 @@ function ChatBox() {
     $gameScreen.clearZoom();
   };
 
+  // Handle the toggle of the chatbox in case of dialogue with NPC
+  ChatBox.startMessage = Window_Message.prototype.startMessage;
+  Window_Message.prototype.startMessage = function() {
+    ChatBox.toggle();
+    ChatBox.startMessage.call(this);
+  }
+
+  // Handle the toggle of the chatbox in case of dialogue with NPC
+  ChatBox.terminateMessage = Window_Message.prototype.terminateMessage;
+  Window_Message.prototype.terminateMessage = function() {
+    ChatBox.toggle();
+    ChatBox.terminateMessage.call(this);
+  }
+
+  // ---------------------------------------
+  // ---------- Exposed Functions
+  // ---------------------------------------
+
+  // Generate the chatbox
   ChatBox.generate = function() {
     generateTextField();
     generateTextBox();
@@ -62,6 +84,7 @@ function ChatBox() {
     this.isVisible = true;
   };
 
+  // Toggle the chatbox
   ChatBox.toggle = function() {
     let state = (this.isVisible) ? "hidden" : "visible";
     let chatboxInput = document.querySelector("#chatbox_input");
@@ -71,6 +94,7 @@ function ChatBox() {
     this.isVisible = !this.isVisible;
   }
 
+  // Resize the chatbox following predefined parameters
   ChatBox.resize = function() {
     let canvas = document.querySelector("canvas");
     let offsetTop     = canvas.offsetTop;
@@ -109,7 +133,11 @@ function ChatBox() {
     
   }
 
-  // Private function
+  // ---------------------------------------
+  // ---------- Private Functions
+  // ---------------------------------------
+
+  // Generate the main chatbox that contains messages
   function generateTextField() {
     var textField = document.createElement('input');
     textField.id                    = 'chatbox_input';
@@ -128,6 +156,7 @@ function ChatBox() {
     document.body.appendChild(textField);
   }
 
+  // Generate the textbox
   function generateTextBox() {
     var textBox = document.createElement('div');
     textBox.id                    = 'chatbox_box';
@@ -160,6 +189,10 @@ function ChatBox() {
 
     (ChatBox.isFocused) ? $gameSystem.disableMenu() : $gameSystem.enableMenu();
   }
+
+  // ---------------------------------------
+  // ---------- Sockets Handling
+  // ---------------------------------------
 
   // Handle new messages
   socket.on("new_message",function(messageData){
