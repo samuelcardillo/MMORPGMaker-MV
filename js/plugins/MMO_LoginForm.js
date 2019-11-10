@@ -3,10 +3,20 @@
 //=============================================================================
 
 /*:
- * @plugindesc Login form
+ * @plugindesc MMORPG Maker MV - Login Form
  * @author Samuel LESPES CARDILLO
  *
- * @help This plugin does not provide plugin commands.
+ * @help
+ * /!\ WARNING /!\
+ * If you turn the "require account creation" to off, make sure to change the server
+ * configuration "passwordRequired" to false.
+ * 
+ * @param allowAccountCreation
+ * @text Require account creation
+ * @type combo
+ * @option Yes
+ * @option No
+ * @default Yes
  */
 
 function LoginForm() {
@@ -14,6 +24,8 @@ function LoginForm() {
 }
 
 (function() {  
+  LoginForm.Parameters = PluginManager.parameters('MMO_LoginForm');
+  LoginForm.Parameters["allowAccountCreation"] = (LoginForm.Parameters["allowAccountCreation"] === "Yes") ? true : false;
   LoginForm.connectionLost = false;
 
   document.addEventListener("mmorpg_core_lost_connection", function() {
@@ -66,17 +78,23 @@ function LoginForm() {
   };
 
   LoginForm.prototype.createLoginForm = function() {
-    $("#ErrorPrinter").append(
-      '<div id="LoginForm" style="background-color: rgba(0,0,0,0.4); border-radius: 8px; margin: 0 auto; width: 400px; padding: 8px;">'+
-        '<div style="color: white;">Login</div>'+
-        '<div>'+
-          '<div id="loginErrBox"></div>'+
-          '<div>'+
-            '<input type="text" id="inputUsername" placeholder="Username">'+
-          '</div><br>'+
-          '<button id="btnConnect">Connect</button>'+
-        '</div>'+
-      '</div>');
+    // Generate the form depending on parameters (it is ugly but eh)
+    let html =  '<div id="LoginForm" style="background-color: rgba(0,0,0,0.4); border-radius: 8px; margin: 0 auto; width: 400px; padding: 8px;">'+
+    '<div style="color: white;">Login</div>'+
+    '<div>'+
+      '<div id="loginErrBox"></div>'+
+      '<div>'+
+        '<input type="text" id="inputUsername" placeholder="Username">';
+
+    if(LoginForm.Parameters["allowAccountCreation"]) html = html + '<br><input type="password" id="inputPassword" placeholder="Password">';
+
+    html = html + '</div><br>'+
+        '<button id="btnConnect">Connect</button>'+
+      '</div>'+
+    '</div>';
+
+
+    $("#ErrorPrinter").append(html);
 
     if(LoginForm.connectionLost) this.disableForm();
 
@@ -96,10 +114,7 @@ function LoginForm() {
   }
 
   LoginForm.prototype.disableForm = function() {
-    console.log("e")
     if(document.querySelector("input#inputUsername") === null) return;
-    console.log("e")
-    
     document.querySelector("input#inputUsername").disabled = true;
     document.querySelector("button#btnConnect").disabled = true;
     this.displayError("Connection with server was lost.")
@@ -107,11 +122,12 @@ function LoginForm() {
 
   LoginForm.prototype.connectAttempt = function(){
     var that = this;
-    var username = $("#inputUsername").val();
+    let payload = { username: $("#inputUsername").val() }
+    if(LoginForm.Parameters["allowAccountCreation"]) payload.password = $("#inputPassword").val();
 
-    if (username.length == 0) return this.displayError("You must provide a username!");
+    if (payload.username.length <= 0) return this.displayError("You must provide a username!");
 
-    socket.on("login", function(data){
+    socket.on("login_success", function(data){
       if (data.err) return that.displayError("Error : " + data.err);
       $("#ErrorPrinter").fadeOut({duration: 1000}).html("");
 
@@ -123,9 +139,11 @@ function LoginForm() {
       return true;
     });
 
-    socket.emit("login", {
-      username: username
-    });
+    socket.on("login_error", function(data) {
+      that.displayError(data.msg);      
+    })
+
+    socket.emit("login", payload);
   }
 
   LoginForm.prototype.createBackground = function() {

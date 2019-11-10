@@ -8,7 +8,7 @@ var $plugins =
 {"name":"OrangeCustomEventCreator","status":true,"description":"This plugin Will let you create virtual events with script calls","parameters":{}},
 {"name":"MMO_Core","status":true,"description":"MMORPG Maker MV - Core","parameters":{"Server Location":"http://127.0.0.1:8097/"}},
 {"name":"MMO_Core_Player","status":true,"description":"MMORPG Maker MV - Core Handling Player","parameters":{"Mouse Movements":"false"}},
-{"name":"MMO_ChatBox","status":true,"description":"Chatbox form","parameters":{}},
-{"name":"MMO_LoginForm","status":true,"description":"Login form","parameters":{}},
+{"name":"MMO_ChatBox","status":true,"description":"MMORPG Maker MV - ChatBox","parameters":{"chatPosition":"BOTTOM LEFT"}},
+{"name":"MMO_LoginForm","status":true,"description":"MMORPG Maker MV - Login Form","parameters":{"allowAccountCreation":"Yes"}},
 {"name":"MMO_Overhead","status":true,"description":"Add name over actors name","parameters":{}}
 ];

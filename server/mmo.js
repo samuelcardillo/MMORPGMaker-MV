@@ -23,8 +23,6 @@ app.use(function(req,res,next){ // CORS (read : https://developer.mozilla.org/en
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
     next();
 });
-const SERVER_CONFIG = JSON.parse(fs.readFileSync('./config.json', 'utf-8'));
-server.listen(SERVER_CONFIG['port']);
 
 console.log("######################################");
 console.log("# MMORPG Maker MV - Samuel Lespes Cardillo");
@@ -34,9 +32,37 @@ console.log("######################################");
 // CORE INTEGRATIONS
 MMO_Core = {
   "database": require('./core/database'),
-  "socket": require('./core/socket.js'),
+  "security": require('./core/security'),
+  "socket": require('./core/socket'),
+  "routes": require('./core/routes'),
 }
 
-MMO_Core["database"].initialize(); // Initializing the database
-MMO_Core["socket"].initialize(io, SERVER_CONFIG); // Initalizing the socket-side of the server
+try {
+  MMO_Core["database"].initialize(() => {  // Initializing the database
+    MMO_Core["database"].reloadConfig(() => { // Initializing server config
+      server.listen(MMO_Core["database"].SERVER_CONFIG.port); // Listen configured port
 
+      MMO_Core["socket"].initialize(io, MMO_Core[ "database"].SERVER_CONFIG); // Initalizing the socket-side of the server
+      MMO_Core["routes"].initialize(app, MMO_Core["database"].SERVER_CONFIG, function(callback) { // Initializing the RESTFUL API
+        console.log(callback);
+      });
+    });
+  });
+  
+} catch(err) {
+  console.log(err);
+  saveWorld();
+  server.instance.close();
+}
+
+process.on('SIGINT', function() {
+    console.log("Caught interrupt signal");
+    saveWorld();
+    MMO_Core["security"].saveTokens(function(callback){
+      process.exit();
+    });
+});
+
+function saveWorld() { 
+  // To do : Save every players before closing the server
+}
