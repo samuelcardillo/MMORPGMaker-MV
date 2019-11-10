@@ -31,6 +31,8 @@ Congratulations! Your game is now an MMORPG.
 ### Current functionalities
 - Synchronised player movements
 - Synchronised skins
+- Account creation (password hashed with SHA256 + customizable salt)
+- RESTFUL API support (with JSON Web Token)
 - Persistance of position & skin
 - Persistance of player stats
 - Persistance of inventory & equipments
@@ -41,9 +43,7 @@ Congratulations! Your game is now an MMORPG.
 - In-game chat
 
 ### Improvements to do :
-- Improve in-game chat UX with keybindings and so on
-- Add RESTFUL API for outside game interactions
-- Create inter-players interactivity (visual notification when in menu or combat, trades, pvp, ...)
+- Create inter-players interactivity (trades, pvp, ...)
 - (Continuous) Refactore entire codebase
 - (MUCH LATER) Server-side anti-cheat
 
