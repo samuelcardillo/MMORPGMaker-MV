@@ -54,13 +54,13 @@ function MMO_Core_Players() {
   SceneManager.changeScene = function() {
     if (this.isSceneChanging() && !this.isCurrentSceneBusy()) {
       if(SceneManager._nextScene instanceof Scene_Menu) {
-        MMO_Core.socket.emit("player_update_busy", "menu");
+        MMO_Core_Players.updateBusy("menu");
       } 
       if(SceneManager._nextScene instanceof Scene_Battle) {
-        MMO_Core.socket.emit("player_update_busy", "combat");
+        MMO_Core_Players.updateBusy("combat");
       }
       if(SceneManager._nextScene instanceof Scene_Map) {
-        MMO_Core.socket.emit("player_update_busy", false);        
+        MMO_Core_Players.updateBusy(false);        
       }
     }
 
@@ -157,25 +157,22 @@ function MMO_Core_Players() {
   Game_Actor.prototype.setCharacterImage = function(characterName, characterIndex) {
     MMO_Core_Players.setCharacterImage.call(this, characterName, characterIndex);
 
-    MMO_Core_Players.Player["skin"]["characterName"] = characterName;
-    MMO_Core_Players.Player["skin"]["characterIndex"] = characterIndex;
-
-    MMO_Core.socket.emit("player_update_skin", {type: "sprite", characterName: characterName, characterIndex: characterIndex});    
-    MMO_Core.socket.emit("refresh_player_on_map");    
+    MMO_Core_Players.updateSkin({type: "sprite", characterName: characterName, characterIndex: characterIndex})   
+    MMO_Core_Players.refreshPlayerOnMap();
   };
 
   MMO_Core_Players.setFaceImage = Game_Actor.prototype.setFaceImage;
   Game_Actor.prototype.setFaceImage = function(faceName, faceIndex) {
     MMO_Core_Players.setFaceImage.call(this, faceName, faceIndex);
 
-    MMO_Core.socket.emit("player_update_skin", {type: "face", faceName: faceName, faceIndex: faceIndex});
+    MMO_Core_Players.updateSkin({type: "face", faceName: faceName, faceIndex: faceIndex});
   };
 
   MMO_Core_Players.setBattlerImage = Game_Actor.prototype.setBattlerImage;
   Game_Actor.prototype.setBattlerImage = function(battlerName) {
     MMO_Core_Players.setBattlerImage.call(this, battlerName);
 
-    MMO_Core.socket.emit("player_update_skin", {type: "battler", battlerName: battlerName});
+    MMO_Core_Players.updateSkin({type: "battler", battlerName: battlerName});
   };
 
   // Handle player state of the world (switches)
@@ -268,6 +265,23 @@ function MMO_Core_Players() {
   // ---------------------------------------
   // ---------- Exposed Functions
   // ---------------------------------------
+
+  MMO_Core_Players.updateSkin = function(payload) {
+    if(payload.type === "sprite") {
+      MMO_Core_Players.Player["skin"]["characterName"] = payload.characterName;
+      MMO_Core_Players.Player["skin"]["characterIndex"] = payload.characterIndex;
+    }
+
+    MMO_Core.socket.emit("player_update_skin", payload);
+  }
+
+  MMO_Core_Players.refreshPlayerOnMap = function() {
+    MMO_Core.socket.emit("refresh_player_on_map");
+  }
+
+  MMO_Core_Players.updateBusy = function(newState) {
+    MMO_Core.socket.emit("player_update_busy", newState);    
+  }
   
   MMO_Core_Players.savePlayerStats = function() {
     let equips = [];

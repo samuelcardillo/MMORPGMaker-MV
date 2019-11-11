@@ -25,7 +25,7 @@ MMO_Core.socket = io.connect(String(MMO_Core.Parameters['Server Location']));
 
   MMO_Core.socket.on('connect_error', function() {
     document.dispatchEvent(new Event('mmorpg_core_lost_connection')); // Dispatch event for connection lost.
-    socket.close();
+    MMO_Core.socket.close();
   })
 
   // Clean up the menu
@@ -34,4 +34,15 @@ MMO_Core.socket = io.connect(String(MMO_Core.Parameters['Server Location']));
     this.addOriginalCommands();
     this.addOptionsCommand();
   };
+
+  // ---------------------------------------
+  // ---------- Exposed Functions
+  // ---------------------------------------
+
+  MMO_Core.sendMessage = function(message) {
+    MMO_Core.socket.emit("new_message", message);
+  }
 })();
+
+
+

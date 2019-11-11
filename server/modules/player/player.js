@@ -45,6 +45,8 @@ exports.initialize = function() {
     })
   
     client.on("player_update_busy", function(payload) {
+      if(client.playerData === undefined) return;
+      
       client.playerData.isBusy = payload;
   
       client.broadcast.to("map-" + client.playerData["mapId"]).emit("refresh_player_on_map", {playerId: client.id, playerData: client.playerData});  
@@ -83,7 +85,6 @@ exports.getPlayers = async function(map) {
   let players = {};
 
   for(var i = 0; i < sockets.length; i++) {
-    console.log(i, sockets.length)
     players[sockets[i].playerData.username] = sockets[i];
 
     if(i === sockets.length-1) return players;
