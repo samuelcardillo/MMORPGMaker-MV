@@ -12,6 +12,12 @@ var securityDetails = {
   tokenPassphrase : process.env.tokenPassphrase || "keyboard cat"
 };
 
+// Handle the debugging verbose
+// 1 : No debug
+// 2 : Only in console
+// 3 : Console + File writing
+exports.debugVerbose = 3;
+
 // Middleware to ensure that token is valid
 // Its in a variable in order be used as a global function
 // so it doesn't need to be redeclared in every modules
@@ -115,4 +121,19 @@ exports.generatePassword = function(length) {
       password = character;
   }
   return password;
+}
+
+exports.createLog = function(message) {
+  if(exports.debugVerbose <= 1) return; 
+
+  console.log(message);
+
+  if(exports.debugVerbose >= 3) { 
+    let fullDate = new Date();
+    let todayDate = `${fullDate.getFullYear()}-${fullDate.getMonth()}-${fullDate.getDate()}`;
+
+    fs.appendFile(`${todayDate}.log`, `${fullDate.toISOString()} : ${message}\r\n`, function (err) {
+      if (err) throw err;
+    });
+  }
 }
