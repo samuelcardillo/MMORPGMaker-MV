@@ -54,13 +54,13 @@ function MMO_Core_Players() {
   SceneManager.changeScene = function() {
     if (this.isSceneChanging() && !this.isCurrentSceneBusy()) {
       if(SceneManager._nextScene instanceof Scene_Menu) {
-        socket.emit("player_update_busy", "menu");
+        MMO_Core.socket.emit("player_update_busy", "menu");
       } 
       if(SceneManager._nextScene instanceof Scene_Battle) {
-        socket.emit("player_update_busy", "combat");
+        MMO_Core.socket.emit("player_update_busy", "combat");
       }
       if(SceneManager._nextScene instanceof Scene_Map) {
-        socket.emit("player_update_busy", false);        
+        MMO_Core.socket.emit("player_update_busy", false);        
       }
     }
 
@@ -120,7 +120,7 @@ function MMO_Core_Players() {
     }
     
     MMO_Core_Players.savePlayerStats();
-    socket.emit("map_joined", MMO_Core_Players.getPlayerPos());
+    MMO_Core.socket.emit("map_joined", MMO_Core_Players.getPlayerPos());
   }
 
   // Handle player movement
@@ -140,7 +140,7 @@ function MMO_Core_Players() {
 
       if(direction > 0) {
         this.executeMove(direction);
-        socket.emit('player_moving', {
+        MMO_Core.socket.emit('player_moving', {
           direction: direction,
           mapId: $gameMap["_mapId"],
           x: this.x,
@@ -160,27 +160,27 @@ function MMO_Core_Players() {
     MMO_Core_Players.Player["skin"]["characterName"] = characterName;
     MMO_Core_Players.Player["skin"]["characterIndex"] = characterIndex;
 
-    socket.emit("player_update_skin", {type: "sprite", characterName: characterName, characterIndex: characterIndex});    
-    socket.emit("refresh_player_on_map");    
+    MMO_Core.socket.emit("player_update_skin", {type: "sprite", characterName: characterName, characterIndex: characterIndex});    
+    MMO_Core.socket.emit("refresh_player_on_map");    
   };
 
   MMO_Core_Players.setFaceImage = Game_Actor.prototype.setFaceImage;
   Game_Actor.prototype.setFaceImage = function(faceName, faceIndex) {
     MMO_Core_Players.setFaceImage.call(this, faceName, faceIndex);
 
-    socket.emit("player_update_skin", {type: "face", faceName: faceName, faceIndex: faceIndex});
+    MMO_Core.socket.emit("player_update_skin", {type: "face", faceName: faceName, faceIndex: faceIndex});
   };
 
   MMO_Core_Players.setBattlerImage = Game_Actor.prototype.setBattlerImage;
   Game_Actor.prototype.setBattlerImage = function(battlerName) {
     MMO_Core_Players.setBattlerImage.call(this, battlerName);
 
-    socket.emit("player_update_skin", {type: "battler", battlerName: battlerName});
+    MMO_Core.socket.emit("player_update_skin", {type: "battler", battlerName: battlerName});
   };
 
   // Handle player state of the world (switches)
   Game_Switches.prototype.onChange = function() {
-    socket.emit("player_update_switches", $gameSwitches["_data"]);
+    MMO_Core.socket.emit("player_update_switches", $gameSwitches["_data"]);
     $gameMap.requestRefresh();
   };
 
@@ -192,7 +192,7 @@ function MMO_Core_Players() {
   // Handle the global switch system
   Game_Switches.prototype.setValue = function(switchId, value) {
     if (switchId > 0 && switchId < $dataSystem.switches.length) {
-      socket.emit("player_global_switch_check",{switchId: switchId, value: value});
+      MMO_Core.socket.emit("player_global_switch_check",{switchId: switchId, value: value});
       this._data[switchId] = value;
       this.onChange();
     }
@@ -201,7 +201,7 @@ function MMO_Core_Players() {
   // Handle player death during combat
   Scene_Gameover.prototype.gotoTitle = function() {
     DataManager.setupNewGame();
-    socket.emit("player_dead");
+    MMO_Core.socket.emit("player_dead");
   };
 
   // Handle adding custom parameters to characters
@@ -212,9 +212,9 @@ function MMO_Core_Players() {
   }
 
   // ---------------------------------------
-  // ---------- Socket Handling
+  // ---------- MMO_Core.socket Handling
   // ---------------------------------------
-  socket.on("map_joined",function(data){
+  MMO_Core.socket.on("map_joined",function(data){
     if(MMO_Core_Players.Players[data.id] !== undefined && $gameMap._events[MMO_Core_Players.Players[data.id]["_eventId"]] !== undefined) $gameMap.eraseEvent(MMO_Core_Players.Players[data.id]["_eventId"]);
 
     MMO_Core_Players.Players[data.id] = $gameMap.createNormalEventAt(data["playerData"]["skin"]["characterName"], data["playerData"]["skin"]["characterIndex"], data["playerData"]["x"], data["playerData"]["y"], 2, 0, true);
@@ -224,17 +224,17 @@ function MMO_Core_Players() {
     MMO_Core_Players.Players[data.id]._moveSpeed = 4;
   })
 
-  socket.on("map_exited",function(data){
+  MMO_Core.socket.on("map_exited",function(data){
     if($gameMap._events[MMO_Core_Players.Players[data]["_eventId"]] === undefined) return;
     
     $gameMap.eraseEvent(MMO_Core_Players.Players[data]["_eventId"]);
   })
 
-  socket.on("refresh_players_position",function(data){
-    socket.emit("refresh_players_position",{id: data, playerData: MMO_Core_Players.getPlayerPos()});
+  MMO_Core.socket.on("refresh_players_position",function(data){
+    MMO_Core.socket.emit("refresh_players_position",{id: data, playerData: MMO_Core_Players.getPlayerPos()});
   })
 
-  socket.on("refresh_player_on_map", function(payload) {
+  MMO_Core.socket.on("refresh_player_on_map", function(payload) {
     if(MMO_Core_Players.Players[payload.playerId] === undefined) return;
 
     MMO_Core_Players.Players[payload.playerId]._characterName = payload.playerData["skin"]["characterName"];
@@ -244,7 +244,7 @@ function MMO_Core_Players() {
     document.dispatchEvent(new Event('refresh_player_on_map', {'detail': payload})); // Dispatch DOM event for external plugins
   });
 
-  socket.on('player_moving', function(data){
+  MMO_Core.socket.on('player_moving', function(data){
     if(!SceneManager._scene._spriteset || SceneManager._scene instanceof Scene_Battle) return;
     if(MMO_Core_Players.Players[data.id] === undefined) return;
 
@@ -255,12 +255,12 @@ function MMO_Core_Players() {
     if (MMO_Core_Players.Players[data.id].x !== data.x || MMO_Core_Players.Players[data.id].y !== data.y) MMO_Core_Players.Players[data.id].setPosition(data.x, data.y);
   });
 
-  socket.on("player_update_switch", function(data){
+  MMO_Core.socket.on("player_update_switch", function(data){
     $gameSwitches["_data"][data["switchId"]] = data["value"]; // Bypass the setValue function.
     Game_Switches.prototype.onChange();
   });
 
-  socket.on("player_respawn", function(payload) {
+  MMO_Core.socket.on("player_respawn", function(payload) {
     $gamePlayer.reserveTransfer(payload["mapId"], payload["x"], payload["y"]);
     SceneManager.goto(Scene_Map);
   })
@@ -275,7 +275,7 @@ function MMO_Core_Players() {
       equips.push($gameActors["_data"][1]["_equips"][i]["_itemId"])
     }
 
-    socket.emit("player_update_stats", {
+    MMO_Core.socket.emit("player_update_stats", {
       hp: $gameActors["_data"][1]["_hp"],
       mp: $gameActors["_data"][1]["_mp"],
       equips: equips,

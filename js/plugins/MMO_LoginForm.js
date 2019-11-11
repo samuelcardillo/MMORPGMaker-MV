@@ -127,7 +127,7 @@ function LoginForm() {
 
     if (payload.username.length <= 0) return this.displayError("You must provide a username!");
 
-    socket.on("login_success", function(data){
+     MMO_Core.socket.on("login_success", function(data){
       if (data.err) return that.displayError("Error : " + data.err);
       $("#ErrorPrinter").fadeOut({duration: 1000}).html("");
 
@@ -139,11 +139,11 @@ function LoginForm() {
       return true;
     });
 
-    socket.on("login_error", function(data) {
+     MMO_Core.socket.on("login_error", function(data) {
       that.displayError(data.msg);      
     })
 
-    socket.emit("login", payload);
+     MMO_Core.socket.emit("login", payload);
   }
 
   LoginForm.prototype.createBackground = function() {

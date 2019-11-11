@@ -190,7 +190,7 @@ function ChatBox() {
     let message = document.querySelector("#chatbox_input").value;
     if(message.length <= 0) return;
 
-    socket.emit("new_message", message);
+    MMO_Core.socket.emit("new_message", message);
     document.querySelector("#chatbox_input").value = "";
     document.querySelector("#chatbox_input").blur();
   }
@@ -203,7 +203,7 @@ function ChatBox() {
     
     freezePlayer(ChatBox.isFocused);
     
-    socket.emit("player_update_busy", (ChatBox.isFocused) ? "writing" : false)
+    MMO_Core.socket.emit("player_update_busy", (ChatBox.isFocused) ? "writing" : false)
   }
 
   function freezePlayer(freezePlayer) {
@@ -215,11 +215,11 @@ function ChatBox() {
   }
 
   // ---------------------------------------
-  // ---------- Sockets Handling
+  // ---------- MMO_Core.sockets Handling
   // ---------------------------------------
 
   // Handle new messages
-  socket.on("new_message",function(messageData){
+  MMO_Core.socket.on("new_message",function(messageData){
     var span = document.createElement("span");
         span.style.display     = "block";
         span.style.padding     = '2px';

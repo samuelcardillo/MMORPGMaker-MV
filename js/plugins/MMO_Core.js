@@ -14,16 +14,16 @@
  */
 
 
-var socket = undefined;
+function MMO_Core() { 
+  this.initialize.apply(this, arguments);
+}
+
+MMO_Core.Parameters = PluginManager.parameters('MMO_Core');
+MMO_Core.socket = io.connect(String(MMO_Core.Parameters['Server Location']));
 
 (function() {
-  var MMO = MMO || {};
-  MMO.Parameters = PluginManager.parameters('MMO_Core');
-  let serverAddress = String(MMO.Parameters['Server Location']);
 
-  socket = socket || io.connect(serverAddress);
-
-  socket.on('connect_error', function() {
+  MMO_Core.socket.on('connect_error', function() {
     document.dispatchEvent(new Event('mmorpg_core_lost_connection')); // Dispatch event for connection lost.
     socket.close();
   })
