@@ -254,8 +254,6 @@ Scene_Map.prototype.refreshAllMiniLabels = function() {
     for (var i = 0; i < length; ++i) {
       var sp = this._spriteset._characterSprites[i];
 
-      if(sp._miniLabel === undefined) return;
-
       if(sp._character._isBusy && sp._miniLabel._text.length > 0) sp._miniLabel._text = `(${sp._character._isBusy}) ${sp._miniLabel._text}`;
       if(!sp._character._isBusy  && sp._miniLabel._text.length > 0) sp._miniLabel._text = `${sp._miniLabel._initialText}`; 
 
