@@ -51,13 +51,13 @@ try {
   
 } catch(err) {
   console.log(err);
-  MMO_Core["socket"].modules["player"]["auth"].saveWorld();
+  MMO_Core["socket"].modules["player"].subs["auth"].saveWorld();
   server.instance.close();
 }
 
 process.on('SIGINT', function() {
     console.log("Caught interrupt signal");
-    MMO_Core["socket"].modules["player"]["auth"].saveWorld();
+    MMO_Core["socket"].modules["player"].subs["auth"].saveWorld();
     MMO_Core["security"].saveTokens(function(callback){
       process.exit();
     });

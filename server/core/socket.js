@@ -21,7 +21,9 @@ exports.initialize = function(socketConfig) {
 };
 
 exports.loadModules = function(path, isSub) {
-  let modulePath = (isSub) ? exports.modules[path] : exports.modules;
+  if(isSub && exports.modules[path].subs === undefined) exports.modules[path].subs = {};
+  
+  let modulePath = (isSub) ? exports.modules[path].subs : exports.modules;
   let correctedPath = `${__dirname}/../modules/${path}`;
 
   return new Promise((resolve, reject) => {
@@ -45,6 +47,7 @@ exports.loadModules = function(path, isSub) {
             
             for(var key in modulePath) {
               if(typeof(modulePath[key]) === "function") continue;
+              
               modulePath[key].initialize(io);
               console.log(`[I] Module ${key} initialized.`);
             }

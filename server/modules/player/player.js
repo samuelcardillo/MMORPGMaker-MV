@@ -1,4 +1,4 @@
-exports.initialize = function(io) { 
+exports.initialize = function(io) {
   io.on("connect", function(client) {
   
     client.on("player_update_switches", function(payload) {
