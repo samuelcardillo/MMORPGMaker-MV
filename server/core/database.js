@@ -103,6 +103,19 @@ exports.findUser = function(userDetails, callback) {
   })
 }
 
+exports.findUserById = function(userId, callback) {
+  onConnect(function(err, conn) {
+     r.db("mmorpg").table('users')
+    .get(userId)
+    .run(conn)
+    .then(function(cursor) { return cursor.toArray(); })
+    .then(function(output) {
+      return callback(output);
+    })
+    .finally(function() { conn.close(); });
+  })
+}
+
 exports.registerUser = function(userDetails, callback) {
   let userPayload = exports.SERVER_CONFIG["newPlayerDetails"];
   userPayload.username = userDetails["username"];

@@ -1,4 +1,6 @@
-exports.initialize = function(io) { 
+exports.initialize = function() {
+  var io = MMO_Core["socket"].socketConnection;
+
   io.on("connect", function(client) {
 
     // Handle in-game user login and registration
@@ -32,8 +34,9 @@ exports.initialize = function(io) {
     client.on("disconnect",function(){
       if(client.lastMap == undefined) return;
   
-      // ANTI-CHEAT : Deleting "permission" before saving player to avoid permission elevation exploit.
-      delete(client.playerData.permission);
+      // ANTI-CHEAT : Deleting some entries before saving the character.
+      delete(client.playerData.permission); // Avoid permission elevation exploit
+      delete(client.playerData.id); // Avoid account-spoofing
   
       client.playerData.isBusy = false; // Putting isBusy back to false to prevent false player state
 

@@ -7,10 +7,10 @@ var exports = module.exports = {};
 
 exports.modules = {};
 
-var io = null;
+exports.socketConnection = null;
 
-exports.initialize = function(socketConfig) {
-  io = socketConfig;
+exports.initialize = function(socketConnection) {
+  exports.socketConnection = socketConnection;
 
   // We load all the modules in the socket server
   exports.loadModules('', false).then(() => {
@@ -48,7 +48,7 @@ exports.loadModules = function(path, isSub) {
             for(var key in modulePath) {
               if(typeof(modulePath[key]) === "function") continue;
               
-              modulePath[key].initialize(io);
+              modulePath[key].initialize();
               console.log(`[I] Module ${key} initialized.`);
             }
           }
@@ -56,4 +56,25 @@ exports.loadModules = function(path, isSub) {
       })
     });
   })
+}
+
+// Return all connected sockets to the world or specific map
+exports.getConnectedSockets = function(map) {
+  return new Promise(resolve => {
+    let sockets = [];
+    let ns = exports.socketConnection.of("/");
+
+    for (var id in ns.connected) {
+      if(map) {
+        var index = ns.connected[id].rooms.indexOf(map);
+        if(index !== -1) {
+          sockets.push(ns.connected[id]);
+        }
+      } else {
+        sockets.push(ns.connected[id]);
+      }
+    }
+
+    return resolve(sockets);
+  });
 }

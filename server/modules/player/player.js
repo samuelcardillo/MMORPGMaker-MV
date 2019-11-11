@@ -1,4 +1,6 @@
-exports.initialize = function(io) {
+exports.initialize = function() {
+  var io = MMO_Core["socket"].socketConnection;
+
   io.on("connect", function(client) {
   
     client.on("player_update_switches", function(payload) {
@@ -70,3 +72,20 @@ exports.initialize = function(io) {
   })
 }
 
+// ---------------------------------------
+// ---------- EXPOSED FUNCTIONS
+// ---------------------------------------
+
+exports.getPlayers = async function(map) {
+  map = map || false;
+
+  let sockets = await MMO_Core["socket"].getConnectedSockets(map);
+  let players = {};
+
+  for(var i = 0; i < sockets.length; i++) {
+    console.log(i, sockets.length)
+    players[sockets[i].playerData.username] = sockets[i];
+
+    if(i === sockets.length-1) return players;
+  }
+}

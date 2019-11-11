@@ -1,4 +1,6 @@
-exports.initialize = function(io) { 
+exports.initialize = function() {
+  var io = MMO_Core["socket"].socketConnection;
+
   io.on("connect", function(client) {
 
     // Handle players joining a map
