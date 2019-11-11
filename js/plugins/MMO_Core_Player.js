@@ -241,6 +241,11 @@ function MMO_Core_Players() {
     document.dispatchEvent(new Event('refresh_player_on_map', {'detail': payload})); // Dispatch DOM event for external plugins
   });
 
+  MMO_Core.socket.on("refresh_player_data", function(payload) {
+    MMO_Core_Players.Player = payload; // We update the local playerData details
+    MMO_Core_Players.refreshStats();
+  })
+
   MMO_Core.socket.on('player_moving', function(data){
     if(!SceneManager._scene._spriteset || SceneManager._scene instanceof Scene_Battle) return;
     if(MMO_Core_Players.Players[data.id] === undefined) return;
@@ -281,6 +286,14 @@ function MMO_Core_Players() {
 
   MMO_Core_Players.updateBusy = function(newState) {
     MMO_Core.socket.emit("player_update_busy", newState);    
+  }
+
+  MMO_Core_Players.refreshStats = function() {
+    $gameParty._gold = MMO_Core_Players.Player["stats"]["gold"];
+    $gameActors["_data"][1]._level = MMO_Core_Players.Player["stats"]["level"];
+    $gameActors["_data"][1]._exp = MMO_Core_Players.Player["stats"]["exp"];
+    $gameActors["_data"][1]._hp = MMO_Core_Players.Player["stats"]["hp"];
+    $gameActors["_data"][1]._mp = MMO_Core_Players.Player["stats"]["mp"];
   }
   
   MMO_Core_Players.savePlayerStats = function() {

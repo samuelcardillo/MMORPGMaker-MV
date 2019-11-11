@@ -46,7 +46,7 @@ exports.initialize = function() {
   
     client.on("player_update_busy", function(payload) {
       if(client.playerData === undefined) return;
-      
+
       client.playerData.isBusy = payload;
   
       client.broadcast.to("map-" + client.playerData["mapId"]).emit("refresh_player_on_map", {playerId: client.id, playerData: client.playerData});  
@@ -89,4 +89,12 @@ exports.getPlayers = async function(map) {
 
     if(i === sockets.length-1) return players;
   }
+}
+
+exports.refreshData = function(player) {
+  MMO_Core["database"].findUserById(player.playerData.id, (results) => {
+    delete results.password; // We delete the password from the result sent back
+
+    player.emit("refresh_player_data", results);
+  })
 }

@@ -28,8 +28,7 @@ exports.sendToMap = function(map, username, message) {
 }
 
 exports.sendToAll = function(username, message) {
-  io.emit("new_message",{username: username, msg: message});
-  
+  io.emit("new_message", {username: username, msg: message});
 }
 
 exports.sendToPlayer = function(player, username, message) {
