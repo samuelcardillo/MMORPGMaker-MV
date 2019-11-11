@@ -5,7 +5,6 @@ exports.initialize = function(app, serverConfig, callback) {
   var SERVER_CONFIG = serverConfig;
   
   try {
-    // Add all the routes you want here
     app.use('/api/auth'     , require('../routes/auth'));
 
     return callback("[I] RESTFUL API started on port " + SERVER_CONFIG["port"] + " ...");

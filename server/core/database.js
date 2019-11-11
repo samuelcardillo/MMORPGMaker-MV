@@ -147,11 +147,11 @@ exports.reloadConfig = function(callback) {
   })
 }
 
-exports.saveConfig = function() {
+exports.saveConfig = function(serverConfig) {
   onConnect(function(err, conn) {
     r.db("mmorpg").table("config")(0)
     .replace(function(configs){
-      return configs.without("globalSwitches").merge({"globalSwitches": exports.SERVER_CONFIG["globalSwitches"]})
+      return configs.without("globalSwitches").merge({"globalSwitches": serverConfig["globalSwitches"]})
     })
     .run(conn)
     .then(() => {

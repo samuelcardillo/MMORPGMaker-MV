@@ -51,14 +51,18 @@ try {
   
 } catch(err) {
   console.log(err);
-  MMO_Core["socket"].modules["player"]["auth"].saveWorld();
+  saveWorld();
   server.instance.close();
 }
 
 process.on('SIGINT', function() {
     console.log("Caught interrupt signal");
-    MMO_Core["socket"].modules["player"]["auth"].saveWorld();
+    saveWorld();
     MMO_Core["security"].saveTokens(function(callback){
       process.exit();
     });
 });
+
+function saveWorld() { 
+  // To do : Save every players before closing the server
+}
