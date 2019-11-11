@@ -23,6 +23,8 @@ function ChatBox() {
 }
 
 (function() {
+  ChatBox.moveByInput = Game_Player.prototype.moveByInput;
+  
   ChatBox.Parameters = PluginManager.parameters('MMO_ChatBox');
 
   ChatBox.isGenerated = false;
@@ -190,6 +192,7 @@ function ChatBox() {
 
     socket.emit("new_message", message);
     document.querySelector("#chatbox_input").value = "";
+    document.querySelector("#chatbox_input").blur();
   }
 
   // Handle focus on the chatbox
@@ -197,7 +200,18 @@ function ChatBox() {
     ChatBox.isFocused = !ChatBox.isFocused;
 
     (ChatBox.isFocused) ? $gameSystem.disableMenu() : $gameSystem.enableMenu();
+    
+    freezePlayer(ChatBox.isFocused);
+    
     socket.emit("player_update_busy", (ChatBox.isFocused) ? "writing" : false)
+  }
+
+  function freezePlayer(freezePlayer) {
+    if(freezePlayer) { 
+      $gamePlayer.moveByInput = function(){ return false; }  
+    } else {
+      $gamePlayer.moveByInput = ChatBox.moveByInput;
+    }
   }
 
   // ---------------------------------------
