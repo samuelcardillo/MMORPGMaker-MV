@@ -13,7 +13,7 @@ exports.initialize = function() {
 
       if(message.indexOf('/') === 0) return checkCommand(message.substr(1, message.length), client);
 
-      exports.sendToMap(client.lastMap, client.playerData["username"], message);
+      exports.sendToMap(client.lastMap, client.playerData["username"], message, client.id);
     })
   })
 }
@@ -22,8 +22,14 @@ exports.initialize = function() {
 // ---------- EXPOSED FUNCTIONS
 // ---------------------------------------
 
-exports.sendToMap = function(map, username, message) {
-  io.in(map).emit("new_message",{username: username, msg: message});
+exports.sendToMap = function(map, username, message, senderId) {
+  let payload = {
+    username: username,
+    msg: message
+  };
+  if(senderId) payload.senderId = senderId;
+
+  io.in(map).emit("new_message", payload);
   
 }
 
@@ -32,7 +38,7 @@ exports.sendToAll = function(username, message) {
 }
 
 exports.sendToPlayer = function(player, username, message) {
-  player.emit("new_message",{username: username, msg: message});
+  player.emit("new_message", {username: username, msg: message});
 }
 
 // ---------------------------------------

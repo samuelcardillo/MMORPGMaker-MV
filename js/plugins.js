@@ -7,8 +7,9 @@ var $plugins =
 {"name":"OrangeCustomEvents","status":true,"description":"This plugin Will let you add or copy events to the current map","parameters":{}},
 {"name":"OrangeCustomEventCreator","status":true,"description":"This plugin Will let you create virtual events with script calls","parameters":{}},
 {"name":"MMO_Core","status":true,"description":"MMORPG Maker MV - Core","parameters":{"Server Location":"http://127.0.0.1:8097/"}},
-{"name":"MMO_Core_Player","status":true,"description":"MMORPG Maker MV - Core Handling Player","parameters":{"Mouse Movements":"false"}},
+{"name":"MMO_Core_Player","status":true,"description":"MMORPG Maker MV - Core Handling Player","parameters":{"Mouse Movements":"true"}},
 {"name":"MMO_ChatBox","status":true,"description":"MMORPG Maker MV - ChatBox","parameters":{"chatPosition":"BOTTOM LEFT"}},
 {"name":"MMO_LoginForm","status":true,"description":"MMORPG Maker MV - Login Form","parameters":{"allowAccountCreation":"Yes"}},
-{"name":"MMO_Overhead","status":true,"description":"Add name over actors name","parameters":{}}
+{"name":"MMO_Overhead","status":true,"description":"Add name over actors name","parameters":{}},
+{"name":"MMO_iavra_event_popup","status":true,"description":"Allows to display popups messages above events, which can be used for speech bubbles or on chests.\r\n<Iavra Event Popup>","parameters":{"Popup Width":"200","Offset X":"0","Offset Y":"0","Display Duration":"200","Fade In Duration":"10","Fade Out Duration":"60","Font Name":"","Font Size":"12","Line Height":"18","Retain On Scene":"Scene_Menu, Scene_Battle\r"}}
 ];
