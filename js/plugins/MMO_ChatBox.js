@@ -88,7 +88,6 @@ function ChatBox() {
   ChatBox.generate = function() {
     generateTextField();
     generateTextBox();
-    generateMobileEnterButton();
     this.resize();
 
     this.isGenerated = true;
@@ -115,7 +114,6 @@ function ChatBox() {
 
     let chatboxInput = document.querySelector("#chatbox_input");
     let chatboxBox = document.querySelector("#chatbox_box");
-    let chatboxMobileBtn = document.querySelector("#chatbox_mobileBtn");
     
     switch (this.Parameters["chatPosition"]) {
       case "TOP LEFT":
@@ -123,32 +121,24 @@ function ChatBox() {
         chatboxInput.style.top = (offsetTop + 116) + "px";
         chatboxBox.style.left = (offsetLeft + 8) + "px";
         chatboxBox.style.top = (offsetTop + 8) + "px";
-        chatboxMobileBtn.style.left = (parseInt(chatboxInput.style.width) - (parseInt(chatboxInput.style.left) * 4)) + "px";
-        chatboxMobileBtn.style.top = (parseInt(chatboxInput.style.top))  + "px";
         break;
       case "TOP RIGHT":
         chatboxInput.style.right = (offsetLeft + 8) + "px";
         chatboxInput.style.top = (offsetTop + 116) + "px";
         chatboxBox.style.right = (offsetLeft + 8) + "px";
         chatboxBox.style.top = (offsetTop + 8) + "px";
-        chatboxMobileBtn.style.right = (parseInt(chatboxInput.style.width) - (parseInt(chatboxInput.style.right) * 4)) + "px";
-        chatboxMobileBtn.style.top = (parseInt(chatboxInput.style.top))  + "px";
         break;
       case "BOTTOM LEFT":
         chatboxInput.style.left = (offsetLeft + 8) + "px";
         chatboxInput.style.bottom = (offsetTop + 8) + "px";
         chatboxBox.style.left = (offsetLeft + 8) + "px";
         chatboxBox.style.bottom = (offsetTop + 36) + "px";
-        chatboxMobileBtn.style.left = (parseInt(chatboxInput.style.width) - (parseInt(chatboxInput.style.left) * 4)) + "px";
-        chatboxMobileBtn.style.bottom = (parseInt(chatboxInput.style.bottom))  + "px";
         break;
       case "BOTTOM RIGHT":
         chatboxInput.style.right = (offsetLeft + 8) + "px";
         chatboxInput.style.bottom = (offsetTop + 8) + "px";
         chatboxBox.style.right = (offsetLeft + 8) + "px";
         chatboxBox.style.bottom = (offsetTop + 36) + "px";
-        chatboxMobileBtn.style.right = (parseInt(chatboxInput.style.width) - (parseInt(chatboxInput.style.right) * 4)) + "px";
-        chatboxMobileBtn.style.bottom = (parseInt(chatboxInput.style.bottom))  + "px";
         break;
     }
   }
@@ -193,20 +183,6 @@ function ChatBox() {
     document.body.appendChild(textBox);
   }
 
-  // Generate the textbox
-  function generateMobileEnterButton() {
-    let mobileBtn = document.createElement('button');
-    mobileBtn.id                    = 'chatbox_mobileBtn';
-    mobileBtn.style.position        = 'absolute';
-    mobileBtn.style.zIndex          = "1001";
-    mobileBtn.style.visibility      = "hidden";
-    mobileBtn.addEventListener('touchstart', function(e){sendMessage("touch")});
-    
-    let message = document.createTextNode("Send");
-    mobileBtn.appendChild(message);
-    document.body.appendChild(mobileBtn);
-  }
-
   // Handle sending message
   function sendMessage(e) {
     if(e.keyCode !== undefined && e.keyCode != 13) return;
@@ -222,8 +198,7 @@ function ChatBox() {
 
   // Handle touch events from mobile
   function handleTouch() {
-    MMO_Core.allowTouch = false;
-    document.querySelector("#chatbox_mobileBtn").style.visibility = "visible";              
+    MMO_Core.allowTouch = false;           
   }
 
   // Handle focus on the chatbox
@@ -234,10 +209,7 @@ function ChatBox() {
     
     freezePlayer(ChatBox.isFocused);
     
-    if(!ChatBox.isFocused) { 
-      document.querySelector("#chatbox_mobileBtn").style.visibility = "hidden";          
-      MMO_Core.allowTouch = true;
-    }
+    if(!ChatBox.isFocused) MMO_Core.allowTouch = true;
 
     MMO_Core_Players.updateBusy((ChatBox.isFocused) ? "writing" : false)
   }
