@@ -88,7 +88,9 @@ function ChatBox() {
   ChatBox.generate = function() {
     generateTextField();
     generateTextBox();
+    generateMobileEnterButton();
     this.resize();
+
     this.isGenerated = true;
     this.isVisible = true;
   };
@@ -113,6 +115,7 @@ function ChatBox() {
 
     let chatboxInput = document.querySelector("#chatbox_input");
     let chatboxBox = document.querySelector("#chatbox_box");
+    let chatboxMobileBtn = document.querySelector("#chatbox_mobileBtn");
     
     switch (this.Parameters["chatPosition"]) {
       case "TOP LEFT":
@@ -120,28 +123,34 @@ function ChatBox() {
         chatboxInput.style.top = (offsetTop + 116) + "px";
         chatboxBox.style.left = (offsetLeft + 8) + "px";
         chatboxBox.style.top = (offsetTop + 8) + "px";
+        chatboxMobileBtn.style.left = (parseInt(chatboxInput.style.width) - (parseInt(chatboxInput.style.left) * 4)) + "px";
+        chatboxMobileBtn.style.top = (parseInt(chatboxInput.style.top))  + "px";
         break;
       case "TOP RIGHT":
         chatboxInput.style.right = (offsetLeft + 8) + "px";
         chatboxInput.style.top = (offsetTop + 116) + "px";
         chatboxBox.style.right = (offsetLeft + 8) + "px";
         chatboxBox.style.top = (offsetTop + 8) + "px";
+        chatboxMobileBtn.style.right = (parseInt(chatboxInput.style.width) - (parseInt(chatboxInput.style.right) * 4)) + "px";
+        chatboxMobileBtn.style.top = (parseInt(chatboxInput.style.top))  + "px";
         break;
       case "BOTTOM LEFT":
         chatboxInput.style.left = (offsetLeft + 8) + "px";
         chatboxInput.style.bottom = (offsetTop + 8) + "px";
         chatboxBox.style.left = (offsetLeft + 8) + "px";
         chatboxBox.style.bottom = (offsetTop + 36) + "px";
+        chatboxMobileBtn.style.left = (parseInt(chatboxInput.style.width) - (parseInt(chatboxInput.style.left) * 4)) + "px";
+        chatboxMobileBtn.style.bottom = (parseInt(chatboxInput.style.bottom))  + "px";
         break;
       case "BOTTOM RIGHT":
         chatboxInput.style.right = (offsetLeft + 8) + "px";
         chatboxInput.style.bottom = (offsetTop + 8) + "px";
         chatboxBox.style.right = (offsetLeft + 8) + "px";
         chatboxBox.style.bottom = (offsetTop + 36) + "px";
+        chatboxMobileBtn.style.right = (parseInt(chatboxInput.style.width) - (parseInt(chatboxInput.style.right) * 4)) + "px";
+        chatboxMobileBtn.style.bottom = (parseInt(chatboxInput.style.bottom))  + "px";
         break;
     }
-
-    
   }
 
   // ---------------------------------------
@@ -150,7 +159,7 @@ function ChatBox() {
 
   // Generate the main chatbox that contains messages
   function generateTextField() {
-    var textField = document.createElement('input');
+    let textField = document.createElement('input');
     textField.id                    = 'chatbox_input';
     textField.type                  = 'text';
     textField.style.position        = 'absolute';
@@ -162,6 +171,7 @@ function ChatBox() {
     textField.style.backgroundColor = 'rgba(0,0,0,0.6)';
     textField.style.borderColor     = textField.style.backgroundColor;
     textField.addEventListener('keydown', function(e){sendMessage(e)});
+    textField.addEventListener('touchstart', function(e){handleTouch(e)});
     textField.addEventListener('focus', function(e){handleFocus(e)});
     textField.addEventListener('focusout', function(e){handleFocus(e)});
     document.body.appendChild(textField);
@@ -169,7 +179,7 @@ function ChatBox() {
 
   // Generate the textbox
   function generateTextBox() {
-    var textBox = document.createElement('div');
+    let textBox = document.createElement('div');
     textBox.id                    = 'chatbox_box';
     textBox.style.position        = 'absolute';
     textBox.style.width           = '300px';
@@ -183,9 +193,24 @@ function ChatBox() {
     document.body.appendChild(textBox);
   }
 
+  // Generate the textbox
+  function generateMobileEnterButton() {
+    let mobileBtn = document.createElement('button');
+    mobileBtn.id                    = 'chatbox_mobileBtn';
+    mobileBtn.style.position        = 'absolute';
+    mobileBtn.style.zIndex          = "1001";
+    mobileBtn.style.visibility      = "hidden";
+    mobileBtn.addEventListener('touchstart', function(e){sendMessage("touch")});
+    
+    let message = document.createTextNode("Send");
+    mobileBtn.appendChild(message);
+    document.body.appendChild(mobileBtn);
+  }
+
   // Handle sending message
   function sendMessage(e) {
-    if(e.keyCode != 13) return;
+    if(e.keyCode !== undefined && e.keyCode != 13) return;
+    if(e.keyCode === undefined && e !== "touch") return;
 
     let message = document.querySelector("#chatbox_input").value;
     if(message.length <= 0) return;
@@ -195,6 +220,12 @@ function ChatBox() {
     document.querySelector("#chatbox_input").blur();
   }
 
+  // Handle touch events from mobile
+  function handleTouch() {
+    MMO_Core.allowTouch = false;
+    document.querySelector("#chatbox_mobileBtn").style.visibility = "visible";              
+  }
+
   // Handle focus on the chatbox
   function handleFocus(e) {
     ChatBox.isFocused = !ChatBox.isFocused;
@@ -202,6 +233,11 @@ function ChatBox() {
     (ChatBox.isFocused) ? $gameSystem.disableMenu() : $gameSystem.enableMenu();
     
     freezePlayer(ChatBox.isFocused);
+    
+    if(!ChatBox.isFocused) { 
+      document.querySelector("#chatbox_mobileBtn").style.visibility = "hidden";          
+      MMO_Core.allowTouch = true;
+    }
 
     MMO_Core_Players.updateBusy((ChatBox.isFocused) ? "writing" : false)
   }
@@ -220,28 +256,30 @@ function ChatBox() {
 
   // Handle new messages
   MMO_Core.socket.on("new_message",function(messageData){
-    var span = document.createElement("span");
+    let span = document.createElement("span");
         span.style.display     = "block";
         span.style.padding     = '2px';
         span.style.paddingLeft = '8px';
         span.style.fontWeight  = '200';
         span.style.fontFamily  = 'monoscape';
 
-    var message = document.createTextNode(messageData["username"] + ": " + messageData["msg"]);
+    let message = document.createTextNode(messageData["username"] + ": " + messageData["msg"]);
 
     span.appendChild(message); 
-    document.querySelector("#chatbox_box").insertBefore(span, document.querySelector("#chatbox_box").firstChild);
-    document.querySelector("#chatbox_box").scrollTop = 0;
+    document.querySelector("#chatbox_box").appendChild(span);
+    document.querySelector("#chatbox_box").scrollTop = document.querySelector("#chatbox_box").scrollHeight;
   })
 
   document.addEventListener('keydown', function(e) {
     if(!ChatBox.isGenerated) return;
-    if(e.keyCode !== 119) return;
 
-    ChatBox.toggle();
+    switch (e.keyCode) {
+      case 119:
+        ChatBox.toggle();
+        break;
+      case 13:
+        if(!ChatBox.isFocused) document.querySelector("#chatbox_input").focus();
+        break;
+    }
   })
-
-  TouchInput._onTouchStart = function(event) {
-    return true;
-  };
 })();

@@ -54,12 +54,14 @@ function MMO_Core_Players() {
   SceneManager.changeScene = function() {
     if (this.isSceneChanging() && !this.isCurrentSceneBusy()) {
       if(SceneManager._nextScene instanceof Scene_Menu) {
-        MMO_Core_Players.updateBusy("menu");
+        if(!MMO_Core_Players.Player.isOnMenu) MMO_Core_Players.updateBusy("menu");
+        MMO_Core_Players.Player.isOnMenu = true
       } 
       if(SceneManager._nextScene instanceof Scene_Battle) {
         MMO_Core_Players.updateBusy("combat");
       }
       if(SceneManager._nextScene instanceof Scene_Map) {
+        MMO_Core_Players.Player.isOnMenu = false;
         MMO_Core_Players.updateBusy(false);        
       }
     }
@@ -222,6 +224,7 @@ function MMO_Core_Players() {
   })
 
   MMO_Core.socket.on("map_exited",function(data){
+    if(MMO_Core_Players.Players[data] === undefined) return;
     if($gameMap._events[MMO_Core_Players.Players[data]["_eventId"]] === undefined) return;
     
     $gameMap.eraseEvent(MMO_Core_Players.Players[data]["_eventId"]);

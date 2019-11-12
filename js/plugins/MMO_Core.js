@@ -20,6 +20,7 @@ function MMO_Core() {
 
 MMO_Core.Parameters = PluginManager.parameters('MMO_Core');
 MMO_Core.socket = io.connect(String(MMO_Core.Parameters['Server Location']));
+MMO_Core.allowTouch = true;
 
 (function() {
 
@@ -35,6 +36,12 @@ MMO_Core.socket = io.connect(String(MMO_Core.Parameters['Server Location']));
     this.addOriginalCommands();
     this.addOptionsCommand();
   };
+
+  MMO_Core._onTouchStart = TouchInput._onTouchStart;
+  TouchInput._onTouchStart = function(event) {
+    if(!MMO_Core.allowTouch) return; 
+    MMO_Core._onTouchStart.call(this, event);
+  }
 
   // ---------------------------------------
   // ---------- Exposed Functions

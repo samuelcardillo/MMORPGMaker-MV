@@ -107,6 +107,7 @@ function LoginForm() {
     })
     $("#btnConnect").click(function(){that.connectAttempt()})
     $("#ErrorPrinter").fadeIn({duration: 1000});
+    MMO_Core.allowTouch = false;
   }
 
   LoginForm.prototype.displayError = function(message) {
@@ -136,6 +137,7 @@ function LoginForm() {
       that.fadeOutAll();
       DataManager.setupNewGame();
       SceneManager.goto(Scene_Map);
+      MMO_Core.allowTouch = true;
       return true;
     });
 
@@ -197,18 +199,18 @@ function LoginForm() {
   Input._shouldPreventDefault = function(e) {
     if(e === undefined) return;
 
-    switch (e.keyCode) {
-      case 8:     // backspace
-        if ($(e.target).is("input, textarea"))
-          break;
-      case 33:    // pageup
-      case 34:    // pagedown
-      case 37:    // left arrow
-      case 38:    // up arrow
-      case 39:    // right arrow
-      case 40:    // down arrow
-          return true;
-    }
+    // switch (e) {
+    //   case 8:     // backspace
+    //     if ($(e.target).is("input, textarea"))
+    //       break;
+    //   case 33:    // pageup
+    //   case 34:    // pagedown
+    //   case 37:    // left arrow
+    //   case 38:    // up arrow
+    //   case 39:    // right arrow
+    //   case 40:    // down arrow
+    //       return true;
+    // }
     return false;
   }
 })();
