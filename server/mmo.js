@@ -31,6 +31,7 @@ console.log("######################################");
 
 // CORE INTEGRATIONS
 MMO_Core = {
+  "gamedata": require('./core/gamedata'),
   "database": require('./core/database'),
   "security": require('./core/security'),
   "socket": require('./core/socket'),
@@ -38,6 +39,7 @@ MMO_Core = {
 }
 
 try {
+  MMO_Core["gamedata"].initialize();
   MMO_Core["database"].initialize(() => {  // Initializing the database
     MMO_Core["database"].reloadConfig(() => { // Initializing server config
       server.listen(MMO_Core["database"].SERVER_CONFIG.port); // Listen configured port
