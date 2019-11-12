@@ -30,13 +30,16 @@ exports.reloadData = function(callback) {
       files.forEach((file) => {
         let fileName = file.split('.json')[0];
         
-        fs.readFile(`${correctedPath}/${file}`, 'utf8', function(err, contents) {
-          exports.data[fileName] = JSON.parse(contents);
-
-          if(Object.keys(files).length === Object.keys(exports.data).length) {
-            return callback(true);
-          }
-        });
+        if(file.includes(".json")) { 
+          fs.readFile(`${correctedPath}/${file}`, 'utf8', function(err, contents) {
+            exports.data[fileName] = JSON.parse(contents);
+  
+            if(Object.keys(files).length === Object.keys(exports.data).length) {
+              return callback(true);
+            }
+          });
+        }
+        
       })
     })
   } catch(e) {
