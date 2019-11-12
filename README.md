@@ -28,6 +28,11 @@ Video : [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/TcAmU2bdKvE/0.jpg)](h
 
 Congratulations! Your game is now an MMORPG. 
 
+### Documentation 
+
+Are you a developer ? [Read the developer documentation](https://github.com/samuelcardillo/MMORPGMaker-MV/wiki/Developer-Documentation)
+Are you a maker ? [Read the maker documentation](https://github.com/samuelcardillo/MMORPGMaker-MV/wiki/Maker-Documentation)
+
 ### Current functionalities
 - Synchronised player movements
 - Synchronised skins
