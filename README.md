@@ -30,8 +30,9 @@ Congratulations! Your game is now an MMORPG.
 
 ### Documentation 
 
-Are you a developer ? [Read the developer documentation](https://github.com/samuelcardillo/MMORPGMaker-MV/wiki/Developer-Documentation)
-Are you a maker ? [Read the maker documentation](https://github.com/samuelcardillo/MMORPGMaker-MV/wiki/Maker-Documentation)
+-Are you a developer ? [Read the developer documentation](https://github.com/samuelcardillo/MMORPGMaker-MV/wiki/Developer-Documentation)
+
+-Are you a maker ? [Read the maker documentation](https://github.com/samuelcardillo/MMORPGMaker-MV/wiki/Maker-Documentation)
 
 ### Current functionalities
 - Synchronised player movements
@@ -42,8 +43,13 @@ Are you a maker ? [Read the maker documentation](https://github.com/samuelcardil
 - Persistance of player stats
 - Persistance of inventory & equipments
 - Persistance of local switches
+- Persistance of party switches
 - Persistance of global switches
+- Persistance of local variables
+- Persistance of global variables
 - Global and local map system
+- Party system
+- Party combat system
 - Respawn system
 - In-game chat
 
