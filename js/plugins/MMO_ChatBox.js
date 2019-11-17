@@ -153,7 +153,7 @@ function ChatBox() {
     textField.id                    = 'chatbox_input';
     textField.type                  = 'text';
     textField.style.position        = 'absolute';
-    textField.style.width           = '287px';
+    textField.style.width           = '325px';
     textField.style.height          = '20px';
     textField.style.zIndex          = "1000";
     textField.style.color           = "#fafafa";
@@ -172,13 +172,13 @@ function ChatBox() {
     let textBox = document.createElement('div');
     textBox.id                    = 'chatbox_box';
     textBox.style.position        = 'absolute';
-    textBox.style.width           = '300px';
-    textBox.style.height          = '100px';
+    textBox.style.width           = '338px';
+    textBox.style.height          = '150px';
     textBox.style.zIndex          = "1000";
     textBox.style.overflowY       = "hidden";
     textBox.style.borderRadius    = "8px";
     textBox.style.color           = "#fafafa";
-    textBox.style.backgroundColor = 'rgba(0,0,0,0.4)';
+    textBox.style.backgroundColor = 'rgba(0,0,0,0.6)';
     textBox.style.borderColor     = textBox.style.backgroundColor;
     document.body.appendChild(textBox);
   }
@@ -205,7 +205,11 @@ function ChatBox() {
   function handleFocus(e) {
     ChatBox.isFocused = !ChatBox.isFocused;
 
+    document.querySelector("#chatbox_box").scrollTop = document.querySelector("#chatbox_box").scrollHeight;
+
     (ChatBox.isFocused) ? $gameSystem.disableMenu() : $gameSystem.enableMenu();
+    document.querySelector("#chatbox_box").style.overflowY = (ChatBox.isFocused) ? "scroll" : "hidden";
+    document.querySelector("#chatbox_box").style.backgroundColor = (ChatBox.isFocused) ? 'rgba(0,0,0,0.9)' : 'rgba(0,0,0,0.6)';
     
     freezePlayer(ChatBox.isFocused);
     
@@ -231,6 +235,7 @@ function ChatBox() {
     let span = document.createElement("span");
         span.style.display     = "block";
         span.style.padding     = '2px';
+        span.style.color       = messageData.color;
         span.style.paddingLeft = '8px';
         span.style.fontWeight  = '200';
         span.style.fontFamily  = 'monoscape';
@@ -239,7 +244,8 @@ function ChatBox() {
 
     span.appendChild(message); 
     document.querySelector("#chatbox_box").appendChild(span);
-    document.querySelector("#chatbox_box").scrollTop = document.querySelector("#chatbox_box").scrollHeight;
+
+    if(!ChatBox.isFocused) document.querySelector("#chatbox_box").scrollTop = document.querySelector("#chatbox_box").scrollHeight;
   })
 
   document.addEventListener('keydown', function(e) {

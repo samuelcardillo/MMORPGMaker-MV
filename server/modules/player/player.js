@@ -11,6 +11,14 @@ exports.initialize = function() {
   
     client.on("player_global_switch_check", function(payload) {
       if(client.playerData === undefined) return;
+
+      // If the player is in a party
+      if(client.isInParty) { 
+        if(MMO_Core["database"].SERVER_CONFIG["partySwitches"][payload["switchId"]] != undefined) {
+          io.in(client.isInParty).emit("player_update_switch", payload);
+          return;          
+        }
+      }
   
       if(MMO_Core["database"].SERVER_CONFIG["globalSwitches"][payload["switchId"]] === undefined) return;
   
@@ -19,11 +27,32 @@ exports.initialize = function() {
   
       client.broadcast.emit("player_update_switch", payload);
     })
-  
-    client.on("player_update_stats", function(payload) {
+
+    client.on("player_update_variables", function(payload) {
       if(client.playerData === undefined) return;
   
+      client.playerData["variables"] = payload;
+    })
+  
+    client.on("player_global_variables_check", function(payload) {
+      if(client.playerData === undefined) return;
+  
+      if(MMO_Core["database"].SERVER_CONFIG["globalVariables"][payload["variableId"]] === undefined) return;
+  
+      MMO_Core["database"].SERVER_CONFIG["globalVariables"][payload["variableId"]] = payload["value"];
+      MMO_Core["database"].saveConfig();
+  
+      client.broadcast.emit("player_update_variable", payload);
+    })
+  
+    client.on("player_update_stats", async function(payload) {
+      if(client.playerData === undefined) return;
+
       client.playerData["stats"] = payload;
+
+      MMO_Core["database"].savePlayer(client.playerData, () => {
+        exports.refreshData(client);
+      })
     })
   
     client.on("player_update_skin", function(payload) {
@@ -46,10 +75,13 @@ exports.initialize = function() {
   
     client.on("player_update_busy", function(payload) {
       if(client.playerData === undefined) return;
-
+      if(client.playerData.isBusy === payload) return;
+    
       client.playerData.isBusy = payload;
-  
-      client.broadcast.to("map-" + client.playerData["mapId"]).emit("refresh_player_on_map", {playerId: client.id, playerData: client.playerData});  
+
+      MMO_Core["database"].savePlayer({username: client.playerData.username, isBusy: client.playerData.isBusy}, (e) => { 
+        client.broadcast.to("map-" + client.playerData["mapId"]).emit("refresh_player_on_map", {playerId: client.id, playerData: client.playerData});  
+      })
     })
   
     client.on("player_moving",function(payload){
@@ -72,29 +104,46 @@ exports.initialize = function() {
       client.emit("player_respawn", {mapId: MMO_Core["database"].SERVER_CONFIG["newPlayerDetails"]["mapId"], x: MMO_Core["database"].SERVER_CONFIG["newPlayerDetails"]["x"], y: MMO_Core["database"].SERVER_CONFIG["newPlayerDetails"]["y"]})
     })
   })
-}
 
-// ---------------------------------------
-// ---------- EXPOSED FUNCTIONS
-// ---------------------------------------
+  // ---------------------------------------
+  // ---------- EXPOSED FUNCTIONS
+  // ---------------------------------------
 
-exports.getPlayers = async function(map) {
-  map = map || false;
+  exports.getPlayers = async function(spaceName) {
+    spaceName = spaceName || false;
 
-  let sockets = await MMO_Core["socket"].getConnectedSockets(map);
-  let players = {};
+    let sockets = await MMO_Core["socket"].getConnectedSockets(spaceName);
+    let players = {};
 
-  for(var i = 0; i < sockets.length; i++) {
-    players[sockets[i].playerData.username] = sockets[i];
+    for(var i = 0; i < sockets.length; i++) {
+      if(!sockets[i].playerData) continue;
 
-    if(i === sockets.length-1) return players;
+      players[sockets[i].playerData.username] = sockets[i];
+
+      if(i === sockets.length-1) return players;
+    }
+  }
+
+  exports.getPlayer = async function(username) { 
+    let players = await exports.getPlayers();
+
+    return players[username] || null;
+  }
+
+  exports.getPlayerById = async function(socketId) { 
+    return io.sockets.connected[socketId];
+  }
+
+  exports.refreshData = function(player) {
+    MMO_Core["database"].findUserById(player.playerData.id, (playerData) => {
+      delete playerData.password; // We delete the password from the result sent back
+      
+      player.emit("refresh_player_data", playerData, () => {
+        if(!player.isInParty) return;
+
+        MMO_Core["socket"].modules["player"].subs["party"].refreshPartyData(player.isInParty);
+      }); 
+    })
   }
 }
 
-exports.refreshData = function(player) {
-  MMO_Core["database"].findUserById(player.playerData.id, (results) => {
-    delete results.password; // We delete the password from the result sent back
-
-    player.emit("refresh_player_data", results);
-  })
-}

@@ -1,13 +1,16 @@
-const fs    = require('fs');
+const fs            = require('fs')
+  ,   EventEmitter = require('events');
 var exports = module.exports = {};
 
 /*****************************
       PUBLIC FUNCTIONS
 *****************************/
 
+
 exports.modules = {};
 
 exports.socketConnection = null;
+exports.serverEvent = new EventEmitter();
 
 exports.initialize = function(socketConnection) {
   exports.socketConnection = socketConnection;
@@ -58,15 +61,15 @@ exports.loadModules = function(path, isSub) {
   })
 }
 
-// Return all connected sockets to the world or specific map
-exports.getConnectedSockets = function(map) {
+// Return all connected sockets to the world or specific room (map-* OR party-*)
+exports.getConnectedSockets = function(roomName) {
   return new Promise(resolve => {
     let sockets = [];
     let ns = exports.socketConnection.of("/");
 
     for (var id in ns.connected) {
-      if(map) {
-        var index = ns.connected[id].rooms.indexOf(map);
+      if(roomName) {
+        var index = ns.connected[id].rooms.indexOf(roomName);
         if(index !== -1) {
           sockets.push(ns.connected[id]);
         }

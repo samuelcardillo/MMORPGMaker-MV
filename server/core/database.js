@@ -18,6 +18,7 @@ exports.initialize = function(callback) {
 
   // We check if the database exist
   onConnect(function(err, conn) {
+    // IMPORTANT : DO NOT TOUCH THIS
     var initialServerConfig = {
       "port": 8097,
       "passwordRequired": true,
@@ -35,10 +36,12 @@ exports.initialize = function(callback) {
         "y": 5
       },
       "globalSwitches": {
-        "2": false
+      },
+      "partySwitches": {
+      },
+      "globalVariables": {
       },
       "offlineMaps": {
-        "map-2": true
       }
     }
     
@@ -132,14 +135,25 @@ exports.registerUser = function(userDetails, callback) {
   })
 }
 
-exports.savePlayer = function(playerData, callback) {
+exports.savePlayer = function(playerData, callback) {  
+  // We delete what we don't want to be saved (in case it is there)
+  delete playerData.permission;
+
   onConnect(function(err, conn) {
-    r.db("mmorpg").table('users')
+    let request = r.db("mmorpg").table('users')
     .filter({
       "username": playerData["username"],
     })
     .update(playerData)
-    .run(conn)
+
+    if(playerData.stats) { 
+      request = request.do(r.db("mmorpg").table('users')
+      .filter({
+        "username": playerData["username"],
+      }).update({"stats": r.literal(playerData.stats)}))
+    }
+
+    request.run(conn)
     .then(function(cursor) { return cursor; })
     .then(function(output) {
       return callback(output);
@@ -163,9 +177,7 @@ exports.reloadConfig = function(callback) {
 exports.saveConfig = function() {
   onConnect(function(err, conn) {
     r.db("mmorpg").table("config")(0)
-    .replace(function(configs){
-      return configs.without("globalSwitches").merge({"globalSwitches": exports.SERVER_CONFIG["globalSwitches"]})
-    })
+    .update(exports.SERVER_CONFIG)
     .run(conn)
     .then(() => {
       console.log("[I] Server configuration changes saved.")

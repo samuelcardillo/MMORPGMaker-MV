@@ -254,10 +254,20 @@ Scene_Map.prototype.refreshAllMiniLabels = function() {
     for (var i = 0; i < length; ++i) {
       var sp = this._spriteset._characterSprites[i];
 
+      // If there is no minilabel then we do nothing
       if(sp._miniLabel === undefined) return;
 
-      if(sp._character._isBusy && sp._miniLabel._text.length > 0) sp._miniLabel._text = `(${sp._character._isBusy}) ${sp._miniLabel._text}`;
+      if(sp._character._isBusy && sp._miniLabel._text.length > 0) sp._miniLabel._text = `(${sp._character._isBusy}) ${sp._miniLabel._initialText}`;
       if(!sp._character._isBusy  && sp._miniLabel._text.length > 0) sp._miniLabel._text = `${sp._miniLabel._initialText}`; 
+
+      // If player is in party
+      if(MMO_Core_Players.Party.length > 0) { 
+        for(var c = 0; c < MMO_Core_Players.Party.length; c++) {
+          if(!MMO_Core_Players.Party[c]) continue;
+          // If player is in the same party than us then we write his name in blue
+          if(MMO_Core_Players.Party[c].username === sp._miniLabel._initialText) sp._miniLabel._text = "\\C[23]" + sp._miniLabel._text;
+        }
+      }
 
       sp.refreshMiniLabel();
     }
