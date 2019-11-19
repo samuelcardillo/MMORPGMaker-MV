@@ -29,7 +29,7 @@ function LoginForm() {
   LoginForm.connectionLost = false;
 
   document.addEventListener("mmorpg_core_lost_connection", function() {
-    let wasLogged = (MMO_Core_Players.Player.id !== undefined) ? true : false;
+    let wasLogged = (MMO_Core_Player.Player.id !== undefined) ? true : false;
     LoginForm.connectionLost = true;
 
     if(wasLogged) SceneManager.goto(LoginForm);
@@ -134,7 +134,7 @@ function LoginForm() {
       if (data.err) return that.displayError("Error : " + data.err);
       $("#ErrorPrinter").fadeOut({duration: 1000}).html("");
 
-      MMO_Core_Players.Player = data["msg"];
+      MMO_Core_Player.Player = data["msg"];
 
       that.fadeOutAll();
       DataManager.setupNewGame();

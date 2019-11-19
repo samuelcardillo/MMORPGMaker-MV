@@ -60,10 +60,10 @@ exports.initialize = function() {
     })
   
     // Refresh single player on map
-    client.on("refresh_player_on_map", function() {
+    client.on("refresh_players_on_map", function() {
       if(client.playerData === undefined) return;
   
-      client.broadcast.to("map-" + client.playerData["mapId"]).emit("refresh_player_on_map", {playerId: client.id, playerData: client.playerData});   
+      client.broadcast.to("map-" + client.playerData["mapId"]).emit("refresh_players_on_map", {playerId: client.id, playerData: client.playerData});   
     })
   })
 }

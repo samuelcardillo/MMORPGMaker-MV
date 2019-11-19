@@ -194,6 +194,8 @@ function ChatBox() {
     MMO_Core.sendMessage(message);
     document.querySelector("#chatbox_input").value = "";
     document.querySelector("#chatbox_input").blur();
+
+    document.querySelector("#chatbox_box").scrollTop = document.querySelector("#chatbox_box").scrollHeight;    
   }
 
   // Handle touch events from mobile
@@ -215,7 +217,7 @@ function ChatBox() {
     
     if(!ChatBox.isFocused) MMO_Core.allowTouch = true;
 
-    MMO_Core_Players.updateBusy((ChatBox.isFocused) ? "writing" : false)
+    MMO_Core_Player.updateBusy((ChatBox.isFocused) ? "writing" : false)
   }
 
   function freezePlayer(freezePlayer) {

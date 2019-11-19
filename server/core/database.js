@@ -93,6 +93,18 @@ exports.initialize = function(callback) {
   })
 };
 
+exports.getPlayers = function(callback) { 
+  onConnect(function(err, conn) {
+    r.db("mmorpg").table('users')
+   .run(conn)
+   .then(function(cursor) { return cursor.toArray(); })
+   .then(function(output) {
+     callback(output);
+   })
+   .finally(function() { conn.close(); });
+  })
+}
+
 exports.findUser = function(userDetails, callback) {
   onConnect(function(err, conn) {
      r.db("mmorpg").table('users')
@@ -116,6 +128,19 @@ exports.findUserById = function(userId, callback) {
     })
     .finally(function() { conn.close(); });
   })
+}
+
+exports.deleteUser = function(userId, callback) { 
+  onConnect(function(err, conn) {
+    r.db("mmorpg").table('users')
+   .get(userId)
+   .delete()
+   .run(conn)
+   .then(function(output) {
+     callback(output);
+   })
+   .finally(function() { conn.close(); });
+ })
 }
 
 exports.registerUser = function(userDetails, callback) {
@@ -162,12 +187,57 @@ exports.savePlayer = function(playerData, callback) {
   })
 }
 
+exports.savePlayerById = function(playerData, callback) {
+
+  onConnect(function(err, conn) {
+    let request = r.db("mmorpg").table('users')
+    .get(playerData.id)
+    .update(playerData)
+    
+    if(playerData.stats) { 
+      request = request.do(r.db("mmorpg").table('users')
+      .filter({
+        "username": playerData["username"],
+      }).update({"stats": r.literal(playerData.stats)}))
+    }
+
+    request.run(conn)
+    .then(function(cursor) { return cursor; })
+    .then(function(output) {
+      return callback(output);
+    })
+    .finally(function() { conn.close(); });  
+  })
+}
+
 exports.reloadConfig = function(callback) {
   onConnect(function(err, conn) {
     r.db("mmorpg").table("config")(0).run(conn)
       .then(function(cursor) { return cursor; })
       .then(function(output) {
         exports.SERVER_CONFIG = output;
+        callback();
+      })
+      .finally(() => { conn.close(); })
+  })
+}
+
+exports.changeConfig = function(type, payload, callback) {
+  onConnect(function(err, conn) {
+    let query = r.db("mmorpg").table("config")(0);
+
+    if(type === "globalSwitches") query = query.update({"globalSwitches": r.literal(payload)})
+    else if(type === "partySwitches") query = query.update({"partySwitches": r.literal(payload)})
+    else if(type === "offlineMaps") query = query.update({"offlineMaps": r.literal(payload)})
+    else if(type === "globalVariables") query = query.update({"globalVariables": r.literal(payload)})
+    else if(type === "newPlayerDetails") query = query.update({"newPlayerDetails": r.literal(payload)})
+
+    query.run(conn)
+      .then(function(cursor) { return cursor; })
+      .then(function(output) {
+        exports.reloadConfig(() => {
+          console.log("[I] Server configuration changes saved.");        
+        });
         callback();
       })
       .finally(() => { conn.close(); })

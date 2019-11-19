@@ -12,20 +12,22 @@
  * @desc Allow the usage of the mouse to move the player
  * @type Boolean
  * @default false
+ * 
+ * @param Use Native Respawn
+ * @desc Use the native respawn when player is dead
+ * @type Boolean
+ * @default false
  */
 
-function MMO_Core_Players() { 
+function MMO_Core_Player() { 
   this.initialize.apply(this, arguments);
 }
 
 (function() {
-  MMO_Core_Players.Player   = {};
-  MMO_Core_Players.Players  = {};
-  MMO_Core_Players.Party    = [];
-  MMO_Core_Players.Combat   = {};
-  MMO_Core_Players.Parameters = PluginManager.parameters('MMO_Core_Player');
-  MMO_Core_Players.hasInitialized = false;
-  MMO_Core_Players.isCombatInitiator = false;
+  MMO_Core_Player.Player   = {};
+  MMO_Core_Player.Parameters = PluginManager.parameters('MMO_Core_Player');
+  MMO_Core_Player.hasInitialized = false;
+  MMO_Core_Player.isCombatInitiator = false;
   
   // ---------------------------------------
   // ---------- Native Functions Extending
@@ -36,225 +38,82 @@ function MMO_Core_Players() {
     this.createGameObjects();
     this.selectSavefileForNewGame();
     $gameParty.setupStartingMembers();
-    $gamePlayer.reserveTransfer(MMO_Core_Players.Player["mapId"], MMO_Core_Players.Player["x"], MMO_Core_Players.Player["y"]);
+    $gamePlayer.reserveTransfer(MMO_Core_Player.Player["mapId"], MMO_Core_Player.Player["x"], MMO_Core_Player.Player["y"]);
     $gameSystem.disableSave();
     Graphics.frameCount = 0;
 
-    if(!MMO_Core_Players.hasInitialized) {
+    if(!MMO_Core_Player.hasInitialized) {
       // Handling player stats changes
-      MMO_Core_Players.setHp = Game_BattlerBase.prototype.setHp;
+      MMO_Core_Player.setHp = Game_BattlerBase.prototype.setHp;
       Game_BattlerBase.prototype.setHp = function(hp) {
-        MMO_Core_Players.setHp.call(this, hp);
-        if(this._actorId === 1) MMO_Core_Players.savePlayerStats();
+        MMO_Core_Player.setHp.call(this, hp);
+        if(this._actorId === 1) MMO_Core_Player.savePlayerStats();
       }
  
-      MMO_Core_Players.setMp = Game_BattlerBase.prototype.setMp;
+      MMO_Core_Player.setMp = Game_BattlerBase.prototype.setMp;
       Game_BattlerBase.prototype.setMp = function(mp) {
-        MMO_Core_Players.setHp.call(this, mp);
-        if(this._actorId === 1) MMO_Core_Players.savePlayerStats();
+        MMO_Core_Player.setHp.call(this, mp);
+        if(this._actorId === 1) MMO_Core_Player.savePlayerStats();
       }
  
-      MMO_Core_Players.recoverAll = Game_BattlerBase.prototype.recoverAll;
+      MMO_Core_Player.recoverAll = Game_BattlerBase.prototype.recoverAll;
       Game_BattlerBase.prototype.recoverAll = function() {
-        MMO_Core_Players.recoverAll.call(this);
-        if(this._actorId === 1) MMO_Core_Players.savePlayerStats();
+        MMO_Core_Player.recoverAll.call(this);
+        if(this._actorId === 1) MMO_Core_Player.savePlayerStats();
       }
  
-      MMO_Core_Players.consumeItem = Game_Battler.prototype.consumeItem;    
+      MMO_Core_Player.consumeItem = Game_Battler.prototype.consumeItem;    
       Game_Battler.prototype.consumeItem = function(item, amount, includeEquip) {
-        MMO_Core_Players.consumeItem.call(this, item, amount, includeEquip);
-        MMO_Core_Players.savePlayerStats();      
+        MMO_Core_Player.consumeItem.call(this, item, amount, includeEquip);
+        MMO_Core_Player.savePlayerStats();      
       }
 
-      MMO_Core_Players.gainItem = Game_Party.prototype.gainItem;      
+      MMO_Core_Player.gainItem = Game_Party.prototype.gainItem;      
       Game_Party.prototype.gainItem = function(item, amount, includeEquip) {
-        MMO_Core_Players.gainItem.call(this, item, amount, includeEquip);
-        MMO_Core_Players.savePlayerStats();              
+        MMO_Core_Player.gainItem.call(this, item, amount, includeEquip);
+        MMO_Core_Player.savePlayerStats();              
       }
 
-      MMO_Core_Players.changeEquip = Game_Actor.prototype.changeEquip;            
+      MMO_Core_Player.changeEquip = Game_Actor.prototype.changeEquip;            
       Game_Actor.prototype.changeEquip = function(slotId, item) {
-        MMO_Core_Players.changeEquip.call(this, slotId, item);
-        MMO_Core_Players.savePlayerStats();  
+        MMO_Core_Player.changeEquip.call(this, slotId, item);
+        MMO_Core_Player.savePlayerStats();  
       }
 
-      MMO_Core_Players.processOk = Window_MenuStatus.prototype.processOk;   
-      Window_MenuStatus.prototype.processOk = function() {
-
-        // Temporary (not sure) - Block equiping stuff to other party members (and skills)
-        if(this.index() > 0 && SceneManager._scene._commandWindow._index !== 3) {
-          this.deselect()
-          SoundManager.playBuzzer();
-          SceneManager.goto(Scene_Menu);
-          return;
-        }
-
-        MMO_Core_Players.processOk.call(this);
-      }
-
-      // Temporary - Block using items on other party members
-      MMO_Core_Players.onActorOk = Scene_ItemBase.prototype.onActorOk;   
-      Scene_ItemBase.prototype.onActorOk = function() {
-        if(this._actorWindow._index > 0) {
-          SoundManager.playBuzzer();
-          SceneManager.goto(Scene_Menu);
-          return;
-        }
-
-        MMO_Core_Players.onActorOk.call(this);
-      }
-
-      MMO_Core_Players.startActorCommandSelection = Scene_Battle.prototype.startActorCommandSelection;
-      Scene_Battle.prototype.startActorCommandSelection = function() {
-        // If it is a party battle and the player selected an action
-        if($gameParty.size() > 1 && BattleManager.actor().index() > 0) {
-
-          if(MMO_Core_Players.isCombatInitiator) BattleManager._canEscape = true; // If combat initiator, we can escape the combat.
-          
-          BattleManager._actorIndex = 0; // We make sure he can't control the others
-          let action = BattleManager.actor()._actions[0]; // We store its action
-          MMO_Core.socket.emit("party_player_action_fight", action); // We send the action to the server
-          BattleManager.startInput();
-          return;
-        }
-
-        MMO_Core_Players.startActorCommandSelection.call(this);
-      }
-
-      // Create an estimation of damages for combat synchronisation
-      Game_Action.prototype.estimateDamages = async function(target) {
-        var targetResult = target.result();
-        var result = {};
-                
-        this.subject().clearResult();
-        targetResult.clear();
-
-        result.used = this.testApply(target);
-        result.missed = (result.used && Math.random() >= this.itemHit(target));
-        result.evaded = (!result.missed && Math.random() < this.itemEva(target));
-        result.physical = this.isPhysical();
-        result.drain = this.isDrain();
-        if (result.used && !result.missed && !result.evaded) {
-          if (this.item().damage.type > 0) {
-            result.critical = (Math.random() < this.itemCri(target));
-            var value = this.makeDamageValue(target, result.critical);
-            if (value === 0) result.critical = false;
-            if (this.isHpEffect()) {
-              if (this.isDrain()) value = Math.min(target.hp, value);
-              result.hpDamage = -value;
-            }
-            if (this.isMpEffect()) {
-              if (!this.isMpRecover()) value = Math.min(target.mp, value);
-              result.mpDamage = -value;
-            }
-          }
-          this.item().effects.forEach(function(effect) {
-              this.applyItemEffect(target, effect);
-          }, this);
-          this.applyItemUserEffect(target);
-        }
-        return result;
-      };
-
-      // Apply preset damages to the target
-      Game_Action.prototype.applyPresetDamages = function(target, presetDamages) {
-        var result = target.result();
-        this.subject().clearResult();
-        result.clear();
-        result.used = presetDamages.used;
-        result.missed = presetDamages.missed;
-        result.evaded = presetDamages.evaded;
-        result.physical = presetDamages.physical;
-        result.drain = presetDamages.drain;
-        if (result.isHit()) {
-            if (this.item().damage.type > 0) {
-              result.critical = presetDamages.critical;
-                        
-              if(presetDamages.hpDamage) {
-                presetDamages.hpDamage = -presetDamages.hpDamage;
-                if (this.isDrain()) {
-                  presetDamages.hpDamage = Math.min(target.hp, presetDamages.hpDamage);
-                }
-                this.makeSuccess(target);
-                target.gainHp(-presetDamages.hpDamage);
-                if (presetDamages.hpDamage > 0) {
-                    target.onDamage(presetDamages.hpDamage);
-                }
-                this.gainDrainedHp(presetDamages.hpDamage);
-              }
-              if(presetDamages.mpDamage) {
-                presetDamages.mpDamage = -presetDamages.mpDamage;
-                if (!this.isMpRecover()) {
-                  presetDamages.mpDamage = Math.min(target.mp, presetDamages.mpDamage);
-                }
-                if(presetDamages.mpDamage !== 0) this.makeSuccess();
-                target.gainMp(-presetDamages.mpDamage);
-                this.gainDrainedMp(presetDamages.mpDamage);             
-              }
-            }
-            this.item().effects.forEach(function(effect) {
-                this.applyItemEffect(target, effect);
-            }, this);
-            this.applyItemUserEffect(target);
-        }
-      };
-      
-      MMO_Core_Players.hasInitialized = true;
+      MMO_Core_Player.hasInitialized = true;
     }
   };
 
   // Handle the initialization of the player with the proper stats and items
-  MMO_Core_Players.partyInit = Game_Party.prototype.initialize;
+  MMO_Core_Player.partyInit = Game_Party.prototype.initialize;
   Game_Party.prototype.initialize = function() {
-    MMO_Core_Players.partyInit.call(this);
-    if(MMO_Core_Players.Player["stats"] !== undefined) { 
-      this._gold = MMO_Core_Players.Player["stats"]["gold"];
-      this._items = MMO_Core_Players.Player["stats"]["items"];
-      this._weapons = MMO_Core_Players.Player["stats"]["weapons"];
-      this._armors = MMO_Core_Players.Player["stats"]["armors"];
+    MMO_Core_Player.partyInit.call(this);
+    if(MMO_Core_Player.Player["stats"] !== undefined) { 
+      this._gold = MMO_Core_Player.Player["stats"]["gold"];
+      this._items = MMO_Core_Player.Player["stats"]["items"];
+      this._weapons = MMO_Core_Player.Player["stats"]["weapons"];
+      this._armors = MMO_Core_Player.Player["stats"]["armors"];
     }
   }
 
   // Handle change of scenes
-  MMO_Core_Players.changeScene = SceneManager.changeScene;
+  MMO_Core_Player.changeScene = SceneManager.changeScene;
   SceneManager.changeScene = function() {
     if (this.isSceneChanging() && !this.isCurrentSceneBusy()) {
       if(SceneManager._nextScene instanceof Scene_Menu) {
-        if(!MMO_Core_Players.Player.isOnMenu) MMO_Core_Players.updateBusy("menu");
-        MMO_Core_Players.Player.isOnMenu = true
+        if(!MMO_Core_Player.Player.isOnMenu) MMO_Core_Player.updateBusy("menu");
+        MMO_Core_Player.Player.isOnMenu = true
       } 
       if(SceneManager._nextScene instanceof Scene_Battle) {
-        MMO_Core_Players.updateBusy("combat");
+        MMO_Core_Player.updateBusy("combat");
       }
       if(SceneManager._nextScene instanceof Scene_Map) {
-        MMO_Core_Players.Player.isOnMenu = false;
-        MMO_Core_Players.updateBusy(false);        
+        MMO_Core_Player.Player.isOnMenu = false;
+        MMO_Core_Player.updateBusy(false);        
       }
     }
 
-    MMO_Core_Players.changeScene.call(this);
-  }
-
-  MMO_Core_Players.onBattleStart = Game_Unit.prototype.onBattleStart;
-  Game_Unit.prototype.onBattleStart = function() {
-    if(this instanceof Game_Party && $gameParty.size() > 1) {
-      MMO_Core.socket.emit("party_player_join_fight", $gameTroop);
-    }
-    MMO_Core_Players.onBattleStart.call(this);
-  };
-
-  MMO_Core_Players.onBattleEnd = Game_Unit.prototype.onBattleEnd;
-  Game_Unit.prototype.onBattleEnd = function() {
-    if(this instanceof Game_Party && $gameParty.size() > 1) MMO_Core.socket.emit("party_player_end_fight");
-    MMO_Core_Players.onBattleEnd.call(this);
-  };
-
-  // We don't let other people leave the fight until the initiator does
-  MMO_Core_Players.endBattle = BattleManager.endBattle;
-  BattleManager.endBattle = function(result) {
-    if($gameParty.size() > 1 && !MMO_Core_Players.isCombatInitiator) return; // We block it.
-
-    MMO_Core_Players.endBattle.call(this, result);
+    MMO_Core_Player.changeScene.call(this);
   }
 
   // Handle the initialization of the player with the proper stats and items
@@ -262,23 +121,23 @@ function MMO_Core_Players() {
     var actor = $dataActors[actorId];
     var hasLoaded = false;
 
-    if(MMO_Core_Players.Player["stats"] !== undefined) hasLoaded = true;
+    if(MMO_Core_Player.Player["stats"] !== undefined) hasLoaded = true;
       
-    let playerName = MMO_Core_Players.Player["username"];
+    let playerName = MMO_Core_Player.Player["username"];
 
     this._actorId = actorId;
     this._name = playerName || actor.name;
     this._nickname = actor.nickname;
     this._profile = actor.profile;
-    this._classId = MMO_Core_Players.Player["classId"] || actor.classId;
+    this._classId = MMO_Core_Player.Player["classId"] || actor.classId;
     this.clearParamPlus();
     if(hasLoaded) {
-      this._exp     = MMO_Core_Players.Player["stats"]["exp"];
-      this._skills  = MMO_Core_Players.Player["stats"]["skills"];
-      this._hp      = MMO_Core_Players.Player["stats"]["hp"];
-      this._mp      = MMO_Core_Players.Player["stats"]["mp"];
-      this._level   = MMO_Core_Players.Player["stats"]["level"];
-      this.initEquips(MMO_Core_Players.Player["stats"]["equips"]);
+      this._exp     = MMO_Core_Player.Player["stats"]["exp"];
+      this._skills  = MMO_Core_Player.Player["stats"]["skills"];
+      this._hp      = MMO_Core_Player.Player["stats"]["hp"];
+      this._mp      = MMO_Core_Player.Player["stats"]["mp"];
+      this._level   = MMO_Core_Player.Player["stats"]["level"];
+      this.initEquips(MMO_Core_Player.Player["stats"]["equips"]);
     } else {
       this._level = actor.initialLevel;
       this.initEquips(actor.equips);
@@ -296,25 +155,25 @@ function MMO_Core_Players() {
     }
     this.createDisplayObjects();
 
-    if(MMO_Core_Players.Player["skin"]["characterIndex"] === undefined) MMO_Core_Players.Player["skin"]["characterIndex"] = 1;
+    if(MMO_Core_Player.Player["skin"]["characterIndex"] === undefined) MMO_Core_Player.Player["skin"]["characterIndex"] = 1;
 
-    $gamePlayer._characterIndex = MMO_Core_Players.Player["skin"]["characterIndex"];
-    $gamePlayer._characterName = MMO_Core_Players.Player["skin"]["characterName"];
-    $gameActors["_data"][1]["_battlerName"] = MMO_Core_Players.Player["skin"]["battlerName"];
-    $gameActors["_data"][1]["_faceName"] = MMO_Core_Players.Player["skin"]["faceName"];
-    $gameActors["_data"][1]["_faceIndex"] = MMO_Core_Players.Player["skin"]["faceIndex"];
+    $gamePlayer._characterIndex = MMO_Core_Player.Player["skin"]["characterIndex"];
+    $gamePlayer._characterName = MMO_Core_Player.Player["skin"]["characterName"];
+    $gameActors["_data"][1]["_battlerName"] = MMO_Core_Player.Player["skin"]["battlerName"];
+    $gameActors["_data"][1]["_faceName"] = MMO_Core_Player.Player["skin"]["faceName"];
+    $gameActors["_data"][1]["_faceIndex"] = MMO_Core_Player.Player["skin"]["faceIndex"];
 
     players = {}; // Reinit the player variable
-    if(!MMO_Core_Players.Player["loadedOnMap"]) {
+    if(!MMO_Core_Player.Player["loadedOnMap"]) {
       
-      $dataActors[1].characterIndex = MMO_Core_Players.Player["skin"]["characterIndex"];
-      $dataActors[1].characterName = MMO_Core_Players.Player["skin"]["characterName"];
+      $dataActors[1].characterIndex = MMO_Core_Player.Player["skin"]["characterIndex"];
+      $dataActors[1].characterName = MMO_Core_Player.Player["skin"]["characterName"];
 
-      MMO_Core_Players.Player["loadedOnMap"] = true;
+      MMO_Core_Player.Player["loadedOnMap"] = true;
     }
     
-    MMO_Core.socket.emit("map_joined", MMO_Core_Players.getPlayerPos());
-    MMO_Core_Players.savePlayerStats();
+    MMO_Core.socket.emit("map_joined", MMO_Core_Player.getPlayerPos());
+    MMO_Core_Player.savePlayerStats();
   }
 
   // Handle player movement
@@ -326,7 +185,7 @@ function MMO_Core_Players() {
       if (direction > 0) {
         $gameTemp.clearDestination();
       } else if ($gameTemp.isDestinationValid()) {
-        if (MMO_Core_Players.Parameters["Mouse Movements"] === "false") return $gameTemp.clearDestination();
+        if (MMO_Core_Player.Parameters["Mouse Movements"] === "false") return $gameTemp.clearDestination();
         var x = $gameTemp.destinationX();
         var y = $gameTemp.destinationY();
         direction = this.findDirectionTo(x, y);
@@ -347,26 +206,26 @@ function MMO_Core_Players() {
   };
 
   // Handle player skin change
-  MMO_Core_Players.setCharacterImage = Game_Actor.prototype.setCharacterImage;
+  MMO_Core_Player.setCharacterImage = Game_Actor.prototype.setCharacterImage;
   Game_Actor.prototype.setCharacterImage = function(characterName, characterIndex) {
-    MMO_Core_Players.setCharacterImage.call(this, characterName, characterIndex);
+    MMO_Core_Player.setCharacterImage.call(this, characterName, characterIndex);
 
-    MMO_Core_Players.updateSkin({type: "sprite", characterName: characterName, characterIndex: characterIndex})   
-    MMO_Core_Players.refreshPlayerOnMap();
+    MMO_Core_Player.updateSkin({type: "sprite", characterName: characterName, characterIndex: characterIndex})   
+    MMO_Core_Players.refreshPlayersOnMap();
   };
 
-  MMO_Core_Players.setFaceImage = Game_Actor.prototype.setFaceImage;
+  MMO_Core_Player.setFaceImage = Game_Actor.prototype.setFaceImage;
   Game_Actor.prototype.setFaceImage = function(faceName, faceIndex) {
-    MMO_Core_Players.setFaceImage.call(this, faceName, faceIndex);
+    MMO_Core_Player.setFaceImage.call(this, faceName, faceIndex);
 
-    MMO_Core_Players.updateSkin({type: "face", faceName: faceName, faceIndex: faceIndex});
+    MMO_Core_Player.updateSkin({type: "face", faceName: faceName, faceIndex: faceIndex});
   };
 
-  MMO_Core_Players.setBattlerImage = Game_Actor.prototype.setBattlerImage;
+  MMO_Core_Player.setBattlerImage = Game_Actor.prototype.setBattlerImage;
   Game_Actor.prototype.setBattlerImage = function(battlerName) {
-    MMO_Core_Players.setBattlerImage.call(this, battlerName);
+    MMO_Core_Player.setBattlerImage.call(this, battlerName);
 
-    MMO_Core_Players.updateSkin({type: "battler", battlerName: battlerName});
+    MMO_Core_Player.updateSkin({type: "battler", battlerName: battlerName});
   };
 
   // Handle player state of the world (switches)
@@ -377,7 +236,7 @@ function MMO_Core_Players() {
 
   // Handle player state of the world (switches)
   Game_Switches.prototype.initialize = function() {
-    this._data = MMO_Core_Players.Player["switches"] || [];
+    this._data = MMO_Core_Player.Player["switches"] || [];
   }; 
 
   // Handle the global switch system
@@ -396,7 +255,7 @@ function MMO_Core_Players() {
   };
 
   Game_Variables.prototype.initialize = function() {
-    this._data = MMO_Core_Players.Player["variables"] || [];      
+    this._data = MMO_Core_Player.Player["variables"] || [];      
   };
 
   Game_Variables.prototype.setValue = function(variableId, value) {
@@ -411,139 +270,28 @@ function MMO_Core_Players() {
   };
 
   // Handle player death during combat
-  Scene_Gameover.prototype.gotoTitle = function() {
-    DataManager.setupNewGame();
-    MMO_Core.socket.emit("player_dead");
-  };
+  if (MMO_Core_Player.Parameters["Use Native Respawn"] === "false") {
+    Scene_Gameover.prototype.gotoTitle = function() {
+      DataManager.setupNewGame();
+      MMO_Core.socket.emit("player_dead");
+    };
+  }
+
 
   // Handle adding custom parameters to characters
-  MMO_Core_Players.initMembers = Game_CharacterBase.prototype.initMembers;
+  MMO_Core_Player.initMembers = Game_CharacterBase.prototype.initMembers;
   Game_CharacterBase.prototype.initMembers = function() {
-    MMO_Core_Players.initMembers.call(this);
+    MMO_Core_Player.initMembers.call(this);
     this._isBusy = false;
-  };
-
-  // [WORK AROUND] Work around RPG Maker MV engine not understanding party changes at beginning of combat  
-  MMO_Core_Players.updateStatusWindow = Scene_Battle.prototype.updateStatusWindow;
-  Scene_Battle.prototype.updateStatusWindow = function() {
-
-    if (this.isActive() && !this._messageWindow.isClosing()) {
-      if(MMO_Core_Players.Party.length > 0) {
-        for(var i = 0; i < SceneManager._scene._spriteset.children[0].children[2].children.length; i++) { 
-          if(!(SceneManager._scene._spriteset.children[0].children[2].children[i] instanceof Sprite_Actor)) continue;
-          if(SceneManager._scene._spriteset.children[0].children[2].children[i]._actor) continue;
-          SceneManager._scene._spriteset.children[0].children[2].children[i].moveToStartPosition();
-        }
-      }
-    }
-
-    MMO_Core_Players.updateStatusWindow.call(this);
   };
 
   // ---------------------------------------
   // ---------- MMO_Core.socket Handling
   // ---------------------------------------
-  MMO_Core.socket.on("map_joined", function(data){
-    if(MMO_Core_Players.Players[data.id] !== undefined && $gameMap._events[MMO_Core_Players.Players[data.id]["_eventId"]] !== undefined) $gameMap.eraseEvent(MMO_Core_Players.Players[data.id]["_eventId"]);
-
-    MMO_Core_Players.Players[data.id] = $gameMap.createNormalEventAt(data["playerData"]["skin"]["characterName"], data["playerData"]["skin"]["characterIndex"], data["playerData"]["x"], data["playerData"]["y"], 2, 0, true);
-    MMO_Core_Players.Players[data.id].headDisplay = MMO_Core_Players.Players[data.id].list().push({"code":108,"indent":0,"parameters":["<Name: " + data["playerData"]["username"] + ">"]});
-    MMO_Core_Players.Players[data.id]._priorityType = 0;
-    MMO_Core_Players.Players[data.id]._stepAnime = false;
-    MMO_Core_Players.Players[data.id]._moveSpeed = 4;
-
-    if(MMO_Core_Players.Party.length > 0 && !MMO_Core_Players.Player.isInCombat) {
-      for(var i = 0; i < MMO_Core_Players.Party.length; i++) {
-        if(MMO_Core_Players.Party[i].username != data["playerData"]["username"]) continue;
-        if(!MMO_Core_Players.Party[i].isInCombat) continue;
-
-        MMO_Core.socket.emit("party_player_join_fight", {});
-      }
-    }
-  })
-
-  MMO_Core.socket.on("map_exited",function(data){
-    if(MMO_Core_Players.Players[data] === undefined) return;
-    if($gameMap._events[MMO_Core_Players.Players[data]["_eventId"]] === undefined) return;
-    
-    $gameMap.eraseEvent(MMO_Core_Players.Players[data]["_eventId"]);
-  })
-
-  MMO_Core.socket.on("refresh_players_position",function(data){
-    MMO_Core.socket.emit("refresh_players_position",{id: data, playerData: MMO_Core_Players.getPlayerPos()});
-  })
-
-  MMO_Core.socket.on("refresh_player_on_map", function(payload) {
-    if(MMO_Core_Players.Players[payload.playerId] === undefined) return;
-
-    MMO_Core_Players.Players[payload.playerId]._characterName = payload.playerData["skin"]["characterName"];
-    MMO_Core_Players.Players[payload.playerId]._characterIndex = payload.playerData["skin"]["characterIndex"];
-
-    if(MMO_Core_Players.Players[payload.playerId]._isBusy !== payload.playerData["isBusy"]) {
-      MMO_Core_Players.Players[payload.playerId]._isBusy = payload.playerData["isBusy"] || false;    
-    } 
-
-    document.dispatchEvent(new Event('refresh_player_on_map', {'detail': payload})); // Dispatch DOM event for external plugins
-  });
-
   MMO_Core.socket.on("refresh_player_data", function(payload) {
-    MMO_Core_Players.Player = payload; // We update the local playerData details
-    MMO_Core_Players.refreshStats();
+    MMO_Core_Player.Player = payload; // We update the local playerData details
+    MMO_Core_Player.refreshStats();
   })
-
-  MMO_Core.socket.on("refresh_party_data", async function(payload) {
-    if(payload[MMO_Core_Players.Player.username]) {
-      MMO_Core_Players.isCombatInitiator = (payload[MMO_Core_Players.Player.username].isInitiator) ? true : false;
-      MMO_Core_Players.Player.isInCombat = (payload[MMO_Core_Players.Player.username].isInCombat) ? true : false;
-    }
-
-    delete payload[MMO_Core_Players.Player.username];
-
-    let partySize = Object.keys(payload).length; // If no one = 1
-    let currentPartySize = $gameParty.size(); // If no one = 1
-
-    MMO_Core_Players.Party = [];
-
-    // We delete all the actors for refreshing the party
-    if(currentPartySize > 1 && partySize < currentPartySize) {
-      for(var i = 2; i <= currentPartySize; i++) {
-        $gameParty.removeActor(i);
-
-        if(i === currentPartySize) MMO_Core_Players.refreshStats();
-      }
-    }
-
-    if(partySize > 0) {
-      for(var i = 0; i <= partySize; i++) {
-        if(i === partySize) return MMO_Core_Players.refreshStats();
-
-        let playerName = Object.keys(payload)[i];
-        $gameActors.actor(i+2)._hidden = false;
-        
-        // We push the party members in the party Array.
-        MMO_Core_Players.Party.push(payload[playerName]);
-             
-        
-        $gameParty.addActor(i+2);
-
-        // If we are in a battle and that a party member is not on the map, we don't add it in the battle.        
-        if(payload[playerName].isInCombat && payload[playerName].mapId !== $gameMap._mapId) {
-          $gameActors.actor(i+2).hide();
-        }        
-      }
-    }
-  });
-
-  MMO_Core.socket.on('player_moving', function(data){
-    if(!SceneManager._scene._spriteset || SceneManager._scene instanceof Scene_Battle) return;
-    if(MMO_Core_Players.Players[data.id] === undefined) return;
-
-    // Update movement speed and frequenzy
-    MMO_Core_Players.Players[data.id].setMoveSpeed(data.moveSpeed);
-    MMO_Core_Players.Players[data.id].setMoveFrequency(data.moveFrequency);
-    MMO_Core_Players.Players[data.id].moveStraight(data.direction);
-    if (MMO_Core_Players.Players[data.id].x !== data.x || MMO_Core_Players.Players[data.id].y !== data.y) MMO_Core_Players.Players[data.id].setPosition(data.x, data.y);
-  });
 
   MMO_Core.socket.on("player_update_switch", function(data){
     $gameSwitches["_data"][data["switchId"]] = data["value"]; // Bypass the setValue function.
@@ -560,233 +308,42 @@ function MMO_Core_Players() {
     SceneManager.goto(Scene_Map);
   })
 
-  // Received when another party member start a fight on the same map
-  MMO_Core.socket.on("party_player_join_fight", function(payload) {
-    if($gameParty._inBattle) return;
-
-    BattleManager.setup(payload._troopId, false, true);
-
-    for(var i = 0; i < $gameTroop._enemies.length; i++) {
-      $gameTroop._enemies[i]._hp = payload._enemies[i]._hp;
-      $gameTroop._enemies[i]._mp = payload._enemies[i]._mp;
-    }
-
-    MMO_Core_Players.Player.isInCombat = true;
-
-    SceneManager.goto(Scene_Battle);
-  })
-
-  MMO_Core.socket.on("party_player_estimate_fight", async function(actions) {
-    let battleMembers = BattleManager.allBattleMembers();
-    let results = {};
-
-    // We go through every battle members to classify them.
-    for(var i = 0; i < battleMembers.length; i++) {
-      if(battleMembers[i]._actions[0] === undefined) { i++; continue; }
-
-      // If Game Actor then we set up the actions.
-      if(battleMembers[i] instanceof Game_Actor) { 
-        let action = actions[battleMembers[i]._name]; // We assign the action corresponding to the player
-        battleMembers[i]._actions[0]._targetIndex = action._targetIndex;
-        battleMembers[i]._actions[0]._item._dataClass = action._item._dataClass;
-        battleMembers[i]._actions[0]._item._itemId = action._item._itemId;
-      }
-
-      // If Game Enemy then we leave the game logic apply itself.
-      if(battleMembers[i] instanceof Game_Enemy) {
-        battleMembers[i]._actions[0].decideRandomTarget()
-      }
-
-      // Then we gather the targets and make a list out of it.
-      let actorName = battleMembers[i].name();
-      let targets = battleMembers[i]._actions[0].makeTargets();
-      results[actorName] = {};
-      results[actorName].targets = {}
-
-      // We store the action so we also know what the NPCs did.
-      results[actorName].action = battleMembers[i]._actions[0];
-
-      for(var k in targets) {
-        let targetName = targets[k].name();
-        results[actorName].targets[targetName] = await battleMembers[i]._actions[0].estimateDamages(targets[k]);
-      }
-    }
-
-    MMO_Core.socket.emit("party_player_estimate_fight", results);
-  })
-
-
-  // Received when all party members have done their actions
-  MMO_Core.socket.on("party_player_action_fight", async function(results) {
-    let battleMembers = BattleManager.allBattleMembers();
-    let actors = {};
-
-    // We classify the actors by name
-    for(var i = 0; i < battleMembers.length; i++) {
-      actors[battleMembers[i].name()] = battleMembers[i];
-    }
-
-    // We  then go through each actors to do their turns
-    for(var actorName in actors) {
-      let result = results[actorName];
-      let currentActor = actors[actorName];
-
-      // If an action is defined, we set it
-      if(currentActor._actions[0]) {
-        currentActor._actions[0]._item._dataClass = result.action._item._dataClass;
-        currentActor._actions[0]._item._itemId = result.action._item._itemId;
-      }
-          
-      // We set the targets with the appropriate actor in a Array
-      currentActor.realTargets = [];
-      if(result) {
-        for(var targetName in result.targets) {
-          currentActor.realTargets.push(actors[targetName]);
-        }
-      }
-      
-
-      // Turn start
-      BattleManager.startTurn();
-      BattleManager._subject = currentActor; // The actor becomes the subject
-      // BattleManager.processTurn(); // Do the action checking
-
-      // processTurn()
-      var action = currentActor.currentAction();
-      if (action) {
-          action.prepare();
-          if (action.isValid()) {
-            // startAction()
-            BattleManager._phase = 'partyAction';
-            BattleManager._targets = currentActor.realTargets;
-            BattleManager._action = action;
-            currentActor.useItem(action.item());
-            BattleManager._action.applyGlobal();
-            BattleManager.refreshStatus();
-            BattleManager._logWindow.startAction(currentActor, action, currentActor.realTargets);
-
-            // updateAction()
-            for(var k in BattleManager._targets) {
-              var currentTarget = BattleManager._targets.shift();
-              if (currentTarget) {
-                // invokeAction()
-                if (Math.random() < BattleManager._action.itemCnt(currentTarget)) {
-                  // Counter Attack
-                  var action = new Game_Action(currentTarget);
-                  action.setAttack();
-                  action.applyPresetDamages(currentActor, results[currentTarget.name()].targets[currentActor.name()])
-                  BattleManager._logWindow.displayCounter(currentTarget);
-                  BattleManager._logWindow.displayActionResults(currentTarget, currentActor);
-                } else if (Math.random() < BattleManager._action.itemMrf(currentTarget)) {
-                  // Magic Reflection
-                  BattleManager._action._reflectionTarget = currentTarget;
-                  BattleManager._logWindow.displayReflection(currentTarget);
-                  action.applyPresetDamages(currentActor, results[currentTarget.name()].targets[currentActor.name()])
-                  
-                  BattleManager._logWindow.displayActionResults(currentTarget, currentActor);
-                } else {
-                  // Normal Attack
-                  var realTarget = BattleManager.applySubstitute(currentTarget);
-                  BattleManager._action.apply(realTarget);
-                  action.applyPresetDamages(realTarget, result.targets[realTarget.name()]);
-                  currentActor._hidden = (currentActor.hp === 0) ? true : false;
-                  BattleManager._logWindow.displayActionResults(currentActor, realTarget);
-                }
-                currentActor.setLastTarget(currentTarget); // Will probably to rewrite
-                BattleManager._logWindow.push('popBaseLine');
-                BattleManager.refreshStatus();
-              } else {
-                BattleManager.endAction();
-                BattleManager.startInput();
-                BattleManager.selectNextCommand();
-              }
-            }
-            
-            // updateAction()
-
-          }
-          currentActor.removeCurrentAction();
-      } else {
-          currentActor.onAllActionsEnd();
-          BattleManager.refreshStatus();
-          BattleManager._logWindow.displayAutoAffectedStatus(currentActor);
-          BattleManager._logWindow.displayCurrentState(currentActor);
-          BattleManager._logWindow.displayRegeneration(currentActor);
-          BattleManager._subject = BattleManager.getNextSubject();
-      }
-
-      // We end the action (and turn)
-      BattleManager.endAction();
-    }
-  })
-
-  MMO_Core.socket.on("party_player_disband_fight", function(payload) {
-    if(SceneManager._nextScene !== null) return;
-    if(!$gameParty._inBattle) return;
-
-    SceneManager.goto(Scene_Map);
-  })
-
   // ---------------------------------------
   // ---------- Exposed Functions
   // ---------------------------------------
 
-  MMO_Core_Players.updateSkin = function(payload) {
+  MMO_Core_Player.updateSkin = function(payload) {
     if(payload.type === "sprite") {
-      MMO_Core_Players.Player["skin"]["characterName"] = payload.characterName;
-      MMO_Core_Players.Player["skin"]["characterIndex"] = payload.characterIndex;
+      MMO_Core_Player.Player["skin"]["characterName"] = payload.characterName;
+      MMO_Core_Player.Player["skin"]["characterIndex"] = payload.characterIndex;
     }
 
     MMO_Core.socket.emit("player_update_skin", payload);
   }
 
-  MMO_Core_Players.refreshPlayerOnMap = function() {
-    MMO_Core.socket.emit("refresh_player_on_map");
-  }
-
-  MMO_Core_Players.updateBusy = function(newState) {
+  MMO_Core_Player.updateBusy = function(newState) {
     MMO_Core.socket.emit("player_update_busy", newState);    
   }
 
-  MMO_Core_Players.refreshStats = function() {
+  MMO_Core_Player.refreshStats = async function() {
 
-    if(MMO_Core_Players.Player["stats"] !== undefined) {
-      $gameParty._gold = MMO_Core_Players.Player["stats"]["gold"];
-      $gameActors["_data"][1]._level = MMO_Core_Players.Player["stats"]["level"];
-      $gameActors["_data"][1]._exp = MMO_Core_Players.Player["stats"]["exp"];
-      $gameActors["_data"][1]._classId = MMO_Core_Players.Player["stats"]["classId"];
-      $gameActors["_data"][1]._hp = MMO_Core_Players.Player["stats"]["hp"];
-      $gameActors["_data"][1]._mp = MMO_Core_Players.Player["stats"]["mp"];
-      $gamePlayer._characterIndex = MMO_Core_Players.Player["skin"]["characterIndex"];
-      $gamePlayer._characterName =  MMO_Core_Players.Player["skin"]["characterName"];
-    }
-    
-    if(MMO_Core_Players.Party.length > 0) {      
-      for(var i = 0; i < MMO_Core_Players.Party.length; i++) {
-        if(!$gameActors["_data"][i+2]) { continue; }
-
-        if(MMO_Core_Players.Player.isInCombat && !MMO_Core_Players.Party[i].isInCombat) {
-          $gameActors["_data"][i+2].hide();
-        }
-
-        $gameActors["_data"][i+2]._name = MMO_Core_Players.Party[i]["username"];
-        $gameActors["_data"][i+2]._level = MMO_Core_Players.Party[i]["stats"]["level"];
-        $gameActors["_data"][i+2]._exp = MMO_Core_Players.Party[i]["stats"]["exp"]
-        $gameActors["_data"][i+2]._classId = MMO_Core_Players.Party[i]["stats"]["classId"]
-        $gameActors["_data"][i+2]._skills = MMO_Core_Players.Party[i]["stats"]["skills"]
-        $gameActors["_data"][i+2]._hp = MMO_Core_Players.Party[i]["stats"]["hp"]
-        $gameActors["_data"][i+2]._mp = MMO_Core_Players.Party[i]["stats"]["mp"]
-        $gameActors["_data"][i+2].initEquips(MMO_Core_Players.Party[i]["stats"]["equips"]);
-        $gameActors["_data"][i+2]["_battlerName"] = MMO_Core_Players.Party[i]["skin"]["battlerName"];
-        $gameActors["_data"][i+2]["_faceName"] = MMO_Core_Players.Party[i]["skin"]["faceName"];
-        $gameActors["_data"][i+2]["_faceIndex"] = MMO_Core_Players.Party[i]["skin"]["faceIndex"];
-      }
+    if(MMO_Core_Player.Player["stats"] !== undefined) {
+      $gameParty._gold = MMO_Core_Player.Player["stats"]["gold"];
+      $gameActors["_data"][1]._level = MMO_Core_Player.Player["stats"]["level"];
+      $gameActors["_data"][1]._exp = MMO_Core_Player.Player["stats"]["exp"];
+      $gameActors["_data"][1]._classId = MMO_Core_Player.Player["stats"]["classId"];
+      $gameActors["_data"][1]._hp = MMO_Core_Player.Player["stats"]["hp"];
+      $gameActors["_data"][1]._mp = MMO_Core_Player.Player["stats"]["mp"];
+      $gamePlayer._characterIndex = MMO_Core_Player.Player["skin"]["characterIndex"];
+      $gamePlayer._characterName =  MMO_Core_Player.Player["skin"]["characterName"];
     }
 
-    Game_Interpreter.prototype.refreshEventMiniLabel(); // We make sure the colors appear correctly.
+    if(MMO_Core_Party) await MMO_Core_Party.refreshPartyStats();
+
+    Game_Interpreter.prototype.refreshEventMiniLabel();
   }
   
-  MMO_Core_Players.savePlayerStats = function() {
+  MMO_Core_Player.savePlayerStats = function() {
     if($gameActors["_data"][1] === undefined) return;
 
     let equips = [];
@@ -809,7 +366,7 @@ function MMO_Core_Players() {
     });
   }
 
-  MMO_Core_Players.getPlayerPos = function() {
+  MMO_Core_Player.getPlayerPos = function() {
     return {
       x: $gamePlayer["_x"],
       y: $gamePlayer["_y"],

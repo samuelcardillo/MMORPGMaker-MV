@@ -11,16 +11,16 @@ const express       = require("express")
 *****************************/
 
 // Express settings
-app.use('/app/bower_components', express.static(path.join(process.cwd(), 'bower_components')))
-app.use(express.static(__dirname + '/app'));
+app.use('/admin/bower_components', express.static(path.join(process.cwd(), 'bower_components')))
+app.use(express.static(__dirname + '/admin'));
 app.use(bodyParser.json({limit: '2mb'}));       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({extended: true,limit: '2mb'}));   // to support URL-encoded bodies
 app.use(function(req,res,next){ // CORS (read : https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS)
     res.statusCode = 200;
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader("Access-Control-Allow-Headers", "X-Requested-With, Content-Type");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
+    res.setHeader("Access-Control-Allow-Headers", "X-Requested-With, X-Access-Token, X-Socket-ID, Content-Type");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE");
     next();
 });
 

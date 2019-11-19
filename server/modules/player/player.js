@@ -80,7 +80,7 @@ exports.initialize = function() {
       client.playerData.isBusy = payload;
 
       MMO_Core["database"].savePlayer({username: client.playerData.username, isBusy: client.playerData.isBusy}, (e) => { 
-        client.broadcast.to("map-" + client.playerData["mapId"]).emit("refresh_player_on_map", {playerId: client.id, playerData: client.playerData});  
+        client.broadcast.to("map-" + client.playerData["mapId"]).emit("refresh_players_on_map", {playerId: client.id, playerData: client.playerData});  
       })
     })
   
