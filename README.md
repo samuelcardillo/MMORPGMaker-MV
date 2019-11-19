@@ -53,10 +53,6 @@ Congratulations! Your game is now an MMORPG.
 - Respawn system
 - In-game chat
 
-### Improvements to do :
-- Create inter-players interactivity (trades, pvp, ...)
-- (Continuous) Refactore entire codebase
-- (MUCH LATER) Server-side anti-cheat
-
 **See the progress : https://trello.com/b/m4leXuBa/mmorpg-maker-mv-version-1-todo-list**
+
 **Join us on Discord : https://discord.gg/GVqyAwp**
