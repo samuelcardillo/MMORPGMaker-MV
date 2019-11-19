@@ -30,9 +30,9 @@ Congratulations! Your game is now an MMORPG.
 
 ### Documentation 
 
--Are you a developer ? [Read the developer documentation](https://github.com/samuelcardillo/MMORPGMaker-MV/wiki/Developer-Documentation)
+-Are you a developer ? [Read the developer documentation](https://github.com/samuelcardillo/MMORPGMaker-MV/wiki#developers-documentation)
 
--Are you a maker ? [Read the maker documentation](https://github.com/samuelcardillo/MMORPGMaker-MV/wiki/Maker-Documentation)
+-Are you a maker ? [Read the maker documentation](https://github.com/samuelcardillo/MMORPGMaker-MV/wiki#makers-documentation)
 
 ### Current functionalities
 - Synchronised player movements
@@ -58,4 +58,5 @@ Congratulations! Your game is now an MMORPG.
 - (Continuous) Refactore entire codebase
 - (MUCH LATER) Server-side anti-cheat
 
+**See the progress : https://trello.com/b/m4leXuBa/mmorpg-maker-mv-version-1-todo-list**
 **Join us on Discord : https://discord.gg/GVqyAwp**
