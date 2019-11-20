@@ -52,7 +52,7 @@ function MMO_Core_Player() {
  
       MMO_Core_Player.setMp = Game_BattlerBase.prototype.setMp;
       Game_BattlerBase.prototype.setMp = function(mp) {
-        MMO_Core_Player.setHp.call(this, mp);
+        MMO_Core_Player.setMp.call(this, mp);
         if(this._actorId === 1) MMO_Core_Player.savePlayerStats();
       }
  
@@ -129,9 +129,10 @@ function MMO_Core_Player() {
     this._name = playerName || actor.name;
     this._nickname = actor.nickname;
     this._profile = actor.profile;
-    this._classId = MMO_Core_Player.Player["classId"] || actor.classId;
+    this._classId = actor.classId;
     this.clearParamPlus();
     if(hasLoaded) {
+      this._classId = MMO_Core_Player.Player["stats"]["classId"];
       this._exp     = MMO_Core_Player.Player["stats"]["exp"];
       this._skills  = MMO_Core_Player.Player["stats"]["skills"];
       this._hp      = MMO_Core_Player.Player["stats"]["hp"];
