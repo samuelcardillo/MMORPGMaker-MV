@@ -279,8 +279,7 @@ function MMO_Core_Player() {
 
     Scene_Base.prototype.checkGameover = function() {
       if ($gameParty.isAllDead()) {
-        DataManager.setupNewGame();
-        MMO_Core.socket.emit("player_dead");
+        $gameActors["_data"][1].recoverAll();
       }
     };
   }
