@@ -276,7 +276,16 @@ function MMO_Core_Player() {
       DataManager.setupNewGame();
       MMO_Core.socket.emit("player_dead");
     };
+
+    Scene_Base.prototype.checkGameover = function() {
+      if ($gameParty.isAllDead()) {
+        DataManager.setupNewGame();
+        MMO_Core.socket.emit("player_dead");
+      }
+    };
   }
+
+
 
 
   // Handle adding custom parameters to characters
