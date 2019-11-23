@@ -248,6 +248,7 @@ function ChatBox() {
     document.querySelector("#chatbox_box").appendChild(span);
 
     if(!ChatBox.isFocused) document.querySelector("#chatbox_box").scrollTop = document.querySelector("#chatbox_box").scrollHeight;
+	document.querySelector("#chatbox_input").blur();
   })
 
   document.addEventListener('keydown', function(e) {
@@ -258,7 +259,11 @@ function ChatBox() {
         ChatBox.toggle();
         break;
       case 13:
-        if(!ChatBox.isFocused) document.querySelector("#chatbox_input").focus();
+        if(!ChatBox.isFocused) {
+          document.querySelector("#chatbox_input").focus(); 
+        } else {
+          document.querySelector("#chatbox_input").blur();
+        }
         break;
     }
   })
