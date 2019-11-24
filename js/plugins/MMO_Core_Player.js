@@ -337,14 +337,17 @@ function MMO_Core_Player() {
   MMO_Core_Player.refreshStats = async function() {
 
     if(MMO_Core_Player.Player["stats"] !== undefined) {
-      $gameParty._gold = MMO_Core_Player.Player["stats"]["gold"];
-      $gameActors["_data"][1]._level = MMO_Core_Player.Player["stats"]["level"];
-      $gameActors["_data"][1]._exp = MMO_Core_Player.Player["stats"]["exp"];
-      $gameActors["_data"][1]._classId = MMO_Core_Player.Player["stats"]["classId"];
-      $gameActors["_data"][1]._hp = MMO_Core_Player.Player["stats"]["hp"];
-      $gameActors["_data"][1]._mp = MMO_Core_Player.Player["stats"]["mp"];
-      $gamePlayer._characterIndex = MMO_Core_Player.Player["skin"]["characterIndex"];
-      $gamePlayer._characterName =  MMO_Core_Player.Player["skin"]["characterName"];
+      $gameParty._gold                  = MMO_Core_Player.Player["stats"]["gold"];
+      $gameActors["_data"][1]._level    = MMO_Core_Player.Player["stats"]["level"];
+      $gameActors["_data"][1]._exp      = MMO_Core_Player.Player["stats"]["exp"];
+      $gameActors["_data"][1]._classId  = MMO_Core_Player.Player["stats"]["classId"];
+      $gameActors["_data"][1]._hp       = MMO_Core_Player.Player["stats"]["hp"];
+      $gameActors["_data"][1]._mp       = MMO_Core_Player.Player["stats"]["mp"];
+      $gameParty._weapons  = MMO_Core_Player.Player["stats"]["weapons"];
+      $gameParty._armors   = MMO_Core_Player.Player["stats"]["armors"];
+      $gameParty._items    = MMO_Core_Player.Player["stats"]["items"];
+      $gamePlayer._characterIndex       = MMO_Core_Player.Player["skin"]["characterIndex"];
+      $gamePlayer._characterName        = MMO_Core_Player.Player["skin"]["characterName"];
     }
 
     if(MMO_Core_Party) await MMO_Core_Party.refreshPartyStats();

@@ -81,3 +81,8 @@ exports.getConnectedSockets = function(roomName) {
     return resolve(sockets);
   });
 }
+
+// Send a socket to the entire server
+exports.emitToAll = (name, payload) => { 
+  exports.socketConnection.emit(name, payload);
+}

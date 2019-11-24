@@ -11,6 +11,7 @@ var $plugins =
 {"name":"MMO_Core_Players","status":true,"description":"MMORPG Maker MV - Core Handling Players","parameters":{}},
 {"name":"MMO_Core_Party","status":true,"description":"MMORPG Maker MV - Core Handling Parties","parameters":{}},
 {"name":"MMO_Core_Party_Combat","status":true,"description":"MMORPG Maker MV - Core Handling Combat in Party","parameters":{}},
+{"name":"MMO_Core_Bank","status":true,"description":"MMORPG Maker MV - Core Handling Bank","parameters":{}},
 {"name":"MMO_ChatBox","status":true,"description":"MMORPG Maker MV - ChatBox","parameters":{"chatPosition":"BOTTOM LEFT"}},
 {"name":"MMO_LoginForm","status":true,"description":"MMORPG Maker MV - Login Form","parameters":{"allowAccountCreation":"Yes"}},
 {"name":"MMO_Overhead","status":true,"description":"Add name over actors name","parameters":{}},

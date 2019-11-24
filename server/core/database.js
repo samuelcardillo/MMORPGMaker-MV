@@ -13,6 +13,7 @@ exports.initialize = function(callback) {
   // In case we need more tables in the future
   var tables = [
     "users",
+    "banks",
     "config"
   ];
 
@@ -209,6 +210,96 @@ exports.savePlayerById = function(playerData, callback) {
     .finally(function() { conn.close(); });  
   })
 }
+
+
+///////////////// BANKS
+
+exports.getBanks = (callback) => {
+  onConnect(function(err, conn) {
+    r.db("mmorpg").table('banks')
+    .run(conn)
+    .then(function(cursor) { return cursor.toArray(); })
+    .then(function(output) {
+      callback(output);
+    })
+    .finally(function() { conn.close(); });  
+  })
+}
+
+exports.getBank = (bankName, callback) => {
+  onConnect(function(err, conn) {
+    r.db("mmorpg").table('banks')
+    .filter({"name": bankName})
+    .run(conn)
+    .then(function(cursor) { return cursor.toArray(); })
+    .then(function(output) {
+      callback(output[0]);
+    })
+    .finally(function() { conn.close(); });  
+  })
+}
+
+exports.getBankById = function(bankId, callback) {
+  onConnect(function(err, conn) {
+    r.db("mmorpg").table('banks')
+    .get(bankId)
+    .run(conn)
+    .then(function(cursor) { return cursor; })
+    .then(function(output) {
+      callback(output);
+    })
+    .finally(function() { conn.close(); });  
+  })
+}
+
+exports.saveBank = function(bank, callback) {
+  onConnect(function(err, conn) {
+    r.db("mmorpg").table('banks')
+    .get(bank.id)
+    .update(bank)
+    .run(conn)
+    .then(function(output) {
+      callback(output);
+    })
+    .finally(function() { conn.close(); });  
+  })
+}
+ 
+exports.createBank = function(payload, callback) {
+  let content = (payload.type === "global") ? {items: {}, weapons: {}, armors: {}, gold: 0} : {};
+  let template = {
+      name: payload.name,
+      type: payload.type,
+      content: content
+  }
+
+  onConnect(function(err, conn) {
+    r.db("mmorpg").table('banks')
+    .insert(template)
+    .run(conn)
+    .then(function(output) {
+      callback(output);
+    })
+    .finally(function() { conn.close(); });  
+  })
+}
+
+exports.deleteBank = function(bankId, callback) {
+  onConnect(function(err, conn) {
+    r.db("mmorpg").table('banks')
+    .get(bankId)
+    .delete()
+    .run(conn)
+    .then(function(output) {
+      callback(output);
+    })
+    .finally(function() { conn.close(); });  
+  })
+}
+
+
+
+///////////////// SERVER
 
 exports.reloadConfig = function(callback) {
   onConnect(function(err, conn) {
