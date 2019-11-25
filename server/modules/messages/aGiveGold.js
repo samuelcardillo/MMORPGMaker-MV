@@ -12,8 +12,7 @@ exports.initialize = function() {
     if(isNaN(args[2])) return MMO_Core["socket"].modules["messages"].sendToPlayer(initiator, "System", `Amount is not valid.`, "error");    
     if(args[2] > 1000000) return MMO_Core["socket"].modules["messages"].sendToPlayer(initiator, "System", `Amount is above 1,000,000.`, "error");    
     
-    console.log("Admin " + initiator.playerData.username + " gave " + args[2] + " gold to " + players[args[1]].playerData.username + "!");
-	MMO_Core["socket"].modules["messages"].sendToPlayer(initiator, "System", `You gave ${args[2]} gold to ${players[args[1]].playerData.username}!`, "action");
+    MMO_Core["socket"].modules["messages"].sendToPlayer(initiator, "System", `You gave ${args[2]} gold to ${players[args[1]].playerData.username}!`, "action");
     players[args[1]].playerData.stats.gold += parseInt(args[2]);
 
     // We save the new datas
