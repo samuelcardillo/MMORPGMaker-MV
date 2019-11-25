@@ -163,7 +163,6 @@ exports.registerUser = function(userDetails, callback) {
 
 exports.savePlayer = function(playerData, callback) {  
   // We delete what we don't want to be saved (in case it is there)
-  delete playerData.permission;
 
   onConnect(function(err, conn) {
     let request = r.db("mmorpg").table('users')
