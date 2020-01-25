@@ -39,46 +39,6 @@ function SceneBank() {
     });
   })
 
-  // Handling the withdraw and deposit of an object (work around)
-  document.addEventListener('keydown', function (e) {
-    if (e.keyCode != 13) return;
-    if (!(SceneManager._scene instanceof SceneBank)) return;
-    if (SceneManager._scene._bankItems.active || SceneManager._scene._playerItems.active) {
-      let item = (!SceneManager._scene._bankItems.active) ? SceneManager._scene._playerItems.item() : SceneManager._scene._bankItems.item().item;
-
-      if(!item) return;
-
-      let payload = {
-        bankId: MMO_Core_Bank.Bank.id,
-        itemId: item.id,
-        amount: 1
-      }
-
-      if (DataManager.isItem(item)) payload.itemType = "items";
-      if (DataManager.isWeapon(item)) payload.itemType = "weapons";
-      if (DataManager.isArmor(item)) payload.itemType = "armors";
-
-      if (SceneManager._scene._bankItems.active) MMO_Core.socket.emit("bank_withdraw", payload)
-      else MMO_Core.socket.emit("bank_deposit", payload)
-    }
-
-    if (SceneManager._scene._messageWindow._numberWindow.active) {
-      let goldAmount = SceneManager._scene._messageWindow._numberWindow._number;
-      let payload = {
-        bankId: MMO_Core_Bank.Bank.id,
-        gold: goldAmount
-      }
-
-      if(MMO_Core_Bank.isDeposit) MMO_Core.socket.emit("bank_deposit", payload);
-      else MMO_Core.socket.emit("bank_withdraw", payload);
-
-      SceneManager._scene._messageWindow._numberWindow.close();      
-      $gameMessage.clear();
-      SceneManager._scene._messageWindow._numberWindow.deactivate();
-      SceneManager._scene._bankChoice.activate();
-    }
-  })
-
   SceneBank.prototype = Object.create(Scene_MenuBase.prototype);
   SceneBank.prototype.constructor = MMO_Core_Bank;
 
@@ -152,9 +112,11 @@ function SceneBank() {
     this._bankChoiceWithdraw.setHandler('cancel', this.backToChoice.bind(this));
     this.addWindow(this._bankChoiceWithdraw);
 
+    this._playerItems.setHandler('ok', this.depositItem.bind(this));
     this._playerItems.setHandler('cancel', this.backToChoice.bind(this));
     this.addWindow(this._playerItems);
 
+    this._bankItems.setHandler('ok', this.withdrawItem.bind(this));
     this._bankItems.setHandler('cancel', this.backToChoice.bind(this));
     this.addWindow(this._bankItems);
 
@@ -168,6 +130,59 @@ function SceneBank() {
       this.addWindow(window);
     }, this);
   }
+
+  // Handling the withdraw and deposit of an object (work around)
+  SceneBank.prototype.depositItem = function () {
+    let item = this._playerItems.item();
+    if(!item) return;
+
+    let payload = {
+      bankId: MMO_Core_Bank.Bank.id,
+      itemId: item.id,
+      amount: 1
+    }
+
+    if (DataManager.isItem(item)) payload.itemType = "items";
+    if (DataManager.isWeapon(item)) payload.itemType = "weapons";
+    if (DataManager.isArmor(item)) payload.itemType = "armors";
+
+    MMO_Core.socket.emit("bank_deposit", payload);
+    this._playerItems.activate();
+  }
+
+  SceneBank.prototype.withdrawItem = function () {
+    let item = this._bankItems.item().item;
+    if(!item) return;
+
+    let payload = {
+      bankId: MMO_Core_Bank.Bank.id,
+      itemId: item.id,
+      amount: 1
+    }
+
+    if (DataManager.isItem(item)) payload.itemType = "items";
+    if (DataManager.isWeapon(item)) payload.itemType = "weapons";
+    if (DataManager.isArmor(item)) payload.itemType = "armors";
+
+    MMO_Core.socket.emit("bank_withdraw", payload);
+    this._bankItems.activate();
+  }
+
+    // if (this._messageWindow._numberWindow.active) {
+    //   let goldAmount = this._messageWindow._numberWindow._number;
+    //   let payload = {
+    //     bankId: MMO_Core_Bank.Bank.id,
+    //     gold: goldAmount
+    //   }
+
+    //   if(MMO_Core_Bank.isDeposit) MMO_Core.socket.emit("bank_deposit", payload);
+    //   else MMO_Core.socket.emit("bank_withdraw", payload);
+
+    //   this._messageWindow._numberWindow.close();      
+    //   $gameMessage.clear();
+    //   this._messageWindow._numberWindow.deactivate();
+    //   this._bankChoice.activate();
+    // }
 
   SceneBank.prototype.leaveBank = function () {
     MMO_Core_Bank.Bank = {};
@@ -319,7 +334,6 @@ function SceneBank() {
 
   Window_ActorItems.prototype.refresh = function () {
     this._data = $gameParty.allItems();
-    console.dir($gameParty.allItems());
     this.createContents();
     this.drawAllItems();
   }
@@ -340,7 +354,6 @@ function SceneBank() {
 
   Window_BankItems.prototype.refresh = function () {
     this._data = MMO_Core_Bank.finalItems;
-    console.dir(this._data)
     this.createContents();
     this.drawAllItems();
   }
