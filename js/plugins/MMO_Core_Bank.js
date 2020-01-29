@@ -20,6 +20,7 @@ function SceneBank() {
 (function () {
   MMO_Core_Bank.Bank        = {};
   MMO_Core_Bank.finalItems  = [];
+  MMO_Core_Bank.itemCounts  = [];
   MMO_Core_Bank.isDeposit   = false;
 
   // ---------------------------------------
@@ -31,52 +32,13 @@ function SceneBank() {
 
     MMO_Core_Bank.Bank        = bank;
     MMO_Core_Bank.finalItems  = [];
+    MMO_Core_Bank.itemCounts  = [];
 
     SceneBank.prototype._refreshItems().then(() => {
       SceneBank.prototype._refreshWindows();   
       SceneManager._scene._playerGold.refresh($gameParty.gold());
       SceneManager._scene._bankGold.refresh(MMO_Core_Bank.Bank.content.gold);
     });
-  })
-
-  // Handling the withdraw and deposit of an object (work around)
-  document.addEventListener('keydown', function (e) {
-    if (e.keyCode != 13) return;
-    if (!(SceneManager._scene instanceof SceneBank)) return;
-    if (SceneManager._scene._bankItems.active || SceneManager._scene._playerItems.active) {
-      let item = (!SceneManager._scene._bankItems.active) ? SceneManager._scene._playerItems.item() : SceneManager._scene._bankItems.item().item;
-
-      if(!item) return;
-
-      let payload = {
-        bankId: MMO_Core_Bank.Bank.id,
-        itemId: item.id,
-        amount: 1
-      }
-
-      if (DataManager.isItem(item)) payload.itemType = "items";
-      if (DataManager.isWeapon(item)) payload.itemType = "weapons";
-      if (DataManager.isArmor(item)) payload.itemType = "armors";
-
-      if (SceneManager._scene._bankItems.active) MMO_Core.socket.emit("bank_withdraw", payload)
-      else MMO_Core.socket.emit("bank_deposit", payload)
-    }
-
-    if (SceneManager._scene._messageWindow._numberWindow.active) {
-      let goldAmount = SceneManager._scene._messageWindow._numberWindow._number;
-      let payload = {
-        bankId: MMO_Core_Bank.Bank.id,
-        gold: goldAmount
-      }
-
-      if(MMO_Core_Bank.isDeposit) MMO_Core.socket.emit("bank_deposit", payload);
-      else MMO_Core.socket.emit("bank_withdraw", payload);
-
-      SceneManager._scene._messageWindow._numberWindow.close();      
-      $gameMessage.clear();
-      SceneManager._scene._messageWindow._numberWindow.deactivate();
-      SceneManager._scene._bankChoice.activate();
-    }
   })
 
   SceneBank.prototype = Object.create(Scene_MenuBase.prototype);
@@ -91,24 +53,18 @@ function SceneBank() {
     return new Promise(resolve => { 
       for (var k in MMO_Core_Bank.Bank.content.items) {
         if(MMO_Core_Bank.Bank.content.items[k] === 0) continue;
-        MMO_Core_Bank.finalItems.push({
-          item: $dataItems[k],
-          amount: MMO_Core_Bank.Bank.content.items[k]
-        });
+        MMO_Core_Bank.finalItems.push($dataItems[k]);
+        MMO_Core_Bank.itemCounts.push(MMO_Core_Bank.Bank.content.items[k]);
       }
       for (var k in MMO_Core_Bank.Bank.content.weapons) {
         if(MMO_Core_Bank.Bank.content.weapons[k] === 0) continue;        
-        MMO_Core_Bank.finalItems.push({
-          item: $dataWeapons[k],
-          amount: MMO_Core_Bank.Bank.content.weapons[k]
-        });
+        MMO_Core_Bank.finalItems.push($dataWeapons[k]);
+        MMO_Core_Bank.itemCounts.push(MMO_Core_Bank.Bank.content.weapons[k]);
       }
       for (var k in MMO_Core_Bank.Bank.content.armors) {
         if(MMO_Core_Bank.Bank.content.armors[k] === 0) continue;        
-        MMO_Core_Bank.finalItems.push({
-          item: $dataArmors[k],
-          amount: MMO_Core_Bank.Bank.content.armors[k]
-        });
+        MMO_Core_Bank.finalItems.push($dataArmors[k]);
+        MMO_Core_Bank.itemCounts.push(MMO_Core_Bank.Bank.content.armors[k]);
       }
       resolve();
     })
@@ -122,11 +78,11 @@ function SceneBank() {
   SceneBank.prototype.create = function () {
     Scene_MenuBase.prototype.create.call(this);
     // x, y, width, height
-    this._bankName = new Window_BankName((Graphics.boxWidth - 400) / 2, 0, 400, 100, MMO_Core_Bank.Bank.name);
-    this._playerGold = new Window_BankGold(50, 520, $gameParty.gold());
+    this._bankName = new Window_BankName((Graphics.boxWidth - 400) / 2, 5, 400, 80, MMO_Core_Bank.Bank.name);
+    this._playerGold = new Window_BankGold(75, 520, $gameParty.gold());
     this._bankGold = new Window_BankGold(Graphics.boxWidth - 325, 520, MMO_Core_Bank.Bank.content.gold);
 
-    this._bankChoice = new Window_BankChoice((Graphics.boxWidth - 400) / 2, 100, 400);
+    this._bankChoice = new Window_BankChoice((Graphics.boxWidth - 400) / 2, 85, 400);
     this._bankChoiceDeposit = new Window_BankCommand(50, 165, 300);
     this._bankChoiceWithdraw = new Window_BankCommand(Graphics.boxWidth - 350, 165, 300);
 
@@ -152,9 +108,11 @@ function SceneBank() {
     this._bankChoiceWithdraw.setHandler('cancel', this.backToChoice.bind(this));
     this.addWindow(this._bankChoiceWithdraw);
 
+    this._playerItems.setHandler('ok', this.depositItem.bind(this));
     this._playerItems.setHandler('cancel', this.backToChoice.bind(this));
     this.addWindow(this._playerItems);
 
+    this._bankItems.setHandler('ok', this.withdrawItem.bind(this));
     this._bankItems.setHandler('cancel', this.backToChoice.bind(this));
     this.addWindow(this._bankItems);
 
@@ -164,14 +122,54 @@ function SceneBank() {
 
     this._messageWindow = new Window_Message();
     this.addWindow(this._messageWindow);
+
+    this._numberWindow = new Window_NumInput(this._messageWindow);
+    this.addWindow(this._numberWindow);
+
     this._messageWindow.subWindows().forEach(function (window) {
       this.addWindow(window);
     }, this);
   }
 
+  // Handling the withdraw and deposit of an object (work around)
+  SceneBank.prototype.depositItem = function () {
+    MMO_Core_Bank.isDeposit = true;
+    let item = this._playerItems.item();
+    this.transferItem(item);
+  }
+
+  SceneBank.prototype.withdrawItem = function () {
+    MMO_Core_Bank.isDeposit = false;
+    let item = this._bankItems.item();
+    this.transferItem(item);
+  }
+
+  SceneBank.prototype.transferItem = function (item) {
+    if(!item) return;
+
+    let payload = {
+      bankId: MMO_Core_Bank.Bank.id,
+      itemId: item.id,
+      amount: 1
+    }
+
+    if (DataManager.isItem(item)) payload.itemType = "items";
+    if (DataManager.isWeapon(item)) payload.itemType = "weapons";
+    if (DataManager.isArmor(item)) payload.itemType = "armors";
+
+    if (MMO_Core_Bank.isDeposit) {
+      MMO_Core.socket.emit("bank_deposit", payload);
+      this._playerItems.activate();
+    } else if (!MMO_Core_Bank.isDeposit) {
+      MMO_Core.socket.emit("bank_withdraw", payload);
+      this._bankItems.activate();
+    }
+  }
+
   SceneBank.prototype.leaveBank = function () {
     MMO_Core_Bank.Bank = {};
     MMO_Core_Bank.finalItems = [];
+    MMO_Core_Bank.itemCounts = [];
     this.popScene();
   }
 
@@ -188,7 +186,7 @@ function SceneBank() {
   SceneBank.prototype.commandDepositGold = function () {
     MMO_Core_Bank.isDeposit = true;
     this._bankChoiceDeposit.deactivate();
-    $gameMessage.setNumberInput(999, 3)
+    this._numberWindow.start();
   }
 
   SceneBank.prototype.commandWithdraw = function () {
@@ -204,7 +202,7 @@ function SceneBank() {
   SceneBank.prototype.commandWithdrawGold = function () {
     MMO_Core_Bank.isDeposit = false;
     this._bankChoiceWithdraw.deactivate();
-    $gameMessage.setNumberInput(999, 3)
+    this._numberWindow.start();
   }
 
   SceneBank.prototype.backToChoice = function () {
@@ -221,7 +219,8 @@ function SceneBank() {
 
   Window_BankName.prototype.initialize = function (x, y, width, height, text) {
     Window_Base.prototype.initialize.call(this, x, y, width, height);
-    this.drawTextEx(text, 0, 0)
+    var textWidth = this.drawTextEx(text, -width, 0);
+    this.drawTextEx(text, (width/2) - (textWidth/2) - 10, 0);
   };
 
   function Window_BankChoice() {
@@ -319,9 +318,12 @@ function SceneBank() {
 
   Window_ActorItems.prototype.refresh = function () {
     this._data = $gameParty.allItems();
-    console.dir($gameParty.allItems());
     this.createContents();
     this.drawAllItems();
+  }
+
+  Window_ActorItems.prototype.isCurrentItemEnabled = function() {
+    return true;
   }
 
   // Bank side
@@ -340,19 +342,20 @@ function SceneBank() {
 
   Window_BankItems.prototype.refresh = function () {
     this._data = MMO_Core_Bank.finalItems;
-    console.dir(this._data)
+    this._counts = MMO_Core_Bank.itemCounts;
     this.createContents();
     this.drawAllItems();
   }
 
   Window_BankItems.prototype.drawItem = function (index) {
     var item = this._data[index];
+    var count = this._counts[index];
     if (item) {
       var numberWidth = this.numberWidth();
       var rect = this.itemRect(index);
       rect.width -= this.textPadding();
-      this.drawItemName(item.item, rect.x, rect.y, rect.width - numberWidth);
-      this.drawItemNumber(item.amount, rect.x, rect.y, rect.width);
+      this.drawItemName(item, rect.x, rect.y, rect.width - numberWidth);
+      this.drawItemNumber(count, rect.x, rect.y, rect.width);
     }
   };
 
@@ -361,6 +364,236 @@ function SceneBank() {
       this.drawText(':', x, y, width - this.textWidth('00'), 'right');
       this.drawText(amount, x, y, width, 'right');
     }
+  };
+
+  Window_BankItems.prototype.isCurrentItemEnabled = function() {
+    return true;
+  }
+
+  function Window_NumInput() {
+    this.initialize.apply(this, arguments);
+  }
+  
+  Window_NumInput.prototype = Object.create(Window_Selectable.prototype);
+  Window_NumInput.prototype.constructor = Window_NumInput;
+
+  Window_NumInput.prototype.initialize = function(messageWindow) {
+    this._messageWindow = messageWindow;
+    Window_Selectable.prototype.initialize.call(this, 0, 0, 0, 0);
+    this._number = 0;
+    this._maxDigits = 1;
+    this.openness = 0;
+    this.createButtons();
+    this.deactivate();
+  };
+
+  Window_NumInput.prototype.start = function() {
+    this._maxDigits = 3;
+    this._number = 0;
+    this.updatePlacement();
+    this.placeButtons();
+    this.updateButtonsVisiblity();
+    this.createContents();
+    this.refresh();
+    this.open();
+    this.activate();
+    this.select(0);
+  };
+
+  Window_NumInput.prototype.updatePlacement = function() {
+    var messageY = this._messageWindow.y;
+    var spacing = 8;
+    this.width = this.windowWidth();
+    this.height = this.windowHeight();
+    this.x = (Graphics.boxWidth - this.width) / 2;
+    if (messageY >= Graphics.boxHeight / 2) {
+      this.y = messageY - this.height - spacing;
+    } else {
+      this.y = messageY + this._messageWindow.height + spacing;
+    }
+  };
+
+  Window_NumInput.prototype.windowWidth = function() {
+    return this.maxCols() * this.itemWidth() + this.padding * 2;
+  };
+
+  Window_NumInput.prototype.windowHeight = function() {
+    return this.fittingHeight(1);
+  };
+
+  Window_NumInput.prototype.maxCols = function() {
+    return this._maxDigits;
+  };
+
+  Window_NumInput.prototype.maxItems = function() {
+    return this._maxDigits;
+  };
+
+  Window_NumInput.prototype.spacing = function() {
+    return 0;
+  };
+
+  Window_NumInput.prototype.itemWidth = function() {
+    return 32;
+  };
+
+  Window_NumInput.prototype.createButtons = function() {
+    var bitmap = ImageManager.loadSystem('ButtonSet');
+    var buttonWidth = 48;
+    var buttonHeight = 48;
+    this._buttons = [];
+    for (var i = 0; i < 3; i++) {
+      var button = new Sprite_Button();
+      var x = buttonWidth * [1, 2, 4][i];
+      var w = buttonWidth * (i === 2 ? 2 : 1);
+      button.bitmap = bitmap;
+      button.setColdFrame(x, 0, w, buttonHeight);
+      button.setHotFrame(x, buttonHeight, w, buttonHeight);
+      button.visible = false;
+      this._buttons.push(button);
+      this.addChild(button);
+    }
+    this._buttons[0].setClickHandler(this.onButtonDown.bind(this));
+    this._buttons[1].setClickHandler(this.onButtonUp.bind(this));
+    this._buttons[2].setClickHandler(this.onButtonOk.bind(this));
+  };
+
+  Window_NumInput.prototype.placeButtons = function() {
+    var numButtons = this._buttons.length;
+    var spacing = 16;
+    var totalWidth = -spacing;
+    for (var i = 0; i < numButtons; i++) {
+      totalWidth += this._buttons[i].width + spacing;
+    }
+    var x = (this.width - totalWidth) / 2;
+    for (var j = 0; j < numButtons; j++) {
+      var button = this._buttons[j];
+      button.x = x;
+      button.y = this.buttonY();
+      x += button.width + spacing;
+    }
+  };
+
+  Window_NumInput.prototype.updateButtonsVisiblity = function() {
+    if (TouchInput.date > Input.date) {
+      this.showButtons();
+    } else {
+      this.hideButtons();
+    }
+  };
+
+  Window_NumInput.prototype.showButtons = function() {
+    for (var i = 0; i < this._buttons.length; i++) {
+      this._buttons[i].visible = true;
+    }
+  };
+
+  Window_NumInput.prototype.hideButtons = function() {
+    for (var i = 0; i < this._buttons.length; i++) {
+      this._buttons[i].visible = false;
+    }
+  };
+
+  Window_NumInput.prototype.buttonY = function() {
+    var spacing = 8;
+    if (this._messageWindow.y >= Graphics.boxHeight / 2) {
+      return 0 - this._buttons[0].height - spacing;
+    } else {
+      return this.height + spacing;
+    }
+  };
+
+  Window_NumInput.prototype.update = function() {
+    Window_Selectable.prototype.update.call(this);
+    this.processDigitChange();
+  };
+
+  Window_NumInput.prototype.processDigitChange = function() {
+    if (this.isOpenAndActive()) {
+      if (Input.isRepeated('up')) {
+        this.changeDigit(true);
+      } else if (Input.isRepeated('down')) {
+        this.changeDigit(false);
+      }
+    }
+  };
+
+  Window_NumInput.prototype.changeDigit = function(up) {
+    var index = this.index();
+    var place = Math.pow(10, this._maxDigits - 1 - index);
+    var n = Math.floor(this._number / place) % 10;
+    this._number -= n * place;
+    if (up) {
+        n = (n + 1) % 10;
+    } else {
+        n = (n + 9) % 10;
+    }
+    this._number += n * place;
+
+    if (this._number > $gameParty.gold() && MMO_Core_Bank.isDeposit) {
+      this._number = $gameParty.gold();
+    } else if (this._number > MMO_Core_Bank.Bank.content.gold && !MMO_Core_Bank.isDeposit) {
+      this._number = MMO_Core_Bank.Bank.content.gold;
+    }
+
+    this.refresh();
+    SoundManager.playCursor();
+  };
+
+  Window_NumInput.prototype.isTouchOkEnabled = function() {
+    return false;
+  };
+
+  Window_NumInput.prototype.isOkEnabled = function() {
+    return true;
+  };
+
+  Window_NumInput.prototype.isCancelEnabled = function() {
+    return false;
+  };
+
+  Window_NumInput.prototype.isOkTriggered = function() {
+    return Input.isTriggered('ok');
+  };
+
+  Window_NumInput.prototype.processOk = function() {
+    let goldAmount = this._number;
+    let payload = {
+      bankId: MMO_Core_Bank.Bank.id,
+      gold: goldAmount
+    }
+
+    if(MMO_Core_Bank.isDeposit) MMO_Core.socket.emit("bank_deposit", payload);
+    else MMO_Core.socket.emit("bank_withdraw", payload);
+
+    // SoundManager.playOk();
+    $gameVariables.setValue($gameMessage.numInputVariableId(), this._number);
+    this.updateInputData();
+    this.deactivate();
+    this.close();
+    SceneManager._scene._bankChoice.activate();
+  };
+
+  Window_NumInput.prototype.drawItem = function(index) {
+    var rect = this.itemRect(index);
+    var align = 'center';
+    var s = this._number.padZero(this._maxDigits);
+    var c = s.slice(index, index + 1);
+    this.resetTextColor();
+    this.drawText(c, rect.x, rect.y, rect.width, align);
+  };
+
+  Window_NumInput.prototype.onButtonUp = function() {
+    this.changeDigit(true);
+  };
+
+  Window_NumInput.prototype.onButtonDown = function() {
+    this.changeDigit(false);
+  };
+
+  Window_NumInput.prototype.onButtonOk = function() {
+    this.processOk();
+    this.hideButtons();
   };
 
   // ---------------------------------------
