@@ -20,6 +20,7 @@ function SceneBank() {
 (function () {
   MMO_Core_Bank.Bank        = {};
   MMO_Core_Bank.finalItems  = [];
+  MMO_Core_Bank.itemCounts  = [];
   MMO_Core_Bank.isDeposit   = false;
 
   // ---------------------------------------
@@ -31,6 +32,7 @@ function SceneBank() {
 
     MMO_Core_Bank.Bank        = bank;
     MMO_Core_Bank.finalItems  = [];
+    MMO_Core_Bank.itemCounts  = [];
 
     SceneBank.prototype._refreshItems().then(() => {
       SceneBank.prototype._refreshWindows();   
@@ -51,24 +53,18 @@ function SceneBank() {
     return new Promise(resolve => { 
       for (var k in MMO_Core_Bank.Bank.content.items) {
         if(MMO_Core_Bank.Bank.content.items[k] === 0) continue;
-        MMO_Core_Bank.finalItems.push({
-          item: $dataItems[k],
-          amount: MMO_Core_Bank.Bank.content.items[k]
-        });
+        MMO_Core_Bank.finalItems.push($dataItems[k]);
+        MMO_Core_Bank.itemCounts.push(MMO_Core_Bank.Bank.content.items[k]);
       }
       for (var k in MMO_Core_Bank.Bank.content.weapons) {
         if(MMO_Core_Bank.Bank.content.weapons[k] === 0) continue;        
-        MMO_Core_Bank.finalItems.push({
-          item: $dataWeapons[k],
-          amount: MMO_Core_Bank.Bank.content.weapons[k]
-        });
+        MMO_Core_Bank.finalItems.push($dataWeapons[k]);
+        MMO_Core_Bank.itemCounts.push(MMO_Core_Bank.Bank.content.weapons[k]);
       }
       for (var k in MMO_Core_Bank.Bank.content.armors) {
         if(MMO_Core_Bank.Bank.content.armors[k] === 0) continue;        
-        MMO_Core_Bank.finalItems.push({
-          item: $dataArmors[k],
-          amount: MMO_Core_Bank.Bank.content.armors[k]
-        });
+        MMO_Core_Bank.finalItems.push($dataArmors[k]);
+        MMO_Core_Bank.itemCounts.push(MMO_Core_Bank.Bank.content.armors[k]);
       }
       resolve();
     })
@@ -82,11 +78,11 @@ function SceneBank() {
   SceneBank.prototype.create = function () {
     Scene_MenuBase.prototype.create.call(this);
     // x, y, width, height
-    this._bankName = new Window_BankName((Graphics.boxWidth - 400) / 2, 0, 400, 100, MMO_Core_Bank.Bank.name);
+    this._bankName = new Window_BankName((Graphics.boxWidth - 400) / 2, 5, 400, 80, MMO_Core_Bank.Bank.name);
     this._playerGold = new Window_BankGold(50, 520, $gameParty.gold());
     this._bankGold = new Window_BankGold(Graphics.boxWidth - 325, 520, MMO_Core_Bank.Bank.content.gold);
 
-    this._bankChoice = new Window_BankChoice((Graphics.boxWidth - 400) / 2, 100, 400);
+    this._bankChoice = new Window_BankChoice((Graphics.boxWidth - 400) / 2, 85, 400);
     this._bankChoiceDeposit = new Window_BankCommand(50, 165, 300);
     this._bankChoiceWithdraw = new Window_BankCommand(Graphics.boxWidth - 350, 165, 300);
 
@@ -125,7 +121,12 @@ function SceneBank() {
     this._bankChoiceWithdraw.deactivate();
 
     this._messageWindow = new Window_Message();
+    console.dir(this._messageWindow);
+    console.dir(this._messageWindow._numberWindow);
+    this._messageWindow._numberWindow.setHandler('ok',     this.test.bind(this));
+    this._messageWindow._numberWindow.setHandler('cancel', this.test.bind(this));
     this.addWindow(this._messageWindow);
+  
     this._messageWindow.subWindows().forEach(function (window) {
       this.addWindow(window);
     }, this);
@@ -151,7 +152,7 @@ function SceneBank() {
   }
 
   SceneBank.prototype.withdrawItem = function () {
-    let item = this._bankItems.item().item;
+    let item = this._bankItems.item();
     if(!item) return;
 
     let payload = {
@@ -187,6 +188,7 @@ function SceneBank() {
   SceneBank.prototype.leaveBank = function () {
     MMO_Core_Bank.Bank = {};
     MMO_Core_Bank.finalItems = [];
+    MMO_Core_Bank.itemCounts = [];
     this.popScene();
   }
 
@@ -203,8 +205,21 @@ function SceneBank() {
   SceneBank.prototype.commandDepositGold = function () {
     MMO_Core_Bank.isDeposit = true;
     this._bankChoiceDeposit.deactivate();
-    $gameMessage.setNumberInput(999, 3)
+    $gameMessage.setNumberInput(999, 3);
+    // console.log(this._messageWindow._numberWindow);
+    // this._messageWindow._numberWindow.start();
+    // this._messageWindow._numberWindow.activate();
+    // this._messageWindow._numberWindow.setHandler('ok',     this.test.bind(this));
+    // this._messageWindow._numberWindow.setHandler('cancel', this.test.bind(this));
+    // this._messageWindow._numberWindow.start();
+    // this._messageWindow._numberWindow.activate();
+    // this._messageWindow._numberWindow.select(0);
   }
+
+  SceneBank.prototype.test = function () {
+    this._messageWindow._numberWindow.hide();
+    console.log("test");
+  };
 
   SceneBank.prototype.commandWithdraw = function () {
     this._bankChoice.deactivate();
@@ -236,7 +251,8 @@ function SceneBank() {
 
   Window_BankName.prototype.initialize = function (x, y, width, height, text) {
     Window_Base.prototype.initialize.call(this, x, y, width, height);
-    this.drawTextEx(text, 0, 0)
+    var textWidth = this.drawTextEx(text, -width, 0);
+    this.drawTextEx(text, (width/2) - (textWidth/2) - 10, 0);
   };
 
   function Window_BankChoice() {
@@ -354,18 +370,20 @@ function SceneBank() {
 
   Window_BankItems.prototype.refresh = function () {
     this._data = MMO_Core_Bank.finalItems;
+    this._counts = MMO_Core_Bank.itemCounts;
     this.createContents();
     this.drawAllItems();
   }
 
   Window_BankItems.prototype.drawItem = function (index) {
     var item = this._data[index];
+    var count = this._counts[index];
     if (item) {
       var numberWidth = this.numberWidth();
       var rect = this.itemRect(index);
       rect.width -= this.textPadding();
-      this.drawItemName(item.item, rect.x, rect.y, rect.width - numberWidth);
-      this.drawItemNumber(item.amount, rect.x, rect.y, rect.width);
+      this.drawItemName(item, rect.x, rect.y, rect.width - numberWidth);
+      this.drawItemNumber(count, rect.x, rect.y, rect.width);
     }
   };
 

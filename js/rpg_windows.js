@@ -1940,9 +1940,6 @@ Window_ItemList.prototype.item = function() {
 };
 
 Window_ItemList.prototype.isCurrentItemEnabled = function() {
-    // if (typeof this.item().item !== "undefined") {
-    //     return true;
-    // }
     return this.isEnabled(this.item());
 };
 
