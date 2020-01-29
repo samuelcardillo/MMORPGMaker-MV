@@ -133,25 +133,18 @@ function SceneBank() {
 
   // Handling the withdraw and deposit of an object (work around)
   SceneBank.prototype.depositItem = function () {
+    MMO_Core_Bank.isDeposit = true;
     let item = this._playerItems.item();
-    if(!item) return;
-
-    let payload = {
-      bankId: MMO_Core_Bank.Bank.id,
-      itemId: item.id,
-      amount: 1
-    }
-
-    if (DataManager.isItem(item)) payload.itemType = "items";
-    if (DataManager.isWeapon(item)) payload.itemType = "weapons";
-    if (DataManager.isArmor(item)) payload.itemType = "armors";
-
-    MMO_Core.socket.emit("bank_deposit", payload);
-    this._playerItems.activate();
+    this.transferItem(item);
   }
 
   SceneBank.prototype.withdrawItem = function () {
+    MMO_Core_Bank.isDeposit = false;
     let item = this._bankItems.item();
+    this.transferItem(item);
+  }
+
+  SceneBank.prototype.transferItem = function (item) {
     if(!item) return;
 
     let payload = {
@@ -164,8 +157,13 @@ function SceneBank() {
     if (DataManager.isWeapon(item)) payload.itemType = "weapons";
     if (DataManager.isArmor(item)) payload.itemType = "armors";
 
-    MMO_Core.socket.emit("bank_withdraw", payload);
-    this._bankItems.activate();
+    if (MMO_Core_Bank.isDeposit) {
+      MMO_Core.socket.emit("bank_deposit", payload);
+      this._playerItems.activate();
+    } else if (!MMO_Core_Bank.isDeposit) {
+      MMO_Core.socket.emit("bank_withdraw", payload);
+      this._bankItems.activate();
+    }
   }
 
   SceneBank.prototype.leaveBank = function () {
@@ -324,6 +322,10 @@ function SceneBank() {
     this.drawAllItems();
   }
 
+  Window_ActorItems.prototype.isCurrentItemEnabled = function() {
+    return true;
+  }
+
   // Bank side
   function Window_BankItems() {
     this.initialize.apply(this, arguments);
@@ -363,6 +365,10 @@ function SceneBank() {
       this.drawText(amount, x, y, width, 'right');
     }
   };
+
+  Window_BankItems.prototype.isCurrentItemEnabled = function() {
+    return true;
+  }
 
   function Window_NumInput() {
     this.initialize.apply(this, arguments);
