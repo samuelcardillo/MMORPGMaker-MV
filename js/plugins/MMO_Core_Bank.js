@@ -374,18 +374,8 @@ function SceneBank() {
     this.initialize.apply(this, arguments);
   }
   
-  Window_NumInput.prototype = Object.create(Window_Selectable.prototype);
+  Window_NumInput.prototype = Object.create(Window_NumberInput.prototype);
   Window_NumInput.prototype.constructor = Window_NumInput;
-
-  Window_NumInput.prototype.initialize = function(messageWindow) {
-    this._messageWindow = messageWindow;
-    Window_Selectable.prototype.initialize.call(this, 0, 0, 0, 0);
-    this._number = 0;
-    this._maxDigits = 1;
-    this.openness = 0;
-    this.createButtons();
-    this.deactivate();
-  };
 
   Window_NumInput.prototype.start = function() {
     this._maxDigits = 3;
@@ -398,124 +388,6 @@ function SceneBank() {
     this.open();
     this.activate();
     this.select(0);
-  };
-
-  Window_NumInput.prototype.updatePlacement = function() {
-    var messageY = this._messageWindow.y;
-    var spacing = 8;
-    this.width = this.windowWidth();
-    this.height = this.windowHeight();
-    this.x = (Graphics.boxWidth - this.width) / 2;
-    if (messageY >= Graphics.boxHeight / 2) {
-      this.y = messageY - this.height - spacing;
-    } else {
-      this.y = messageY + this._messageWindow.height + spacing;
-    }
-  };
-
-  Window_NumInput.prototype.windowWidth = function() {
-    return this.maxCols() * this.itemWidth() + this.padding * 2;
-  };
-
-  Window_NumInput.prototype.windowHeight = function() {
-    return this.fittingHeight(1);
-  };
-
-  Window_NumInput.prototype.maxCols = function() {
-    return this._maxDigits;
-  };
-
-  Window_NumInput.prototype.maxItems = function() {
-    return this._maxDigits;
-  };
-
-  Window_NumInput.prototype.spacing = function() {
-    return 0;
-  };
-
-  Window_NumInput.prototype.itemWidth = function() {
-    return 32;
-  };
-
-  Window_NumInput.prototype.createButtons = function() {
-    var bitmap = ImageManager.loadSystem('ButtonSet');
-    var buttonWidth = 48;
-    var buttonHeight = 48;
-    this._buttons = [];
-    for (var i = 0; i < 3; i++) {
-      var button = new Sprite_Button();
-      var x = buttonWidth * [1, 2, 4][i];
-      var w = buttonWidth * (i === 2 ? 2 : 1);
-      button.bitmap = bitmap;
-      button.setColdFrame(x, 0, w, buttonHeight);
-      button.setHotFrame(x, buttonHeight, w, buttonHeight);
-      button.visible = false;
-      this._buttons.push(button);
-      this.addChild(button);
-    }
-    this._buttons[0].setClickHandler(this.onButtonDown.bind(this));
-    this._buttons[1].setClickHandler(this.onButtonUp.bind(this));
-    this._buttons[2].setClickHandler(this.onButtonOk.bind(this));
-  };
-
-  Window_NumInput.prototype.placeButtons = function() {
-    var numButtons = this._buttons.length;
-    var spacing = 16;
-    var totalWidth = -spacing;
-    for (var i = 0; i < numButtons; i++) {
-      totalWidth += this._buttons[i].width + spacing;
-    }
-    var x = (this.width - totalWidth) / 2;
-    for (var j = 0; j < numButtons; j++) {
-      var button = this._buttons[j];
-      button.x = x;
-      button.y = this.buttonY();
-      x += button.width + spacing;
-    }
-  };
-
-  Window_NumInput.prototype.updateButtonsVisiblity = function() {
-    if (TouchInput.date > Input.date) {
-      this.showButtons();
-    } else {
-      this.hideButtons();
-    }
-  };
-
-  Window_NumInput.prototype.showButtons = function() {
-    for (var i = 0; i < this._buttons.length; i++) {
-      this._buttons[i].visible = true;
-    }
-  };
-
-  Window_NumInput.prototype.hideButtons = function() {
-    for (var i = 0; i < this._buttons.length; i++) {
-      this._buttons[i].visible = false;
-    }
-  };
-
-  Window_NumInput.prototype.buttonY = function() {
-    var spacing = 8;
-    if (this._messageWindow.y >= Graphics.boxHeight / 2) {
-      return 0 - this._buttons[0].height - spacing;
-    } else {
-      return this.height + spacing;
-    }
-  };
-
-  Window_NumInput.prototype.update = function() {
-    Window_Selectable.prototype.update.call(this);
-    this.processDigitChange();
-  };
-
-  Window_NumInput.prototype.processDigitChange = function() {
-    if (this.isOpenAndActive()) {
-      if (Input.isRepeated('up')) {
-        this.changeDigit(true);
-      } else if (Input.isRepeated('down')) {
-        this.changeDigit(false);
-      }
-    }
   };
 
   Window_NumInput.prototype.changeDigit = function(up) {
@@ -540,22 +412,6 @@ function SceneBank() {
     SoundManager.playCursor();
   };
 
-  Window_NumInput.prototype.isTouchOkEnabled = function() {
-    return false;
-  };
-
-  Window_NumInput.prototype.isOkEnabled = function() {
-    return true;
-  };
-
-  Window_NumInput.prototype.isCancelEnabled = function() {
-    return false;
-  };
-
-  Window_NumInput.prototype.isOkTriggered = function() {
-    return Input.isTriggered('ok');
-  };
-
   Window_NumInput.prototype.processOk = function() {
     let goldAmount = this._number;
     let payload = {
@@ -572,28 +428,6 @@ function SceneBank() {
     this.deactivate();
     this.close();
     SceneManager._scene._bankChoice.activate();
-  };
-
-  Window_NumInput.prototype.drawItem = function(index) {
-    var rect = this.itemRect(index);
-    var align = 'center';
-    var s = this._number.padZero(this._maxDigits);
-    var c = s.slice(index, index + 1);
-    this.resetTextColor();
-    this.drawText(c, rect.x, rect.y, rect.width, align);
-  };
-
-  Window_NumInput.prototype.onButtonUp = function() {
-    this.changeDigit(true);
-  };
-
-  Window_NumInput.prototype.onButtonDown = function() {
-    this.changeDigit(false);
-  };
-
-  Window_NumInput.prototype.onButtonOk = function() {
-    this.processOk();
-    this.hideButtons();
   };
 
   // ---------------------------------------
