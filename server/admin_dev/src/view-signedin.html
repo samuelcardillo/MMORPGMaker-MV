@@ -1,0 +1,266 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="view-signedin">
+  <template>
+    <style>
+      :host {
+        --app-primary-color: #4285f4;
+        --app-secondary-color: black;
+        background-image: url('../images/background.jpg');
+        background-size: 100% 100%;
+        @apply(--layout-vertical);
+        @apply(--layout-center-center);
+        min-height: 100vh;
+      }
+
+      #menu { 
+        @apply(--layout-horizontal);
+        @apply(--layout-justified);
+        width: 680px;
+      }
+
+      iron-pages {
+        width: 960px;
+      }
+      app-drawer-layout:not([narrow]) [drawer-toggle] {
+        display: none;
+      }
+      app-header-layout {
+        background-color: var(--paper-grey-50);
+      }
+      app-toolbar#main{
+        @apply(--layout-horizontal);
+        @apply(--layout-end-justified);
+        background-color: white;
+        color: black;
+      }
+      app-toolbar#main span {
+        font-size: 16px;
+        opacity: 0.54;
+        margin: 0 8px;
+      }
+      app-toolbar div {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      #content {
+        @apply(--layout-vertical);
+        @apply(--layout-center);
+      }
+
+      img#logo {
+        height: 50px;
+        width: 114px;
+      }
+
+      .person {
+        border-radius: 50%;
+        height: 25px;
+      }
+
+      button {
+        text-transform: uppercase;
+        background-color: rgba(218, 213, 148, 0.6);
+        color: white;
+        font-size: 16px;
+        font-weight: 800;
+        border: 1px solid black;
+        padding: 8px;
+      }
+
+       button:hover {
+        background-color: black;
+        border: rgba(218, 213, 148, 0.6);
+      }
+
+      img.minilogo { 
+        height: 50px;
+      }
+    
+      app-drawer {
+        --app-drawer-content-container: {
+          background-color: #2C323A;
+        };
+      }
+    </style>
+
+
+    <app-localstorage-document key="cryptollowSession" data="{{authSession}}">
+    </app-localstorage-document>
+
+    <app-location route="{{route}}"></app-location>
+
+    <app-route
+        route="{{route}}"
+        pattern="/:page"
+        data="{{routeData}}"
+        tail="{{subroute}}">
+    </app-route>
+
+    <!-- As we load customers on two pages (dashboard & customers), we just load it here !-->
+    <iron-ajax id="ajaxGetServer" last-response="{{serverData}}" on-error="_logOut"></iron-ajax>
+    <iron-ajax id="ajaxGetPlayers" last-response="{{players}}" on-error="_logOut"></iron-ajax>
+    <iron-ajax id="ajaxGetBanks" last-response="{{banks}}" on-error="_logOut"></iron-ajax>
+
+    <img src="./images/logo.png">
+    <div id="menu">
+      <a href="/"><button>News</button></a>
+      <a href="/players/"><button>Players</button></a>
+      <a href="/banks/"><button>Banks</button></a>
+      <a href="/server/"><button>Server</button></a>
+      <a target="a_blank "href="https://github.com/samuelcardillo/MMORPGMaker-MV/wiki"><button>Help</button></a>
+    </div>
+    <div id="content">
+      <iron-pages
+          selected="[[page]]"
+          attr-for-selected="name"
+          fallback-selection="view404"
+          role="main">
+        <signedin-dashboard auth-session="{{authSession}}" server-data="{{serverData}}" name="dashboard"></signedin-dashboard>
+        <signedin-players auth-session="{{authSession}}" server-data="{{serverData}}" players="{{players}}" name="players"></signedin-players>
+        <signedin-banks auth-session="{{authSession}}" server-data="{{serverData}}" banks="{{banks}}" name="banks"></signedin-banks>
+        <signedin-server auth-session="{{authSession}}" server-data="{{serverData}}" name="server"></signedin-server>
+      </iron-pages>
+    </div>
+    <a target="a_blank" href="https://discord.gg/GVqyAwp"><img  class="minilogo"  src="./images/discord.png"/></a>
+
+
+    <paper-toast duration="10000">
+    </paper-toast>
+
+    <paper-dialog modal>
+      <h2>{{modalTitle}}</h2>
+      <span style="font-size: 12px;">{{modalMessage}}</span>
+      <div class="buttons" style="padding: 0px !important;">
+        <vaadin-button dialog-confirm autofocus>Ok</vaadin-button>
+      </div>
+    </paper-dialog>
+
+  </template>
+
+  <script>
+    class ViewSignedIn extends Polymer.Element {
+      static get is() { return 'view-signedin'; }
+
+      static get properties() {
+        return {
+          page: {
+            type: String,
+            reflectToAttribute: true,
+            observer: '_pageChanged'
+          },
+          serverData: {
+            type: Object,
+            value: {},
+            notify: true
+          },
+          rootPattern: String,
+          routeData: Object,
+          subroute: String
+        };
+      }
+
+      static get observers() {
+        return [
+          '_routePageChanged(routeData.page)',
+        ];
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+
+        this._loadServerDetails();
+        this._loadPlayers();
+        this._loadBanks();
+
+        document.addEventListener("reload-server", function() {
+          this._loadServerDetails();
+        }.bind(this));
+
+        document.addEventListener("reload-players", function() {
+          this._loadPlayers();
+        }.bind(this));
+
+        document.addEventListener("reload-banks", function() {
+          this._loadBanks();
+        }.bind(this));
+
+        this._isAdmin     = (this.authSession.permission >= 99) ? true : false;
+      }
+
+      _loadServerDetails() {
+        var ironAjax = Polymer.dom(this.root).querySelector("#ajaxGetServer");
+
+        ironAjax.method       = "GET";
+        ironAjax.url          = window.projectUrl + "/api/admin/server/";
+        ironAjax.headers      = {"X-Access-Token": this.authSession.token, "X-Socket-ID": window.socket.id};
+
+        ironAjax.generateRequest();
+      }
+
+       _loadPlayers() {
+        var ironAjax = Polymer.dom(this.root).querySelector("#ajaxGetPlayers");
+
+        ironAjax.method       = "GET";
+        ironAjax.url          = window.projectUrl + "/api/admin/players/";
+        ironAjax.headers      = {"X-Access-Token": this.authSession.token, "X-Socket-ID": window.socket.id};
+
+        ironAjax.generateRequest();
+      }
+
+      _loadBanks() {
+        var ironAjax = Polymer.dom(this.root).querySelector("#ajaxGetBanks");
+
+        ironAjax.method       = "GET";
+        ironAjax.url          = window.projectUrl + "/api/admin/banks/";
+        ironAjax.headers      = {"X-Access-Token": this.authSession.token, "X-Socket-ID": window.socket.id};
+
+        ironAjax.generateRequest();
+      }
+
+      _logOut() {
+        this.dispatchEvent(new CustomEvent('sign-out', {bubbles: true, composed: true}));
+      }
+
+      _routePageChanged(page) {
+        // Polymer 2.0 will call with `undefined` on initialization.
+        // Ignore until we are properly called with a string.
+        if (page === undefined) {
+          return;
+        }
+
+        // If no page was found in the route data, page will be an empty string.
+        // Deault to 'view1' in that case.
+        this.page = page || 'dashboard';
+      }
+
+      _pageChanged(page) {
+        // Load page import on demand. Show 404 page if fails
+        var resolvedPageUrl = this.resolveUrl('signedin/signedin-' + page + '.html');
+        Polymer.importHref(
+            resolvedPageUrl,
+            null,
+            this._showPage404.bind(this),
+            true);
+      }
+
+      _showPage404() {
+        this.page = 'view404';
+      }
+    }
+
+    window.customElements.define(ViewSignedIn.is, ViewSignedIn);
+  </script>
+</dom-module>

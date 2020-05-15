@@ -1,0 +1,136 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/app-storage/app-localstorage/app-localstorage-document.html">
+
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+
+
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+
+
+<link rel="import" href="../bower_components/vaadin-valo-theme/color.html">
+<link rel="import" href="../bower_components/vaadin-valo-theme/vaadin-text-field.html">
+<link rel="import" href="../bower_components/vaadin-text-field/vaadin-text-field.html">
+<link rel="import" href="../bower_components/vaadin-text-field/vaadin-password-field.html">
+<link rel="import" href="../bower_components/vaadin-valo-theme/vaadin-button.html">
+<link rel="import" href="../bower_components/vaadin-button/vaadin-button.html">
+<link rel="import" href="../bower_components/vaadin-grid/vaadin-grid.html">
+<link rel="import" href="../bower_components/vaadin-grid/vaadin-grid-sorter.html">
+<link rel="import" href="../bower_components/vaadin-grid/vaadin-grid-selection-column.html">
+<link rel="import" href="../bower_components/vaadin-grid/vaadin-grid-filter.html">
+
+<link rel="import" href="../bower_components/wysiwyg-e/wysiwyg-e.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/underline.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/bold.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/italic.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/clear.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/strike.html">
+<link rel="import" href="../bower_components/wysiwyg-e/tools/color.html">
+
+<link rel="import" href="../bower_components/paper-countries/paper-countries.html">
+
+<link rel="import" href="my-icons.html">
+
+<dom-module id="mmomv-admin">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    
+    <app-localstorage-document key="tradingCrmSession" data="{{authSession}}"></app-localstorage-document>
+    <iron-ajax method="GET" on-response="_platformLoaded" on-error="_signOut"></iron-ajax>
+
+    <iron-pages
+        selected="[[page]]"
+        attr-for-selected="name"
+        fallback-selection="view404"
+        role="main">
+      <view-signin    platform-details="{{platformDetails}}" name="signin"></view-signin>
+      <view-signedin  platform-details="{{platformDetails}}" auth-session="{{authSession}}" name="signedin"></view-signedin>
+    </iron-pages>
+  </template>
+
+  <script>
+    class Mmovmvadmin extends Polymer.Element {
+
+      static get is() { return 'mmomv-admin'; }
+
+      static get properties() {
+        return {
+          page: {
+            type: String
+          },
+          authSession: {
+            type: Object,
+            observer: "_triggerSession"
+          }
+        };
+      }
+
+      connectedCallback() {
+        var page = (this.authSession === null || this.authSession === undefined) ? "signin" : "signedin";
+        this._loadPage(page);
+
+        document.addEventListener("sign-in", function(data) {
+          this._signIn(data);
+        }.bind(this));
+
+        document.addEventListener("sign-out", function() {
+          this._signOut();
+        }.bind(this));
+        
+        super.connectedCallback();
+      }
+
+      _triggerSession(){
+        var page = (this.authSession === null || this.authSession === undefined) ? "signin" : "signedin";
+        this._loadPage(page);
+      }
+
+      _signIn(data) {
+        this.authSession = data.detail;
+        this._loadPage("signedin");
+      }
+
+      _signOut() {
+        this.authSession = null;
+        window.location.href = "/";
+      }
+
+      _loadPage(pageToLoad) {
+        this.page = pageToLoad;
+        var resolvedPageUrl = this.resolveUrl('view-' + this.page + '.html');
+        Polymer.importHref(resolvedPageUrl, null, this._showPage404, true);
+      }
+    }
+
+    window.customElements.define(Mmovmvadmin.is, Mmovmvadmin);
+  </script>
+</dom-module>

@@ -1,0 +1,114 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="view-signin">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        height: 100vh;
+        width: 100%;
+        background-image: url('../images/background.jpg');
+        background-size: 100% 100%;
+        @apply(--layout-vertical);
+        @apply(--layout-center-center);
+      }
+
+      .box {
+        @apply(--layout-vertical);
+        @apply(--layout-center-center);
+
+        margin-top: 24px;
+        width: 250px;
+        padding: 16px;
+      }
+
+      img {
+        width: 250px;
+      }
+    </style>
+
+    <iron-ajax on-error="_handleAjaxError" on-response="_handleAjaxResponse"></iron-ajax>
+
+
+    <div class="box" >
+      <img src="images/logo.png"/>
+      
+      <h2>Server Management</h2>
+
+      <iron-form>
+        <form on-keydown="_signIn">
+          <vaadin-text-field label="Username"  name="username" required value=""></vaadin-text-field><br/>
+          <vaadin-password-field label="Password" name="password" value="" required></vaadin-password-field>
+        </form>
+      </iron-form>
+        
+      <vaadin-button on-click="_signIn">Sign In</vaadin-button>
+    </div>
+
+
+    <!-- Paper dialog in case of failure !-->
+    
+    <paper-dialog modal>
+      <h1 style="margin-bottom: 12px;">Oops...</h1>
+      <span>{{_errorMessage}}</span>
+      <div class="buttons" style="padding: 0px !important; margin-top: 12px;">
+        <vaadin-button dialog-confirm autofocus>I understand</vaadin-button>
+      </div>
+    </paper-dialog>
+  </template>
+
+  <script>
+    class ViewSignin extends Polymer.Element {
+      static get is() { return 'view-signin'; }
+
+      _signIn(evt) {
+        if(evt.keyCode && evt.keyCode != 13) return;
+        var form      = Polymer.dom(this.root).querySelector("iron-form").serializeForm();
+        var ironAjax  = Polymer.dom(this.root).querySelector("iron-ajax");
+
+        if(form.password.length <= 0 || form.username.length <= 0) return this._displayError("Please fill correctly the sign in form in order to proceed.");
+
+        form.password = form.password.toLowerCase();
+
+        ironAjax.method       = "POST";
+        ironAjax.url          = window.projectUrl + "/api/admin/auth/signin";
+        ironAjax.contentType  = "application/json";
+        ironAjax.body         = form;
+
+        ironAjax.generateRequest();
+      }
+
+      _handleAjaxResponse(event) {
+        var _response = event.detail.response;
+        
+        this.dispatchEvent(new CustomEvent('sign-in', {detail: _response, bubbles: true, composed: true}));
+      }
+
+      _displayError(message) {
+        this._errorMessage = message;
+        Polymer.dom(this.root).querySelector("paper-dialog").open();
+      }
+
+      _handleAjaxError(event) {
+        var message = event.detail.request.response.message;
+
+        if(event.detail.request.response.message === "User doesn't exist") message = "No user found. Is your username and password correct?";
+
+        this._displayError(message);
+      }
+    }
+
+    window.customElements.define(ViewSignin.is, ViewSignin);
+  </script>
+</dom-module>
