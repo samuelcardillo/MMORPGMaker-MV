@@ -299,11 +299,13 @@ function MMO_Core_Player() {
   })
 
   MMO_Core.socket.on("player_update_switch", function(data){
+    if($gameSwitches === null) return;
     $gameSwitches["_data"][data["switchId"]] = data["value"]; // Bypass the setValue function.
     Game_Switches.prototype.onChange();
   });
 
   MMO_Core.socket.on("player_update_variable", function(data){
+    if($gameVariables === null) return; 
     $gameVariables["_data"][data["variableId"]] = data["value"]; // Bypass the setValue function.
     Game_Variables.prototype.onChange();
   });
