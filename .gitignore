@@ -3,3 +3,6 @@ node_modules/
 save/
 server/admin_dev/bower_components/
 server/admin_dev/build/
+server/*.log
+server/package-lock.json
+server/tokens.json
