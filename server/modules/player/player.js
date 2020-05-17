@@ -111,22 +111,19 @@ exports.initialize = function() {
 
   exports.getPlayers = async function(spaceName) {
     spaceName = spaceName || false;
-
     let sockets = await MMO_Core["socket"].getConnectedSockets(spaceName);
     let players = {};
-
     for(var i = 0; i < sockets.length; i++) {
       if(!sockets[i].playerData) continue;
 
       players[sockets[i].playerData.username] = sockets[i];
-
-      if(i === sockets.length-1) return players;
     }
+    return players;
   }
 
   exports.getPlayer = async function(username) { 
     let players = await exports.getPlayers();
-
+    
     return players[username] || null;
   }
 

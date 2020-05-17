@@ -5,12 +5,12 @@ exports.initialize = function() {
 
     // Handle in-game user login and registration
     // Expect : data : {username, password (optional)}
-    client.on("login",function(data){
+    client.on("login", (data) => {
 
       if(data["username"] === undefined) return loginError(client, "Missing username");
       if(MMO_Core["database"].SERVER_CONFIG["passwordRequired"] && data["password"] === undefined) return loginError(client, "Missing password");        
 
-      MMO_Core["database"].findUser(data, function(output) {
+      MMO_Core["database"].findUser(data, async (output) => {
         // If user exist
         if(output[0] !== undefined) {
           // If passwordRequired is activated then we check for password
@@ -18,12 +18,16 @@ exports.initialize = function() {
             if(MMO_Core["security"].hashPassword(data["password"].toLowerCase()) !== output[0]["password"].toLowerCase()) return loginError(client, "Wrong password");
           }
 
+          // let existingPlayer = await MMO_Core["socket"].modules["player"].subs["player"].getPlayers();
+          let existingPlayer = await MMO_Core["socket"].modules["player"].subs["player"].getPlayer(data["username"]);
+          if(existingPlayer != null)  return loginError(client, "Player is already connected."); 
+
           return loginSuccess(client, output[0]);
         }
 
         // If user doesn't exist
-        MMO_Core["database"].registerUser(data, function(output){
-          MMO_Core["database"].findUser(data, function(output){
+        MMO_Core["database"].registerUser(data, (output) => {
+          MMO_Core["database"].findUser(data, (output) => {
             loginSuccess(client, output[0]);
           });
         });
@@ -31,7 +35,7 @@ exports.initialize = function() {
     });
 
     // Handle the disconnection of a player
-    client.on("disconnect",function(){
+    client.on("disconnect", () => {
       if(client.lastMap == undefined) return;
   
       // ANTI-CHEAT : Deleting some entries before saving the character.

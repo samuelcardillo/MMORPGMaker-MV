@@ -23,8 +23,13 @@ exports.initialize = function() {
       client.playerData.mapId = parseInt(playerData.mapId);
   
       // Update global switches
-      for(var key in MMO_Core["database"].SERVER_CONFIG["globalSwitches"]) {
-        client.emit("player_update_switch", {switchId: key, value: MMO_Core["database"].SERVER_CONFIG["globalSwitches"][key]});
+      for(var switchKey in MMO_Core["database"].SERVER_CONFIG["globalSwitches"]) {
+        client.emit("player_update_switch", {switchId: switchKey, value: MMO_Core["database"].SERVER_CONFIG["globalSwitches"][switchKey]});
+      }
+
+      // Update global variables
+      for(var varKey in MMO_Core["database"].SERVER_CONFIG["globalVariables"]) {
+        client.emit("player_update_variable", {variableId: varKey, value: MMO_Core["database"].SERVER_CONFIG["globalVariables"][varKey]});
       }
   
       client.join("map-" + playerData["mapId"]);
@@ -55,6 +60,7 @@ exports.initialize = function() {
   
       data["playerData"].username = client.playerData.username; // Temporary way to pass the username
       data["playerData"].skin     = client.playerData.skin;
+      data["playerData"].isBusy  = client.playerData.isBusy;
   
       client.broadcast.to(data["id"]).emit("map_joined",{id: client.id, playerData: data["playerData"]});
     })
