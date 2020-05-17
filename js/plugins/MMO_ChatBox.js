@@ -233,7 +233,7 @@ function ChatBox() {
   // ---------------------------------------
 
   // Handle new messages
-  MMO_Core.socket.on("new_message",function(messageData){
+  MMO_Core.socket.on("new_message",function(messageData) {
     let span = document.createElement("span");
         span.style.display     = "block";
         span.style.padding     = '2px';
@@ -246,9 +246,11 @@ function ChatBox() {
 
     span.appendChild(message); 
     document.querySelector("#chatbox_box").appendChild(span);
+    document.querySelector("#chatbox_box").scrollTop = document.querySelector("#chatbox_box").scrollHeight;
 
-    if(!ChatBox.isFocused) document.querySelector("#chatbox_box").scrollTop = document.querySelector("#chatbox_box").scrollHeight;
-	document.querySelector("#chatbox_input").blur();
+    if(!ChatBox.isFocused) {
+      document.querySelector("#chatbox_input").blur();
+    }
   })
 
   document.addEventListener('keydown', function(e) {
