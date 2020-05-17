@@ -84,9 +84,9 @@ function LoginForm() {
     '<div>'+
       '<div id="loginErrBox"></div>'+
       '<div>'+
-        '<input type="text" id="inputUsername" placeholder="Username">';
+        '<input type="text" id="inputUsername" placeholder="Username" class="login-input">';
 
-    if(LoginForm.Parameters["allowAccountCreation"]) html = html + '<br><input type="password" id="inputPassword" placeholder="Password">';
+    if(LoginForm.Parameters["allowAccountCreation"]) html = html + '<br><input type="password" id="inputPassword" placeholder="Password" class="login-input">';
 
     html = html + '</div><br>'+
         '<button id="btnConnect">Connect</button>'+
