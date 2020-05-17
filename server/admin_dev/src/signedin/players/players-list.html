@@ -1,0 +1,175 @@
+<link rel="import" href="../../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../../bower_components/paper-dropdown-menu-multi/paper-dropdown-menu-multi.html">
+<link rel="import" href="../../shared-styles.html">
+
+<dom-module id="players-list">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        margin: 8px;
+      }
+
+      #toolbar {
+        @apply(--layout-horizontal);
+        @apply(--layout-justified);
+      }
+    </style>
+
+    <iron-ajax id="ajaxCreateCustomer" on-response="_customerCreated" on-error="_customerNotCreated"></iron-ajax>
+    <iron-ajax id="ajaxChangeplayerstatus" on-response="_statusEdited"></iron-ajax>
+    
+    <div id="toolbar">
+      <div></div>
+      <vaadin-button on-tap="_createCustomer">New user</vaadin-button>
+    </div>
+    
+    <vaadin-grid style="width: 100%; height: 400px;" name="ordersbook" aria-label="Orders book" items="[[players]]">
+
+      <vaadin-grid-column resizable>
+        <template class="header">
+          <vaadin-grid-filter aria-label="Username" path="username" value="[[_filterusername]]">
+            <input placeholder="username" value="{{_filterusername::input}}" focus-target>
+          </vaadin-grid-filter>
+        </template>
+        <template>{{item.username}}</template>
+      </vaadin-grid-column>
+
+      <vaadin-grid-column resizable>
+        <template class="header">
+          <vaadin-grid-filter aria-label="Permission" path="permission" value="[[_filterpermission]]">
+            <input placeholder="permission" value="{{_filterpermission::input}}" focus-target>
+          </vaadin-grid-filter>
+        </template>
+        <template>{{item.permission}}</template>
+      </vaadin-grid-column>
+
+      <vaadin-grid-column resizable>
+        <template class="header">
+            <vaadin-grid-filter aria-label="Level" path="level" value="[[_filterlevel]]">
+              <input placeholder="level" value="{{_filterlevel::input}}" focus-target>
+            </vaadin-grid-filter>
+        </template>
+        <template>{{item.stats.level}}</template>
+      </vaadin-grid-column>
+
+      <vaadin-grid-column resizable flex-grow="0">
+        <template class="header">
+          <span></span>
+        </template>
+        <template>
+          <a href="/players/view/{{item.id}}"><vaadin-button>View</vaadin-button></a>
+        </template>
+      </vaadin-grid-column>
+    </vaadin-grid>
+
+    <paper-dialog id="createCustomer">
+      <h2>New player</h2>
+      <iron-form id="formCreateCustomer">
+        <form>
+          <vaadin-text-field required value="" label="Username" name="username"></vaadin-text-field>
+          <vaadin-password-field required value="" label="Password" name="password"></vaadin-password-field>
+        </form>
+      </iron-form>
+      <div class="buttons" style="padding: 0px !important;">
+        <vaadin-button dialog-dismiss autofocus>Cancel</vaadin-button>
+        <vaadin-button dialog-confirm autofocus on-tap="_createCustomer">Ok</vaadin-button>
+      </div>
+    </paper-dialog>
+  </template>
+
+  <script>
+    /**
+     * `players-list` Description
+     *
+     * @summary ShortDescription.
+     * @customElement
+     * @polymer
+     * @extends {Polymer.Element}
+     */
+    class playersList extends Polymer.Element {
+      /**
+       * String providing the tag name to register the element under.
+       */
+      static get is() {
+        return 'players-list';
+      }
+
+      /**
+        * Called every time the element is inserted into the DOM. Useful for 
+        * running setup code, such as fetching resources or rendering.
+        * Generally, you should try to delay work until this time.
+        */
+      connectedCallback() {
+        super.connectedCallback();
+      
+        this._canChangeSupervisor = (this.authSession.permission >= 99) ? true : false;
+      
+      }
+
+      _createCustomer() {
+        var paperDialog = Polymer.dom(this.root).querySelector("paper-dialog#createCustomer");
+        var form = Polymer.dom(this.root).querySelector("#formCreateCustomer").serializeForm();
+        var ironAjax = Polymer.dom(this.root).querySelector("#ajaxCreateCustomer");
+
+        if(!paperDialog.opened) {
+          paperDialog.toggle();
+          return; 
+        }
+
+        if((form.username.length || form.password.length) <= 0)
+          return this.dispatchEvent(new CustomEvent('show-modal', {
+            bubbles: true,
+            composed: true,
+            detail: {
+              "title": "Error occured",
+              "message": "Please fill all the form correctly"
+            }
+          }));
+
+        Polymer.dom(this.root).querySelector("#formCreateCustomer").children[0].reset();
+
+        ironAjax.method       = "POST";
+        ironAjax.headers      = {"X-Access-Token": this.authSession.token, "X-Socket-ID": window.socket.id};
+        ironAjax.url          = window.projectUrl + "/api/auth/signup/"
+        ironAjax.body         = form;
+        ironAjax.contentType  = "application/json";
+
+        ironAjax.generateRequest();
+      }
+
+      _customerCreated() {
+        this.dispatchEvent(new CustomEvent('reload-players', {
+          bubbles: true,
+          composed: true,
+        }));
+
+        return this.dispatchEvent(new CustomEvent('show-modal', {
+            bubbles: true,
+            composed: true,
+            detail: {
+              "title": "New player created",
+              "message": "The new player has been successfully created."
+            }
+          }));
+      }
+
+      _customerNotCreated(evt) {
+        var message = event.detail.request.response.message;
+
+        if(event.detail.request.response.message === "email used") message = "The username is already being used.";
+
+        return this.dispatchEvent(new CustomEvent('show-modal', {
+            bubbles: true,
+            composed: true,
+            detail: {
+              "title": "Error occured",
+              "message": message
+            }
+          }));
+      }
+    }
+
+    window.customElements.define(playersList.is, playersList);
+  </script>
+</dom-module>

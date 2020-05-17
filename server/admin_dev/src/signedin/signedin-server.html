@@ -1,0 +1,529 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/vaadin-charts/vaadin-charts.html">
+<link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../shared-styles.html">
+
+</template>
+<dom-module id="signedin-server">
+  <template>
+    <style include="shared-styles">
+      :host {
+        @apply(--layout-vertical);
+        @apply(--layout-center);
+      }
+
+      div.row .box.dashboard {
+        @apply(--layout-vertical);
+        @apply(--layout-center);
+        width: 100%;
+        height: 150px;
+      }
+    </style>
+    <app-location route="{{route}}"></app-location>
+    <app-route
+        route="{{route}}"
+        pattern="/server"
+        data="{{routeData}}"
+        tail="{{subroute}}"></app-route>
+
+    <iron-ajax id="ajaxUpdateServer" on-response="_serverChangesMade"></iron-ajax>    
+
+     <!-- First row !-->
+     <div class="row">
+        <!-- Chart + today & monthly stats !-->
+        <div class="box dashboard">
+          <center><h2>New Players Details</h2></center>
+          <iron-form id="formNewPlayerDetails">
+            <form>
+              <vaadin-text-field required value="{{serverData.serverConfig.newPlayerDetails.mapId}}" label="Map ID" name="mapid"></vaadin-text-field>
+              <vaadin-text-field required value="{{serverData.serverConfig.newPlayerDetails.x}}" label="Spawn position X" name="x"></vaadin-text-field>
+              <vaadin-text-field required value="{{serverData.serverConfig.newPlayerDetails.y}}" label="Spawn position Y" name="y"></vaadin-text-field>
+              <vaadin-button on-tap="_saveChanges">Save</vaadin-button>            
+            </form>
+          </iron-form>
+        </div>
+      </div>
+      
+      <!-- Second row !-->
+      <div class="row">
+        <!-- Leaderboard !-->
+        <div class="box leaderboard">
+          <center><h2>Switches</h2></center>
+          <vaadin-button on-tap="_addSwitch">Add switch</vaadin-button>        
+          <!-- Party switch !-->
+          <vaadin-grid style="width: 100%;" name="ordersbook" aria-label="Orders book" items="[[_switches]]" active-item="{{activeItem}}">
+          
+              <vaadin-grid-column resizable>
+                <template class="header">
+                  <vaadin-grid-filter aria-label="id" path="id" value="[[_filterid]]">
+                    <input placeholder="id" value="{{_filterid::input}}" focus-target>
+                  </vaadin-grid-filter>
+                </template>
+                <template>{{item.id}} ({{item.name}})</template>
+              </vaadin-grid-column>
+        
+              <vaadin-grid-column resizable>
+                  <template class="header">
+                    <vaadin-grid-filter aria-label="type" path="type" value="[[_filtertype]]">
+                    <input placeholder="type" value="{{_filtertype::input}}" focus-target>
+                  </vaadin-grid-filter>
+                </template>
+                <template>{{item.type}}</template>
+              </vaadin-grid-column>
+        
+              <vaadin-grid-column resizable>
+                <template class="header">
+                  <vaadin-grid-filter aria-label="status" path="status" value="[[_filterStatus]]">
+                    <paper-dropdown-menu-multi label="Status" selections='["true","false"]' maxDisplay=3 value="{{_filterStatus}}"></paper-dropdown-menu-multi>
+                  </vaadin-grid-filter>
+                </template>
+                <template>
+                  <select id="value" name="value" on-change="_changeSwitchValue" class="form-control">
+                    <option slot="filter" value$="{{item.value}}">{{item.value}}</option>
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                  </select>
+                </template>
+              </vaadin-grid-column>
+        
+              <vaadin-grid-column resizable flex-grow="0">
+                <template class="header">
+                  <span></span>
+                </template>
+                <template>
+                  <vaadin-button on-tap="_deleteSwitch">Delete</vaadin-button>
+                </template>
+              </vaadin-grid-column>
+            </vaadin-grid>
+        </div>
+  
+        <!-- New users !-->
+        <div class="box registrations">
+          <center><h2>Global Variables</h2></center>
+          <vaadin-button on-tap="_addVariable">Add variable</vaadin-button>                  
+          <vaadin-grid style="width: 100%;" name="ordersbook" aria-label="Orders book" items="[[_variables]]">
+            <vaadin-grid-column resizable>
+              <template class="header">
+                <span>ID</span>
+              </template>
+              <template>{{item.id}} ({{item.name}})</template>
+            </vaadin-grid-column>
+
+            <vaadin-grid-column resizable>
+              <template class="header">
+                <span>Value</span>
+              </template>
+              <template>{{item.value}}</template>
+            </vaadin-grid-column>
+  
+  
+            <vaadin-grid-column resizable flex-grow="0">
+              <template class="header">
+                <span></span>
+              </template>
+              <template>
+                <vaadin-button on-tap="_deleteVariable">Delete</vaadin-button>
+              </template>
+            </vaadin-grid-column>
+          </vaadin-grid>
+        </div>
+
+        <div class="box registrations">
+          <center><h2>Offline Maps</h2></center>
+          <vaadin-button on-tap="_addOfflineMap">Add offline map</vaadin-button>                  
+          <vaadin-grid style="width: 100%;" name="ordersbook" aria-label="Orders book" items="[[_maps]]">
+            <vaadin-grid-column resizable>
+              <template class="header">
+                <span>Map</span>
+              </template>
+              <template>{{item.realId}} ({{item.name}})</template>
+            </vaadin-grid-column>
+  
+            <vaadin-grid-column resizable flex-grow="0">
+              <template class="header">
+                <span></span>
+              </template>
+              <template>
+                <vaadin-button on-tap="_deleteMap">Delete</vaadin-button>
+              </template>
+            </vaadin-grid-column>
+          </vaadin-grid>
+        </div>
+      </div>
+
+      <!----------------------------- DIALOGS !-->
+
+      <paper-dialog id="addSwitch">
+        <h2>Add switch</h2>
+        <iron-form id="formAddSwitch">
+          <form>
+            <vaadin-text-field required value="" label="Switch ID" name="switchid"></vaadin-text-field>
+            <span>Type: </span>
+            <select name="type">
+              <option value="party">Party switch</option>
+              <option value="global">Global switch</option>
+            </select><br/>
+          </form>
+        </iron-form>
+        <div class="buttons" style="padding: 0px !important;">
+          <vaadin-button dialog-dismiss>Cancel</vaadin-button>
+          <vaadin-button dialog-confirm on-tap="_addSwitch">Ok</vaadin-button>
+        </div>
+      </paper-dialog>
+
+      <paper-dialog id="addVariable">
+        <h2>Add global variable</h2>
+        <iron-form id="formAddVariable">
+          <form>
+            <vaadin-text-field required value="" label="Variable ID" name="variableid"></vaadin-text-field>
+            <vaadin-text-field required value="" label="Default value" name="variablevalue"></vaadin-text-field>
+          </form>
+        </iron-form>
+        <div class="buttons" style="padding: 0px !important;">
+          <vaadin-button dialog-dismiss>Cancel</vaadin-button>
+          <vaadin-button dialog-confirm on-tap="_addVariable">Ok</vaadin-button>
+        </div>
+      </paper-dialog>
+
+      <paper-dialog id="addOfflineMap">
+        <h2>Add offline map</h2>
+        <iron-form id="formAddOfflinemap">
+          <form>
+            <vaadin-text-field required value="" label="Map ID" name="mapid"></vaadin-text-field>
+          </form>
+        </iron-form>
+        <div class="buttons" style="padding: 0px !important;">
+          <vaadin-button dialog-dismiss>Cancel</vaadin-button>
+          <vaadin-button dialog-confirm on-tap="_addOfflineMap">Ok</vaadin-button>
+        </div>
+      </paper-dialog>
+  </template>
+
+  <script>
+    class SignedInServer extends Polymer.Element {
+      static get is() { return 'signedin-server'; }
+
+      static get properties() {
+        return {
+          _leaderboard: {value: 0},
+        }
+      }
+
+      static get observers() {
+        return [
+          '_loadSwitches(serverData)',
+          '_loadOfflineMaps(serverData)',
+          '_loadVariables(serverData)',
+        ];
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        
+        this._loadSwitches();
+        this._loadOfflineMaps();
+        this._loadVariables();
+      }
+
+      // --------------------------------------------------------------------------------------
+      // Global Variables
+
+      _saveChanges() {
+        let ironAjax = Polymer.dom(this.root).querySelector("#ajaxUpdateServer");
+        let form = Polymer.dom(this.root).querySelector("#formNewPlayerDetails").serializeForm();
+        
+        if((form.mapid.length || form.x.length || form.y.length) <= 0)
+          return this.dispatchEvent(new CustomEvent('show-modal', {
+            bubbles: true,
+            composed: true,
+            detail: {
+              "title": "Error occured",
+              "message": "Please fill all the form correctly"
+            }
+          }));
+
+        this.serverData.serverConfig.newPlayerDetails.mapId = parseInt(form.mapid);
+        this.serverData.serverConfig.newPlayerDetails.x = parseInt(form.x);
+        this.serverData.serverConfig.newPlayerDetails.y = parseInt(form.y);
+
+        ironAjax.method       = "PATCH";
+        ironAjax.headers      = {"X-Access-Token": this.authSession.token, "X-Socket-ID": window.socket.id};
+        ironAjax.url          = window.projectUrl + `/api/admin/server/newPlayerDetails`;
+        ironAjax.body         = this.serverData.serverConfig.newPlayerDetails;
+        ironAjax.contentType  = "application/json";
+
+        ironAjax.generateRequest();
+      }
+
+      // --------------------------------------------------------------------------------------
+      // Global Variables
+
+      _loadVariables() {
+        let gameDataLoaded = (Object.keys(this.serverData.gameData).length > 0) ? true : false;
+        let globalVariables = Object.keys(this.serverData.serverConfig.globalVariables).length;
+
+        this._variables = [];
+
+        for(var i = 0; i < globalVariables; i++) {
+          let payload = { 
+            id: Object.keys(this.serverData.serverConfig.globalVariables)[i],
+            value: this.serverData.serverConfig.globalVariables[Object.keys(this.serverData.serverConfig.globalVariables)[i]]
+          }
+
+          if(gameDataLoaded && this.serverData.gameData.System.variables[payload.id]) payload.name = this.serverData.gameData.System.variables[payload.id];          
+
+          this.push("_variables", payload);
+        }
+      }
+
+      _addVariable() {
+        let paperDialog = Polymer.dom(this.root).querySelector("paper-dialog#addVariable");
+        let form = Polymer.dom(this.root).querySelector("#formAddVariable").serializeForm();
+        let ironAjax = Polymer.dom(this.root).querySelector("#ajaxUpdateServer");
+
+        if(!paperDialog.opened) return paperDialog.toggle();
+
+        if((form.variableid.length || form.variablevalue.length) <= 0)
+          return this.dispatchEvent(new CustomEvent('show-modal', {
+            bubbles: true,
+            composed: true,
+            detail: {
+              "title": "Error occured",
+              "message": "Please fill all the form correctly"
+            }
+          }));
+
+        this.serverData.serverConfig.globalVariables[form.variableid] = parseInt(form.variablevalue);
+        
+        Polymer.dom(this.root).querySelector("#formAddVariable").children[0].reset();
+
+        ironAjax.method       = "PATCH";
+        ironAjax.headers      = {"X-Access-Token": this.authSession.token, "X-Socket-ID": window.socket.id};
+        ironAjax.url          = window.projectUrl + `/api/admin/server/globalVariables`;
+        ironAjax.body         = this.serverData.serverConfig.globalVariables;
+        ironAjax.contentType  = "application/json";
+
+        ironAjax.generateRequest();
+      }
+
+      _deleteVariable(e) {
+        let ironAjax = Polymer.dom(this.root).querySelector("#ajaxUpdateServer");
+        let selectedVariable = e.model.item;
+
+        delete this.serverData.serverConfig.globalVariables[selectedVariable.id];
+
+        ironAjax.method       = "PATCH";
+        ironAjax.headers      = {"X-Access-Token": this.authSession.token, "X-Socket-ID": window.socket.id};
+        ironAjax.url          = window.projectUrl + `/api/admin/server/globalVariables`;
+        ironAjax.body         = this.serverData.serverConfig.globalVariables;
+        ironAjax.contentType  = "application/json";
+
+        ironAjax.generateRequest();
+      }
+
+      // --------------------------------------------------------------------------------------
+      // Maps
+
+      _loadOfflineMaps() {
+        let gameDataLoaded = (Object.keys(this.serverData.gameData).length > 0) ? true : false;
+        let offlineMaps = Object.keys(this.serverData.serverConfig.offlineMaps).length;
+
+        this._maps = [];
+
+        for(var i = 0; i < offlineMaps; i++) {
+          let realId = parseInt(Object.keys(this.serverData.serverConfig.offlineMaps)[i].split("-")[1]);
+          let payload = { 
+            id: Object.keys(this.serverData.serverConfig.offlineMaps)[i],
+            realId: realId,
+            value: this.serverData.serverConfig.offlineMaps[Object.keys(this.serverData.serverConfig.offlineMaps)[i]]
+          }
+
+          if(gameDataLoaded && this.serverData.gameData.MapInfos[realId]) payload.name = this.serverData.gameData.MapInfos[realId].name;          
+
+          this.push("_maps", payload);
+        }
+      }
+
+      _addOfflineMap() {
+        let paperDialog = Polymer.dom(this.root).querySelector("paper-dialog#addOfflineMap");
+        let form = Polymer.dom(this.root).querySelector("#formAddOfflinemap").serializeForm();
+        let ironAjax = Polymer.dom(this.root).querySelector("#ajaxUpdateServer");
+
+        if(!paperDialog.opened) return paperDialog.toggle();
+
+        if((form.mapid.length) <= 0)
+          return this.dispatchEvent(new CustomEvent('show-modal', {
+            bubbles: true,
+            composed: true,
+            detail: {
+              "title": "Error occured",
+              "message": "Please fill all the form correctly"
+            }
+          }));
+
+        this.serverData.serverConfig.offlineMaps["map-" + form.mapid] = true;
+        
+        Polymer.dom(this.root).querySelector("#formAddOfflinemap").children[0].reset();
+
+        ironAjax.method       = "PATCH";
+        ironAjax.headers      = {"X-Access-Token": this.authSession.token, "X-Socket-ID": window.socket.id};
+        ironAjax.url          = window.projectUrl + `/api/admin/server/offlineMaps`;
+        ironAjax.body         = this.serverData.serverConfig.offlineMaps;
+        ironAjax.contentType  = "application/json";
+
+        ironAjax.generateRequest();
+      }
+
+      _deleteMap(e) {
+        let ironAjax = Polymer.dom(this.root).querySelector("#ajaxUpdateServer");
+        let selectedMap = e.model.item;
+
+        delete this.serverData.serverConfig.offlineMaps[selectedMap.id];
+
+        ironAjax.method       = "PATCH";
+        ironAjax.headers      = {"X-Access-Token": this.authSession.token, "X-Socket-ID": window.socket.id};
+        ironAjax.url          = window.projectUrl + `/api/admin/server/offlineMaps`;
+        ironAjax.body         = this.serverData.serverConfig.offlineMaps;
+        ironAjax.contentType  = "application/json";
+
+        ironAjax.generateRequest();
+      }
+
+      // --------------------------------------------------------------------------------------
+      // Switches
+
+      _loadSwitches() {
+        let gameDataLoaded = (Object.keys(this.serverData.gameData).length > 0) ? true : false;
+        let globalSwitches = Object.keys(this.serverData.serverConfig.globalSwitches).length;
+        let partySwitches = Object.keys(this.serverData.serverConfig.partySwitches).length;
+
+        this._switches = [];
+
+        for(var i = 0; i < globalSwitches; i++) {
+          let payload = { 
+            id: Object.keys(this.serverData.serverConfig.globalSwitches)[i],
+            type: "global",
+            value: this.serverData.serverConfig.globalSwitches[Object.keys(this.serverData.serverConfig.globalSwitches)[i]]
+          }
+
+          if(gameDataLoaded && this.serverData.gameData.System.switches[payload.id]) payload.name = this.serverData.gameData.System.switches[payload.id];          
+
+          this.push("_switches", payload);
+        }
+
+        for(var i = 0; i < partySwitches; i++) {
+          let payload = { 
+            id: Object.keys(this.serverData.serverConfig.partySwitches)[i],
+            type: "party",
+            value: this.serverData.serverConfig.partySwitches[Object.keys(this.serverData.serverConfig.partySwitches)[i]]
+          }
+
+          if(gameDataLoaded && this.serverData.gameData.System.switches[payload.id]) payload.name = this.serverData.gameData.System.switches[payload.id];
+
+          this.push("_switches", payload);
+        }
+      }
+
+      _changeSwitchValue(e) {
+        let ironAjax = Polymer.dom(this.root).querySelector("#ajaxUpdateServer");
+        let selectedSwitch = e.model.item;
+        let newValue = (e.path[0].value === "false") ? false : true;
+
+        if(selectedSwitch.type === "global") this.serverData.serverConfig.globalSwitches[selectedSwitch.id] = newValue;
+        else this.serverData.serverConfig.partySwitches[selectedSwitch.id] = newValue;
+
+        ironAjax.method       = "PATCH";
+        ironAjax.headers      = {"X-Access-Token": this.authSession.token, "X-Socket-ID": window.socket.id};
+        ironAjax.url          = window.projectUrl + `/api/admin/server/${selectedSwitch.type}Switches`;
+        ironAjax.body         = (selectedSwitch.type === "global") ? this.serverData.serverConfig.globalSwitches :  this.serverData.serverConfig.partySwitches;
+        ironAjax.contentType  = "application/json";
+
+        ironAjax.generateRequest();
+      }
+
+      _addSwitch() {
+        let paperDialog = Polymer.dom(this.root).querySelector("paper-dialog#addSwitch");
+        let form = Polymer.dom(this.root).querySelector("#formAddSwitch").serializeForm();
+        let ironAjax = Polymer.dom(this.root).querySelector("#ajaxUpdateServer");
+
+        if(!paperDialog.opened) return paperDialog.toggle();
+
+        if((form.switchid.length) <= 0)
+          return this.dispatchEvent(new CustomEvent('show-modal', {
+            bubbles: true,
+            composed: true,
+            detail: {
+              "title": "Error occured",
+              "message": "Please fill all the form correctly"
+            }
+          }));
+
+        if(form.type === "global") this.serverData.serverConfig.globalSwitches[form.switchid] = false;
+        else this.serverData.serverConfig.partySwitches[form.switchid] = false;
+        
+        Polymer.dom(this.root).querySelector("#formAddSwitch").children[0].reset();
+
+        ironAjax.method       = "PATCH";
+        ironAjax.headers      = {"X-Access-Token": this.authSession.token, "X-Socket-ID": window.socket.id};
+        ironAjax.url          = window.projectUrl + `/api/admin/server/${form.type}Switches`;
+        ironAjax.body         = (form.type === "global") ? this.serverData.serverConfig.globalSwitches :  this.serverData.serverConfig.partySwitches;
+        ironAjax.contentType  = "application/json";
+
+        ironAjax.generateRequest();
+      }
+
+      _deleteSwitch(e) {
+        let ironAjax = Polymer.dom(this.root).querySelector("#ajaxUpdateServer");        
+        let selectedSwitch = e.model.item;
+
+        if(selectedSwitch.type === "global") 
+          delete this.serverData.serverConfig.globalSwitches[selectedSwitch.id];
+        else 
+          delete this.serverData.serverConfig.partySwitches[selectedSwitch.id];
+
+        ironAjax.method       = "PATCH";
+        ironAjax.headers      = {"X-Access-Token": this.authSession.token, "X-Socket-ID": window.socket.id};
+        ironAjax.url          = window.projectUrl + `/api/admin/server/${selectedSwitch.type}Switches`;
+        ironAjax.body         = (selectedSwitch.type === "global") ? this.serverData.serverConfig.globalSwitches :  this.serverData.serverConfig.partySwitches;
+        ironAjax.contentType  = "application/json";
+
+        ironAjax.generateRequest();
+      }
+
+
+      // -------------------------------- GLOBAL
+
+      _serverChangesMade() {
+        this.dispatchEvent(new CustomEvent('reload-server', {
+          bubbles: true,
+          composed: true
+        }));
+        this.dispatchEvent(new CustomEvent('show-modal', {
+            bubbles: true,
+            composed: true,
+            detail: {
+              "title": `Action successful`,
+              "message": `The action has been successfully registered by the server.`
+            }
+          }));
+      }
+
+
+      _logOut() {
+        this.dispatchEvent(new CustomEvent('sign-out', {bubbles: true, composed: true}));
+      }
+    }
+
+    window.customElements.define(SignedInServer.is, SignedInServer);
+  </script>
+</dom-module>

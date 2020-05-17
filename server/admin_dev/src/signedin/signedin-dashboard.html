@@ -1,0 +1,85 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/vaadin-charts/vaadin-charts.html">
+<link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../shared-styles.html">
+
+</template>
+<dom-module id="signedin-dashboard">
+  <template>
+    <style include="shared-styles">
+      :host {
+        @apply(--layout-vertical);
+        @apply(--layout-center);
+      }
+
+      .warning { 
+        background-color:	rgb(255,255,224);
+        color: black;
+        padding: 8px;
+        border-radius: 8px;
+        border: 1px solid rgb(255,255,224);
+      }
+      
+      .news {
+        overflow-y: scroll;
+        border: none;
+        height: 100%;
+      }
+    </style>
+    <app-location route="{{route}}"></app-location>
+    <app-route
+        route="{{route}}"
+        pattern="/dashboard"
+        data="{{routeData}}"
+        tail="{{subroute}}"></app-route>
+
+    <div class="row">
+      <!-- Leaderboard !-->
+      <div class="box dashboard">
+        <template is="dom-if" if="{{!_gameLoaded}}">
+          <span class="warning">WARNING : You have not defined a path for gameData.js. Therefore some informations might be missing from the interface.</span>
+        </template>
+        <center><h2>MMOMV Official News</h2></center>
+        <iframe class="news" src="https://mmorpg.samuelcardillo.com/news.txt"></iframe>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    class SignedInDashboard extends Polymer.Element {
+      static get is() { return 'signedin-dashboard'; }
+
+      static get properties() {
+        return {
+          _gameLoaded: {
+            type: Boolean,
+            value: false
+          }
+        }
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+
+        this.set("_gameLoaded", (Object.keys(this.serverData.gameData).length > 0) ? true : false);
+      }
+
+
+      _logOut() {
+        this.dispatchEvent(new CustomEvent('sign-out', {bubbles: true, composed: true}));
+      }
+    }
+
+    window.customElements.define(SignedInDashboard.is, SignedInDashboard);
+  </script>
+</dom-module>

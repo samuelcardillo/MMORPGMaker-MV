@@ -27,10 +27,6 @@ function MMO_Overhead() {
   this.initialize.apply(this, arguments);
 }
 
-document.addEventListener("refresh_player_on_map", function(){
-  Game_Interpreter.prototype.refreshEventMiniLabel();
-})
-
 Game_Interpreter.prototype.refreshEventMiniLabel = function() {
     if ($gameParty.inBattle()) return;
     var scene = SceneManager._scene;
@@ -41,6 +37,10 @@ Game_Interpreter.prototype.refreshEventMiniLabel = function() {
 
 MMO_Overhead.Windows = function() {
     this.initialize.apply(this, arguments);
+}
+
+MMO_Overhead.forceRefresh = function() {
+  Game_Interpreter.prototype.refreshEventMiniLabel();
 }
 
 MMO_Overhead.Windows.prototype = Object.create(Window_Base.prototype);

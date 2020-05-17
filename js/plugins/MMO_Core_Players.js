@@ -24,7 +24,9 @@ function MMO_Core_Players() {
     MMO_Core_Players.Players[data.id]._priorityType = 0;
     MMO_Core_Players.Players[data.id]._stepAnime = false;
     MMO_Core_Players.Players[data.id]._moveSpeed = 4;
+    MMO_Core_Players.Players[data.id]._isBusy = data.playerData["isBusy"] || false;
 
+    // If player is in a party
     if(MMO_Core_Party.Party.length > 0 && !MMO_Core_Player.Player.isInCombat) {
       for(var i = 0; i < MMO_Core_Party.Party.length; i++) {
         if(MMO_Core_Party.Party[i].username != data["playerData"]["username"]) continue;
@@ -56,7 +58,8 @@ function MMO_Core_Players() {
       MMO_Core_Players.Players[payload.playerId]._isBusy = payload.playerData["isBusy"] || false;    
     } 
 
-    document.dispatchEvent(new Event('refresh_players_on_map', {'detail': payload})); // Dispatch DOM event for external plugins
+    // If MMO_Overhead exists, we force refresh
+    if(MMO_Overhead) MMO_Overhead.forceRefresh();
   });
 
   MMO_Core.socket.on('player_moving', function(data){

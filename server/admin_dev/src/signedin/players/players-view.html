@@ -1,0 +1,545 @@
+<link rel="import" href="../../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../../shared-styles.html">
+<link rel="import" href="../../elements/position-card.html">
+
+<dom-module id="players-view">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        width: 100%;
+        @apply(--layout-vertica);
+        @apply(--layout-center-center);
+      }
+
+      #topbar {
+        @apply(--layout-horizontal);
+        @apply(--layout-justified);
+        margin-top: 8px;
+        margin-bottom: 8px;
+        padding: 8px;
+      }
+
+      .box {
+        @apply(--layout-horizontal);
+        @apply(--layout-justified);
+      }
+
+      .box .left {
+        @apply(--layout-vertical);
+        width: 100%;
+      }
+
+      .box .right {
+        @apply(--layout-vertical);
+        padding: 16px;
+        width: 40%;
+      }
+
+      span.title {
+        font-size: 18px;
+        font-weight: 800;
+        padding: 18px;
+      }
+
+      .notes {
+        padding: 8px;
+      }
+    </style>
+
+    <app-location route="{{route}}"></app-location>
+    <app-route route="{{route}}" pattern="/players/view/:id" data="{{routeData}}" tail="{{subroute}}"></app-route>
+
+    <iron-ajax id="ajaxGetCustomerDetails" on-response="_loadPlayerData"></iron-ajax>
+    <iron-ajax id="ajaxEditCustomer" on-response="_customerEdited"></iron-ajax>
+    <iron-ajax id="ajaxDeleteCustomer" on-response="_customerDeleted"></iron-ajax>
+
+    <div id="topbar">
+      <div>
+        <span>{{_playerData.username}}</span>
+        <paper-icon-button on-tap="_editCustomer" icon="crm:edit"></paper-icon-button>
+      </div>
+      <div>
+        <vaadin-button on-tap="_deleteCustomer">Delete</vaadin-button>
+      </div>
+    </div>
+
+    <div class="box">
+      <div class="left">
+        <paper-tabs selected="{{selectedTab}}">
+          <paper-tab>Inventory</paper-tab>
+          <paper-tab>Skills</paper-tab>          
+          <paper-tab>Switches</paper-tab>          
+          <paper-tab>Variables</paper-tab>
+        </paper-tabs>
+        <iron-pages selected="[[selectedTab]]">
+          <!-- Inventory !-->
+          <section>
+            <vaadin-grid style="width: 100%;" name="ordersbook" aria-label="Orders book" items="[[_playerData.itemsData]]">
+              <vaadin-grid-column resizable>
+                <template class="header">
+                  <span>Item ID</span>
+                </template>
+                <template>{{item.id}}</template>
+              </vaadin-grid-column>
+
+              <vaadin-grid-column resizable>
+                <template class="header">
+                  <span>Item name</span>
+                </template>
+                <template>{{item.name}}</template>
+              </vaadin-grid-column>
+              
+              <vaadin-grid-column resizable>
+                <template class="header">
+                  <span>Amount</span>
+                </template>
+                <template>{{item.amount}}</template>
+              </vaadin-grid-column>
+            </vaadin-grid>
+          </section>
+
+          <!-- Skills !-->
+          <section>
+            <vaadin-grid style="width: 100%;" name="ordersbook" aria-label="Orders book" items="[[_playerData.skillsData]]">
+              <vaadin-grid-column resizable>
+                <template class="header">
+                  <span>Skill ID</span>
+                </template>
+                <template>{{item.id}}</template>
+              </vaadin-grid-column>
+
+              <vaadin-grid-column resizable>
+                <template class="header">
+                  <span>Skill name</span>
+                </template>
+                <template>{{item.name}}</template>
+              </vaadin-grid-column>
+            </vaadin-grid>
+          </section>
+
+          <!-- Switches !-->
+          <section>
+            <vaadin-grid style="width: 100%;" name="ordersbook" aria-label="Orders book" items="[[_playerData.switchesData]]">
+              <vaadin-grid-column resizable>
+                <template class="header">
+                  <span>ID</span>
+                </template>
+                <template>{{item.id}}</template>
+              </vaadin-grid-column>
+
+              <vaadin-grid-column resizable>
+                <template class="header">
+                  <span>Name</span>
+                </template>
+                <template>{{item.name}}</template>
+              </vaadin-grid-column>
+              
+              <vaadin-grid-column resizable>
+                <template class="header">
+                  <span>Switch value</span>
+                </template>
+                <template>{{item.value}}</template>
+              </vaadin-grid-column>
+            </vaadin-grid>
+          </section>
+
+          <!-- Variables !-->
+          <section>
+            <vaadin-grid style="width: 100%;" name="ordersbook" aria-label="Orders book" items="[[_playerData.variablesData]]">
+              <vaadin-grid-column resizable>
+                <template class="header">
+                  <span>ID</span>
+                </template>
+                <template>{{item.id}}</template>
+              </vaadin-grid-column>
+
+              <vaadin-grid-column resizable>
+                <template class="header">
+                  <span>Name</span>
+                </template>
+                <template>{{item.name}}</template>
+              </vaadin-grid-column>
+              
+              <vaadin-grid-column resizable>
+                <template class="header">
+                  <span>Switch value</span>
+                </template>
+                <template>{{item.value}}</template>
+              </vaadin-grid-column>
+            </vaadin-grid>
+          </section>
+          
+        </iron-pages>
+      </div>
+
+      <!-- Global Infos !-->
+      <div class="right">
+        <span class="title">User info</span>
+        <span><strong>Permissions :</strong> {{_playerData.permission}}</span>
+        <span><strong>Last map :</strong> {{_playerData.mapId}}</span>
+        <span><strong>Level :</strong> {{_playerData.stats.level}}</span>
+        <span><strong>Experience :</strong> {{_playerData.realExp}}</span>
+        <span><strong>Gold:</strong> {{_playerData.stats.gold}}</span>
+      </div>
+    </div>
+    
+    <!-- ### PAPER DIALOGS ### !-->
+    <paper-dialog id="depositConfirmation">
+      <h2>Please confirm</h2>
+      <span>{{depositMessage}}</span>
+      <div class="buttons" style="padding: 0px !important;">
+        <vaadin-button dialog-dismiss autofocus>Cancel</vaadin-button>
+        <vaadin-button dialog-confirm autofocus on-tap="_addDeposit">Confirm</vaadin-button>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog id="editCustomer">
+        <h2>Edit player</h2>
+        <iron-form id="formEditCustomer">
+          <form>
+            <vaadin-text-field required value="{{customer.username}}" label="Username" name="username"></vaadin-text-field>
+            <vaadin-text-field required value="{{customer.permission}}" label="Permission" name="permission"></vaadin-text-field>
+            <h3>Player stats :</h3>
+            <vaadin-text-field required value="{{customer.stats.level}}" label="Level" name="level"></vaadin-text-field>
+            <vaadin-text-field required value="{{customer.stats.gold}}" label="Gold" name="gold"></vaadin-text-field>
+            <h3>Player position :</h3>
+            <vaadin-text-field required value="{{customer.mapId}}" label="MapID" name="mapId"></vaadin-text-field>
+            <vaadin-text-field required value="{{customer.x}}" label="Current X" name="x"></vaadin-text-field>
+            <vaadin-text-field required value="{{customer.y}}" label="Current Y" name="y"></vaadin-text-field>
+          </form>
+        </iron-form>
+        <div class="buttons" style="padding: 0px !important;">
+          <vaadin-button dialog-dismiss autofocus>Cancel</vaadin-button>
+          <vaadin-button dialog-confirm autofocus on-tap="_editCustomer">Ok</vaadin-button>
+        </div>
+    </paper-dialog>
+  </template>
+
+  <script>
+    class playersView extends Polymer.Element {
+      /**
+       * String providing the tag name to register the element under.
+       */
+      static get is() {
+        return 'players-view';
+      }
+     
+      static get properties() {
+        return {
+          _actualId: {
+            type: String,
+            value: ""
+          },
+          selectedTab: {
+            type: Number,
+            value: 0
+          },
+          customer: {
+            // observer: "_sumTotalDeposits"
+          },
+        }
+      }
+
+      /**
+        * Array of strings describing multi-property observer methods and their
+        * dependant properties
+        */
+      static get observers() {
+        return [
+          '_idChanged(routeData.id)'
+        ];
+      }
+
+      /**
+        * Called every time the element is inserted into the DOM. Useful for 
+        * running setup code, such as fetching resources or rendering.
+        * Generally, you should try to delay work until this time.
+        */
+      connectedCallback() {
+        super.connectedCallback();
+      
+        
+        console.dir(this.serverData.gameData)
+
+        this._gameLoaded = (Object.keys(this.serverData.gameData).length > 0) ? true : false;
+      
+      }
+
+      _idChanged(newId) {
+        if(this._actualId === newId || newId === null) return;
+
+        this._actualId = newId;
+        this._getCustomerDetails(this._actualId);
+      }
+
+      // Getter functions
+
+      _getCustomerDetails(id) {
+        if(id === undefined) id = this.customer.id;
+        var ironAjax = Polymer.dom(this.root).querySelector("#ajaxGetCustomerDetails");
+
+        ironAjax.method       = "GET";
+        ironAjax.headers      = {"X-Access-Token": this.authSession.token, "X-Socket-ID": window.socket.id};
+        ironAjax.url          = window.projectUrl + "/api/admin/players/" + id;
+
+        ironAjax.generateRequest();
+      }
+
+      _loadPlayerData(event) {
+        let _response = event.detail.response;
+        let _playerData = _response;
+        
+        this.set("customer", _response);
+
+        try {
+          // Loading the visible datas
+          _playerData.realExp = _playerData.stats.exp[1];
+
+          if(this._gameLoaded) { 
+            _playerData.mapId = (this.serverData.gameData.MapInfos[_playerData.mapId]) ? this.serverData.gameData.MapInfos[_playerData.mapId].name : "N/A";
+          
+            if(_playerData.stats) { 
+              // Items
+              _playerData.itemsData = [];
+              _playerData.skillsData = [];
+              
+              for(var i = 0; i < Object.keys(_playerData.stats.items).length; i++) {
+                let payload = { 
+                  id: Object.keys(_playerData.stats.items)[i],
+                  amount: _playerData.stats.items[Object.keys(_playerData.stats.items)[i]]
+                }
+
+                if(this.serverData.gameData.Items[payload.id]) payload.name = this.serverData.gameData.Items[payload.id].name;          
+
+                _playerData.itemsData.push(payload)
+              }
+              
+              // Skills
+              for(var i = 0; i < _playerData.stats.skills.length; i++) {
+                let payload = { 
+                  id: _playerData.stats.skills[i]
+                }
+
+                if(this.serverData.gameData.Skills[payload.id]) payload.name = this.serverData.gameData.Skills[payload.id].name;          
+
+                _playerData.skillsData.push(payload)
+              }
+            }
+
+            // Switches
+            _playerData.switchesData = [];
+            if(_playerData.switches) { 
+              for(var i = 0; i < _playerData.switches.length; i++) {
+                if(_playerData.switches[i] === null) continue;
+
+                let payload = { 
+                  id: i,
+                  value: _playerData.switches[i]
+                }
+
+                if(this.serverData.gameData.System.switches[payload.id]) payload.name = this.serverData.gameData.System.switches[payload.id];          
+
+                _playerData.switchesData.push(payload)
+              }
+            }
+            
+
+            // Variables
+            _playerData.variablesData = [];
+            if(_playerData.variables) { 
+              for(var i = 0; i < _playerData.variables.length; i++) {
+                if(_playerData.variables[i] === null) continue;
+
+                let payload = { 
+                  id: i,
+                  value: _playerData.variables[i]
+                }
+
+                if(this.serverData.gameData.System.variables[payload.id]) payload.name = this.serverData.gameData.System.variables[payload.id];          
+
+                _playerData.variablesData.push(payload)
+              }
+            }
+          }
+
+          this.set("_playerData", _response);  // Loading the visible datas
+          _playerData.realExp = _playerData.stats.exp[1];
+
+          if(this._gameLoaded) { 
+            _playerData.mapId = (this.serverData.gameData.MapInfos[_playerData.mapId]) ? this.serverData.gameData.MapInfos[_playerData.mapId].name : "N/A";
+          
+            if(_playerData.stats) { 
+              // Items
+              _playerData.itemsData = [];
+              _playerData.skillsData = [];
+              
+              for(var i = 0; i < Object.keys(_playerData.stats.items).length; i++) {
+                let payload = { 
+                  id: Object.keys(_playerData.stats.items)[i],
+                  amount: _playerData.stats.items[Object.keys(_playerData.stats.items)[i]]
+                }
+
+                if(this.serverData.gameData.Items[payload.id]) payload.name = this.serverData.gameData.Items[payload.id].name;          
+
+                _playerData.itemsData.push(payload)
+              }
+              
+              // Skills
+              for(var i = 0; i < _playerData.stats.skills.length; i++) {
+                let payload = { 
+                  id: _playerData.stats.skills[i]
+                }
+
+                if(this.serverData.gameData.Skills[payload.id]) payload.name = this.serverData.gameData.Skills[payload.id].name;          
+
+                _playerData.skillsData.push(payload)
+              }
+            }
+
+            // Switches
+            _playerData.switchesData = [];
+            if(_playerData.switches) { 
+              for(var i = 0; i < _playerData.switches.length; i++) {
+                if(_playerData.switches[i] === null) continue;
+
+                let payload = { 
+                  id: i,
+                  value: _playerData.switches[i]
+                }
+
+                if(this.serverData.gameData.System.switches[payload.id]) payload.name = this.serverData.gameData.System.switches[payload.id];          
+
+                _playerData.switchesData.push(payload)
+              }
+            }
+            
+
+            // Variables
+            _playerData.variablesData = [];
+            if(_playerData.variables) { 
+              for(var i = 0; i < _playerData.variables.length; i++) {
+                if(_playerData.variables[i] === null) continue;
+
+                let payload = { 
+                  id: i,
+                  value: _playerData.variables[i]
+                }
+
+                if(this.serverData.gameData.System.variables[payload.id]) payload.name = this.serverData.gameData.System.variables[payload.id];          
+
+                _playerData.variablesData.push(payload)
+              }
+            }
+          }
+
+          this.set("_playerData", _response);
+        } catch(e) {
+          console.log("Error during loading of the player.")
+        }
+      }
+
+      _reloadCustomer() {
+        this._getCustomerDetails(this.customer.id);
+      }
+
+      // Action functions
+
+      _deleteCustomer(e) {
+        var ironAjax          = Polymer.dom(this.root).querySelector("#ajaxDeleteCustomer");
+        ironAjax.method       = "DELETE";
+        ironAjax.headers      = {"X-Access-Token": this.authSession.token, "X-Socket-ID": window.socket.id};
+        ironAjax.url          = window.projectUrl + "/api/admin/players/" + this.customer.id;
+
+        ironAjax.generateRequest();
+      }
+
+      _customerDeleted() {
+        this.dispatchEvent(new CustomEvent('reload-players', {
+          bubbles: true,
+          composed: true,
+        }));
+        
+        this.dispatchEvent(new CustomEvent('show-modal', {
+          bubbles: true,
+          composed: true,
+          detail: {
+            title: "Deletion operation complete",
+            message: "The user has been deleted with success"
+          }
+        }));
+
+        this.set('route.path','/players/list/');
+      }
+
+      _editCustomer() {
+        var paperDialog = Polymer.dom(this.root).querySelector("paper-dialog#editCustomer");
+        var form = Polymer.dom(this.root).querySelector("#formEditCustomer").serializeForm();
+        var ironAjax = Polymer.dom(this.root).querySelector("#ajaxEditCustomer");
+
+        if(!paperDialog.opened) {
+          paperDialog.toggle();
+          return; 
+        }
+
+        if((form.username.length) <= 0)
+          return this.dispatchEvent(new CustomEvent('show-modal', {
+            bubbles: true,
+            composed: true,
+            detail: {
+              "title": "Error occured",
+              "message": "Please fill all the form correctly"
+            }
+          }));
+
+        let payload = { 
+          id: this.customer.id,
+          username: form.username,
+          permission: parseInt(form.permission),
+          stats: this.customer.stats,
+          mapId: parseInt(form.mapId),
+          x: parseInt(form.x),
+          y: parseInt(form.y),
+        }
+
+        payload.stats.gold = parseInt(form.gold);
+        payload.stats.level = parseInt(form.level);
+
+        ironAjax.method       = "PATCH";
+        ironAjax.headers      = {"X-Access-Token": this.authSession.token, "X-Socket-ID": window.socket.id};
+        ironAjax.url          = window.projectUrl + "/api/admin/players/";
+        ironAjax.body         = payload;
+        ironAjax.contentType  = "application/json";
+
+        ironAjax.generateRequest();
+      }
+
+      _customerEdited() {
+        this.dispatchEvent(new CustomEvent('reload-players', {
+          bubbles: true,
+          composed: true,
+        }));
+
+        this.dispatchEvent(new CustomEvent('show-modal', {
+          bubbles: true,
+          composed: true,
+          detail: {
+            title: "Operation successful",
+            message: "The user has been edited with success"
+          }
+        }));
+
+        this._reloadCustomer();
+      }
+
+      _formatDate(data) {
+        return moment(data).format('DD/MM/YY H:mm');
+      }
+      
+
+    }
+
+    window.customElements.define(playersView.is, playersView);
+  </script>
+</dom-module>

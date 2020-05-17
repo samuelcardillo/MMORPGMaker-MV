@@ -1,0 +1,160 @@
+<link rel="import" href="../../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../../bower_components/paper-dropdown-menu-multi/paper-dropdown-menu-multi.html">
+<link rel="import" href="../../shared-styles.html">
+
+<dom-module id="banks-list">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        margin: 8px;
+      }
+
+      #toolbar {
+        @apply(--layout-horizontal);
+        @apply(--layout-justified);
+      }
+    </style>
+
+    <iron-ajax id="ajaxCreateCustomer" on-response="_customerCreated" on-error="_customerNotCreated"></iron-ajax>
+    <iron-ajax id="ajaxDeleteCustomer" on-response="_customerCreated" on-error="_customerNotCreated"></iron-ajax>
+    
+    <div id="toolbar">
+      <div></div>
+      <vaadin-button on-tap="_createCustomer">Create bank</vaadin-button>
+    </div>
+    
+    <vaadin-grid style="width: 100%; height: 400px;" name="ordersbook" aria-label="Orders book" items="[[banks]]">
+
+      <vaadin-grid-column resizable>
+        <template class="header">
+          <vaadin-grid-filter aria-label="Name" path="name" value="[[_filtername]]">
+            <input placeholder="Name" value="{{_filtername::input}}" focus-target>
+          </vaadin-grid-filter>
+        </template>
+        <template>{{item.name}}</template>
+      </vaadin-grid-column>
+
+      <vaadin-grid-column resizable>
+        <template class="header">
+          <vaadin-grid-filter aria-label="Type" path="type" value="[[_filtertype]]">
+            <input placeholder="Type" value="{{_filtertype::input}}" focus-target>
+          </vaadin-grid-filter>
+        </template>
+        <template>{{item.type}}</template>
+      </vaadin-grid-column>
+
+      <vaadin-grid-column resizable flex-grow="0">
+        <template class="header">
+          <span></span>
+        </template>
+        <template>
+          <vaadin-button on-tap="_deleteBank">Delete</vaadin-button>
+        </template>
+      </vaadin-grid-column>
+    </vaadin-grid>
+
+    <paper-dialog id="createCustomer">
+      <h2>New bank</h2>
+      <iron-form id="formCreateCustomer">
+        <form>
+          <vaadin-text-field required value="" label="Bank name" name="name"></vaadin-text-field>
+          <span>Bank type :</span>
+          <select name="type">
+            <option value="local">Local</option>
+            <option value="global">Global</option>
+          </select>
+        </form>
+      </iron-form>
+      <div class="buttons" style="padding: 0px !important;">
+        <vaadin-button dialog-dismiss autofocus>Cancel</vaadin-button>
+        <vaadin-button dialog-confirm autofocus on-tap="_createCustomer">Ok</vaadin-button>
+      </div>
+    </paper-dialog>
+  </template>
+
+  <script>
+    /**
+     * `banks-list` Description
+     *
+     * @summary ShortDescription.
+     * @customElement
+     * @polymer
+     * @extends {Polymer.Element}
+     */
+    class BanksList extends Polymer.Element {
+      /**
+       * String providing the tag name to register the element under.
+       */
+      static get is() {
+        return 'banks-list';
+      }
+
+      /**
+        * Called every time the element is inserted into the DOM. Useful for 
+        * running setup code, such as fetching resources or rendering.
+        * Generally, you should try to delay work until this time.
+        */
+      connectedCallback() {
+        super.connectedCallback();
+
+        console.log("test");      
+      }
+
+      _createCustomer() {
+        var paperDialog = Polymer.dom(this.root).querySelector("paper-dialog#createCustomer");
+        var form = Polymer.dom(this.root).querySelector("#formCreateCustomer").serializeForm();
+        var ironAjax = Polymer.dom(this.root).querySelector("#ajaxCreateCustomer");
+
+        if(!paperDialog.opened) {
+          paperDialog.toggle();
+          return; 
+        }
+
+        if((form.name.length) <= 0)
+          return this.dispatchEvent(new CustomEvent('show-modal', {
+            bubbles: true,
+            composed: true,
+            detail: {
+              "title": "Error occured",
+              "message": "Please fill all the form correctly"
+            }
+          }));
+
+        Polymer.dom(this.root).querySelector("#formCreateCustomer").children[0].reset();
+
+        ironAjax.method       = "POST";
+        ironAjax.headers      = {"X-Access-Token": this.authSession.token, "X-Socket-ID": window.socket.id};
+        ironAjax.url          = window.projectUrl + "/api/admin/banks/"
+        ironAjax.body         = form;
+        ironAjax.contentType  = "application/json";
+
+        ironAjax.generateRequest();
+      }
+
+      _customerCreated() {
+        this.dispatchEvent(new CustomEvent('reload-banks', {
+          bubbles: true,
+          composed: true,
+        }));
+      }
+
+      _customerNotCreated(evt) {
+        var message = event.detail.request.response.message;
+      }
+
+      _deleteBank(e) {
+        let ironAjax = Polymer.dom(this.root).querySelector("#ajaxDeleteCustomer");        
+        let selectedBank = e.model.item;
+
+        ironAjax.method       = "DELETE";
+        ironAjax.headers      = {"X-Access-Token": this.authSession.token, "X-Socket-ID": window.socket.id};
+        ironAjax.url          = window.projectUrl + `/api/admin/banks/${selectedBank.id}`;
+
+        ironAjax.generateRequest();
+      }
+    }
+
+    window.customElements.define(BanksList.is, BanksList);
+  </script>
+</dom-module>

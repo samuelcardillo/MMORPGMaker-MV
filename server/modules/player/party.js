@@ -117,11 +117,16 @@ exports.initialize = function() {
     return io.sockets.connected[hostId];
   }
 
-  exports.joinParty = (joiner, joinee) => {
+  exports.joinParty = async (joiner, joinee) => {
     // If the joiner is alreayd in a party, we do nothing
-    if(joiner.isInParty) return; 
+    if(joiner.isInParty) return;
+    
+    let maxMembers = MMO_Core["gamedata"].data["Actors"].length - 1; // We take the maximum party members set in RPG Maker MV
+    let partyName = `party-${joinee.id}`; // We prepare the party name
+    let rawPartyMembers = await MMO_Core["socket"].modules["player"].subs["player"].getPlayers(partyName) || {};
 
-    let partyName = `party-${joinee.id}`; // We prepare the party naem
+    // If the party is attempted to be created but the game settings don't allow it
+    if(maxMembers === 1 || maxMembers < Object.keys(rawPartyMembers).length + 1) return;
 
     joiner.isInParty = partyName; // We put the joiner in the party
     joiner.join(partyName, () => {
@@ -230,7 +235,7 @@ exports.initialize = function() {
       rawPartyMembers[k].emit("party_player_disband_fight"); 
     }
   }
-
+  
   // ---------------------------------------
   // ---------- PRIVATE FUNCTIONS
   // ---------------------------------------

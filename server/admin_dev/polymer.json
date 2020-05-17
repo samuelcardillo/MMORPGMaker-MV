@@ -1,0 +1,33 @@
+{
+  "entrypoint": "index.html",
+  "shell": "src/mmomv-admin.html",
+  "fragments": [
+    "src/view-signin.html",
+    "src/view-signedin.html",
+    "src/signedin/signedin-dashboard.html",
+    "src/signedin/signedin-players.html",
+    "src/signedin/players/players-list.html",
+    "src/signedin/players/players-view.html",
+    "src/signedin/signedin-banks.html",
+    "src/signedin/banks/banks-list.html",    
+    "src/signedin/signedin-server.html"
+  ],
+  "sources": [
+    "src/**/*",
+    "images/**/*",
+    "scripts/**/*"
+  ],
+  "extraDependencies": [
+    "manifest.json",
+    "bower_components/webcomponentsjs/*.js"
+  ],
+  "lint": {
+    "rules": ["polymer-2"]
+  },
+  "builds": [
+    {
+      "preset": "es5-bundled",
+      "addServiceWorker": false
+    }
+  ]
+}

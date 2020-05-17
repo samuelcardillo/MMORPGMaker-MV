@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+    <title>MMOMV - Administration Interface</title>
+    <meta name="description" content="MMOMV - Administration Interface">
+    <base href="/">
+    <link rel="icon" href="images/favicon.ico">
+    <script src="scripts/socket.io.js"></script>
+    <script src="scripts/moment.js"></script>
+    
+    <script>
+      window.Polymer = {rootPath: '/'};
+
+      // Load and register pre-caching Service Worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('service-worker.js', {
+            scope: Polymer.rootPath,
+          });
+        });
+      }
+
+      let hostname = window.location.hostname;
+
+      if(window.location.hostname.split(".").length < 2 && window.location.hostname !== "localhost") {
+        hostname = hostname.split(".");
+        hostname = hostname[1] + "." + hostname[2];
+      }
+
+      window.projectUrl = window.location.protocol + "//" + hostname + ":8097";
+      window.socket     = io.connect(window.projectUrl);
+    </script>
+    <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
+    <link rel="import" href="src/mmomv-admin.html">
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Roboto', 'Noto', sans-serif;
+        line-height: 1.5;
+        min-height: 100vh;
+        background-color: #eeeeee;
+      }
+    </style>
+  </head>
+  <body>
+    <mmomv-admin></mmomv-admin>
+    <noscript>
+      Please enable JavaScript to view this website.
+    </noscript>
+  </body>
+</html>

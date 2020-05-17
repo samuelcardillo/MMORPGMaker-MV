@@ -250,24 +250,23 @@ function MMO_Core_Player() {
   };
 
   // Handle player state of the world (variables)
-  Game_Variables.prototype.onChange = function() {
+  Game_Variables.prototype.onChange = function() {    
     MMO_Core.socket.emit("player_update_variables", $gameVariables["_data"]);
     $gameMap.requestRefresh();
   };
 
+  // Handle variables for the player including global ones
   Game_Variables.prototype.initialize = function() {
-    this._data = MMO_Core_Player.Player["variables"] || [];      
+    this._data = MMO_Core_Player.Player["variables"] || [];
   };
 
   Game_Variables.prototype.setValue = function(variableId, value) {
-      if (variableId > 0 && variableId < $dataSystem.variables.length) {
-        MMO_Core.socket.emit("player_global_variables_check",{variableId: variableId, value: value});
-        if (typeof value === 'number') {
-            value = Math.floor(value);
-        }
-        this._data[variableId] = value;
-        this.onChange();
-      }
+    if (variableId > 0 && variableId < $dataSystem.variables.length) {
+      MMO_Core.socket.emit("player_global_variables_check", {variableId: variableId, value: value});
+      if (typeof value === 'number') value = Math.floor(value);
+      this._data[variableId] = value;
+      this.onChange();
+    }
   };
 
   // Handle player death during combat
@@ -283,9 +282,6 @@ function MMO_Core_Player() {
       }
     };
   }
-
-
-
 
   // Handle adding custom parameters to characters
   MMO_Core_Player.initMembers = Game_CharacterBase.prototype.initMembers;
@@ -303,11 +299,13 @@ function MMO_Core_Player() {
   })
 
   MMO_Core.socket.on("player_update_switch", function(data){
+    if($gameSwitches === null) return;
     $gameSwitches["_data"][data["switchId"]] = data["value"]; // Bypass the setValue function.
     Game_Switches.prototype.onChange();
   });
 
   MMO_Core.socket.on("player_update_variable", function(data){
+    if($gameVariables === null) return; 
     $gameVariables["_data"][data["variableId"]] = data["value"]; // Bypass the setValue function.
     Game_Variables.prototype.onChange();
   });
