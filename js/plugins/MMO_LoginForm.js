@@ -115,9 +115,6 @@ function LoginForm() {
   }
 
   LoginForm.prototype.disableForm = function() {
-    if(document.querySelector("input#inputUsername") === null) return;
-    document.querySelector("input#inputUsername").disabled = true;
-    document.querySelector("button#btnConnect").disabled = true;
     this.displayError("Connection with server was lost.")
   }
 
@@ -130,7 +127,7 @@ function LoginForm() {
     if(payload.username.includes(" ")) return this.displayError("Spaces are forbidden in username.");
     if(!payload.username.match(/^(?=[a-zA-Z\s]{2,25}$)(?=[a-zA-Z\s])(?:([\w\s*?])\1?(?!\1))+$/)) return this.displayError("You can't have special characters in your username.");
 
-     MMO_Core.socket.on("login_success", function(data){
+    MMO_Core.socket.on("login_success", function(data){
       if (data.err) return that.displayError("Error : " + data.err);
       $("#ErrorPrinter").fadeOut({duration: 1000}).html("");
 
@@ -143,11 +140,16 @@ function LoginForm() {
       return true;
     });
 
-     MMO_Core.socket.on("login_error", function(data) {
+    MMO_Core.socket.on("login_error", function(data) {
       that.displayError(data.msg);      
     })
 
-     MMO_Core.socket.emit("login", payload);
+    // If you're no longer connected to socket - retry connection and then continue
+    if (!MMO_Core.socket.connected) {
+      MMO_Core.socket.connect();
+    }
+
+    MMO_Core.socket.emit("login", payload);
   }
 
   LoginForm.prototype.createBackground = function() {
