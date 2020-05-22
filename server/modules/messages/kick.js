@@ -8,19 +8,14 @@ exports.initialize = function() {
             return MMO_Core.socket.modules.messages.sendToPlayer(initiator, "System", "You don't have the permission to kick a player.", "error");
         }
 
-        const players = await MMO_Core.socket.modules.player.subs.player.getPlayers().catch((e) => {
-            console.log(e);
-        });
-        let player = {};
+        const players = await MMO_Core.socket.modules.player.subs.player.getPlayers();
+        const targetsName = args[1].toLowerCase();
 
-        if (players[args[1]] === undefined) {
+        if (players[targetsName] === undefined) {
             return MMO_Core.socket.modules.messages.sendToPlayer(initiator, "System", "Could not find the player.", "error");
         }
 
-        player = players[args[1]];
-
-        MMO_Core.socket.modules.messages.sendToAll("System", `${player.playerData.username} was kicked!`, "error");
-
-        return player.disconnect();
+        MMO_Core.socket.modules.messages.sendToAll("System", `${players[targetsName].playerData.username} was kicked!`, "error");
+        return players[targetsName].disconnect();
     };
 };

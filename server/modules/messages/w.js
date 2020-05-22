@@ -5,10 +5,9 @@ exports.initialize = function() {
             return MMO_Core.socket.modules.messages.sendToPlayer(player, "System", "Not enough arguments.", "error");
         }
 
-        const players = await MMO_Core.socket.modules.player.subs.player.getPlayers().catch((e) => {
-            console.log(e);
-        });
-        if (players[args[1]] === undefined) {
+        const players = await MMO_Core.socket.modules.player.subs.player.getPlayers();
+        const targetsName = args[1].toLowerCase();
+        if (players[targetsName] === undefined) {
             return MMO_Core.socket.modules.messages.sendToPlayer(player, "System", "Could not find the player.", "error");
         }
 
@@ -18,6 +17,6 @@ exports.initialize = function() {
         }
 
         MMO_Core.socket.modules.messages.sendToPlayer(player, "(Whisp) " + player.playerData.username, message, "whisper");
-        MMO_Core.socket.modules.messages.sendToPlayer(players[args[1]], "(Whisp) " + player.playerData.username, message, "whisper");
+        MMO_Core.socket.modules.messages.sendToPlayer(players[targetsName], "(Whisp) " + player.playerData.username, message, "whisper");
     };
 };

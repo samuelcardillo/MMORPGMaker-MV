@@ -12,9 +12,7 @@ exports.initialize = function() {
             return MMO_Core.socket.modules.messages.sendToPlayer(initiator, "System", "You are already in a party.", "error");
         }
 
-        const players = await MMO_Core.socket.modules.player.subs.player.getPlayers().catch((e) => {
-            console.log(e);
-        });
+        const players = await MMO_Core.socket.modules.player.subs.player.getPlayers();
         const target = players[targetsName];
         if (target === undefined) {
             return MMO_Core.socket.modules.messages.sendToPlayer(initiator, "System", "Could not find the player.", "error");
