@@ -49,9 +49,9 @@
  *
  * @help
  * To create a popup, call the following function in a "Script" event command:
- * 
+ *
  * IAVRA.EVENTPOPUP.popup(eventId, text, options);
- * 
+ *
  * Where "eventId" is the id of the event you want to show the popup on, "text" is the message you want to show and
  * "options" is an optional object, that can be used to override the default values set via plugin parameters.
  *
@@ -89,97 +89,111 @@
 var Imported = Imported || {};
 Imported.iavra_event_popup = true;
 
-//=============================================================================
+//= ============================================================================
 // namespace IAVRA
-//=============================================================================
+//= ============================================================================
 
 var IAVRA = IAVRA || {};
 
 (function() {
     "use strict";
 
-    //=============================================================================
+    //= ============================================================================
     // MMO Part
-    //=============================================================================
+    //= ============================================================================
 
-    MMO_Core.socket.on("new_message",function(messageData) {
-      if(messageData.senderId === undefined || messageData.senderId === null) return;
-      if(MMO_Core_Players["Players"][messageData.senderId] === undefined) return;
+    MMO_Core.socket.on("new_message", function(messageData) {
+        if (messageData.senderId === undefined || messageData.senderId === null) {
+            return;
+        }
+        if (MMO_Core_Players.Players[messageData.senderId] === undefined) {
+            return;
+        }
 
-      let eventId = MMO_Core_Players["Players"][messageData.senderId]["eventId"]();
-      IAVRA.EVENTPOPUP.clear(eventId); // To avoid superposition of messages
-      IAVRA.EVENTPOPUP.popup(eventId, messageData.msg, {y: -42}); // We display the popup
-    })
+        const eventId = MMO_Core_Players.Players[messageData.senderId].eventId();
+        IAVRA.EVENTPOPUP.clear(eventId); // To avoid superposition of messages
+        IAVRA.EVENTPOPUP.popup(eventId, messageData.msg, { y: -42 }); // We display the popup
+    });
 
-    //=============================================================================
+    //= ============================================================================
     // Native Part
-    //=============================================================================
-    
+    //= ============================================================================
+
     /**
      * Since PluginManager.parameters() breaks when the plugin file is renamed, we are using our own solution.
      */
-    var _params = $plugins.filter(function(p) { return p.description.contains('<Iavra Event Popup'); })[0].parameters;
-    
+    const _params = $plugins.filter(function(p) {
+        return p.description.contains("<Iavra Event Popup");
+    })[0].parameters;
+
     /**
      * Usually, popups are destroyed when a new scene becomes active. Specific scenes can be marked in "Retain On Scene"
      * so popups still won't be displayed, but are still there and will be shown once Scene_Map becomes active again.
      */
-    var _paramRetainOnscene = _params['Retain On Scene'].split(/\s*,\s*/).filter(function(scene) {
+    const _paramRetainOnscene = _params["Retain On Scene"].split(/\s*,\s*/).filter(function(scene) {
         return !!scene;
-    }).map(function(scene) { return eval(scene); });
+    }).map(function(scene) {
+        return eval(scene);
+    });
     _paramRetainOnscene.push(Scene_Map);
-    
+
     /**
      * Our default options as given in the plugin's parameters. We default to 0, since otherwise it wouldn't be possible
      * to give 0 as a parameter unless we do a more complicated check.
      */
-    var _defaultOptions = {
-        width: parseInt(_params['Popup Width']) || 0,
-        x: parseInt(_params['Offset X']) || 0,
-        y: parseInt(_params['Offset Y']) || 0,
-        duration: parseInt(_params['Display Duration']) || 0,
-        fadeIn: parseInt(_params['Fade In Duration']) || 0,
-        fadeOut: parseInt(_params['Fade Out Duration']) || 0,
-        fontName: _params['Font Name'] || null, 
-        fontSize: parseInt(_params['Font Size']) || 0,
-        lineHeight: parseInt(_params['Line Height']) || 0
+    const _defaultOptions = {
+        width: parseInt(_params["Popup Width"]) || 0,
+        x: parseInt(_params["Offset X"]) || 0,
+        y: parseInt(_params["Offset Y"]) || 0,
+        duration: parseInt(_params["Display Duration"]) || 0,
+        fadeIn: parseInt(_params["Fade In Duration"]) || 0,
+        fadeOut: parseInt(_params["Fade Out Duration"]) || 0,
+        fontName: _params["Font Name"] || null,
+        fontSize: parseInt(_params["Font Size"]) || 0,
+        lineHeight: parseInt(_params["Line Height"]) || 0
     };
-    
+
     /**
      * Container for all created popup windows. Using WindowLayer would cause overlapping popups to cut each other and
      * inserting directly in Scene_Map causes all popups to vanish when entering the menu (which i don't want). So we
      * are using Pixi's base class with an added update() function to be compatible with Scene_Base.
      */
-    var _container = (function($) {
+    const _container = (function($) {
         $.update = function() {
-            this.children.forEach(function(child) { if(child.update) child.update(); });
+            this.children.forEach(function(child) {
+                if (child.update) {
+                    child.update();
+                }
+            });
         };
         return $;
     })(new PIXI.DisplayObjectContainer());
-    
+
     /**
      * Utility function that takes 2 objects and iterates over all keys in the first one. If the second object contains
      * that key, its value is taken, otherwise we take the default. The result is merged to a new object and returned.
      */
-    var mergeOptions = function(defaults, options) {
+    const mergeOptions = function(defaults, options) {
         options || (options = {});
         return Object.keys(defaults).reduce(function(map, key) {
             map[key] = options[key] !== undefined ? options[key] : defaults[key];
             return map;
         }, {});
     };
-    
+
     /**
      * Removes a popup from the container, so the popup doesn't have to reference the container directly.
      */
-    var removePopup = function(popup) { _container.removeChild(popup); };
-    
-    //=============================================================================
+    const removePopup = function(popup) {
+        _container.removeChild(popup);
+    };
+
+    //= ============================================================================
     // module IAVRA.EVENTPOPUP
-    //=============================================================================
-    
+    //= ============================================================================
+
     IAVRA.EVENTPOPUP = {
-        
+
         /**
          * Creates a new popup displaying the given text on the given event. An optional object can be used to override
          * some or all of the default options.
@@ -187,12 +201,12 @@ var IAVRA = IAVRA || {};
         popup: function(eventId, text, options) {
             _container.addChild(new IAVRA.EVENTPOPUP.Window_Popup(eventId, text, options));
         },
-        
+
         /**
          * Clears either all popups (if eventId is undefined) or only those belonging to the given eventId.
          */
         clear: function(eventId) {
-            if(eventId === undefined) {
+            if (eventId === undefined) {
                 _container.removeChildren();
             } else {
                 _container.children.filter(function(child) {
@@ -202,17 +216,17 @@ var IAVRA = IAVRA || {};
                 });
             }
         },
-        
+
         /**
          * Callbacks for drawing the popup background as well as fading in and out the popups. I put these in the public
          * scope, so it's easy to override them in other plugins.
          */
         _callbacks: {
             drawBackground: function(popup) {
-                var color1 = popup.dimColor1();
-                var color2 = popup.dimColor2();
-                var width = popup.contentsWidth();
-                var height = popup.contentsHeight();
+                const color1 = popup.dimColor1();
+                const color2 = popup.dimColor2();
+                const width = popup.contentsWidth();
+                const height = popup.contentsHeight();
                 popup.opacity = 0;
                 popup.contents.gradientFillRect(0, 0, width / 2, height, color2, color1);
                 popup.contents.gradientFillRect(width / 2, 0, width / 2, height, color1, color2);
@@ -224,17 +238,19 @@ var IAVRA = IAVRA || {};
                 return (popup.contentsOpacity -= 255 / (popup._options.fadeOut || 1)) <= 0;
             }
         }
-        
+
     };
-    
-    //=============================================================================
+
+    //= ============================================================================
     // class IAVRA.EVENTPOPUP.Window_Popup
-    //=============================================================================
-    
-    IAVRA.EVENTPOPUP.Window_Popup = function() { this.initialize.apply(this, arguments); };
+    //= ============================================================================
+
+    IAVRA.EVENTPOPUP.Window_Popup = function() {
+        this.initialize.apply(this, arguments);
+    };
     (function($) {
         ($.prototype = Object.create(Window_Base.prototype)).constructor = $;
-        
+
         /**
          * Creates a new popup displaying the given text on the given event. An optional object can be used to override
          * some or all of the default options.
@@ -242,114 +258,115 @@ var IAVRA = IAVRA || {};
         $.prototype.initialize = function(eventId, text, options) {
             this._options = mergeOptions(_defaultOptions, options);
             this._eventId = eventId;
-            var height = this.fittingHeight(text.split('\n').length);
+            const height = this.fittingHeight(text.split("\n").length);
             Window_Base.prototype.initialize.call(this, 0, 0, this._options.width, height);
             IAVRA.EVENTPOPUP._callbacks.drawBackground(this);
             this.drawTextEx(text, 0, 0);
             this.contentsOpacity = 0;
         };
-        
+
         /**
          * If the event we are referencing doesn't exist, we remove the popup from our container and return. Otherwise we
          * update our position according to the event's screen position.
          */
         $.prototype.update = function() {
             Window_Base.prototype.update.call(this);
-            var event = $gameMap.event(this._eventId);
-            if(event === undefined) { removePopup(this); return; }
+            const event = $gameMap.event(this._eventId);
+            if (event === undefined) {
+                removePopup(this); return;
+            }
             this.x = event.screenX() + this._options.x - this.width / 2;
             this.y = event.screenY() + this._options.y - this.height;
-            if(!this._finishedFadeIn) {
+            if (!this._finishedFadeIn) {
                 this._finishedFadeIn = IAVRA.EVENTPOPUP._callbacks.fadeIn(this);
-            } else if(--this._options.duration <= 0 && IAVRA.EVENTPOPUP._callbacks.fadeOut(this)) {
+            } else if (--this._options.duration <= 0 && IAVRA.EVENTPOPUP._callbacks.fadeOut(this)) {
                 removePopup(this);
             }
         };
-        
+
         /**
          * Using our own font or fall back to the default, if none was specified.
          */
         $.prototype.standardFontFace = function() {
             return this._options.fontName || Window_Base.prototype.standardFontFace.call(this);
         };
-        
+
         /**
          * Using our own font size.
          */
-        $.prototype.standardFontSize = function() { return this._options.fontSize; };
-        
+        $.prototype.standardFontSize = function() {
+            return this._options.fontSize;
+        };
+
         /**
          * Using our own line height.
          */
-        $.prototype.lineHeight = function() { return this._options.lineHeight; };
-        
+        $.prototype.lineHeight = function() {
+            return this._options.lineHeight;
+        };
+
         return $;
     })(IAVRA.EVENTPOPUP.Window_Popup);
-    
-    //=============================================================================
+
+    //= ============================================================================
     // class Scene_Base
-    //=============================================================================
-    
+    //= ============================================================================
+
     (function($) {
-        
         /**
          * When one of the scenes not listed in "Retain on Scene" becomes active, all popups are destroyed.
          */
-        var _alias_terminate = $.prototype.terminate;
+        const _alias_terminate = $.prototype.terminate;
         $.prototype.terminate = function() {
             _alias_terminate.apply(this, arguments);
-            _paramRetainOnscene.some(function(scene) { return SceneManager.isNextScene(scene); }) || _container.removeChildren();
+            _paramRetainOnscene.some(function(scene) {
+                return SceneManager.isNextScene(scene);
+            }) || _container.removeChildren();
         };
-        
     })(Scene_Base);
-    
-    //=============================================================================
+
+    //= ============================================================================
     // class Scene_Map
-    //=============================================================================
-    
+    //= ============================================================================
+
     (function($) {
-        
         /**
          * We add our own container before the windowlayer, so windows are still being displayed on top of popups.
          */
-        var _alias_createWindowLayer = $.prototype.createWindowLayer;
+        const _alias_createWindowLayer = $.prototype.createWindowLayer;
         $.prototype.createWindowLayer = function() {
             this.addChild(_container);
             _alias_createWindowLayer.apply(this, arguments);
         };
-        
     })(Scene_Map);
-    
-    //=============================================================================
+
+    //= ============================================================================
     // class Game_Interpreter
-    //=============================================================================
-    
+    //= ============================================================================
+
     (function($) {
-        
         /**
          * When our plugin command is called, we take the first parameter to determine the actual command and the second
          * parameter to determine the eventId. The special case "this" is used to point to the id of the current event.
          * In case of the "popup" command, we also need to join the remaining arguments to get the complete String and
          * pass it to eval(), so special characters are properly formatted.
          */
-        var _alias_pluginCommand = $.prototype.pluginCommand;
+        const _alias_pluginCommand = $.prototype.pluginCommand;
         $.prototype.pluginCommand = function(command, args) {
             _alias_pluginCommand.apply(this, arguments);
-            if(command === 'EventPopup') {
-                var actualCommand = args.shift();
-                var eventId = args.shift();
-                (eventId !== 'this') || (eventId = this.eventId());
-                switch(actualCommand) {
-                    case 'popup':
-                        IAVRA.EVENTPOPUP.popup(eventId, eval(args.join(' ')));
+            if (command === "EventPopup") {
+                const actualCommand = args.shift();
+                let eventId = args.shift();
+                (eventId !== "this") || (eventId = this.eventId());
+                switch (actualCommand) {
+                    case "popup":
+                        IAVRA.EVENTPOPUP.popup(eventId, eval(args.join(" ")));
                         break;
-                    case 'clear':
+                    case "clear":
                         IAVRA.EVENTPOPUP.clear(eventId);
                         break;
                 };
             }
         };
-        
     })(Game_Interpreter);
-    
 })();
