@@ -1,0 +1,39 @@
+{
+    "extends": "standard",
+    "env": {
+        "node": true
+    },
+    "rules": {
+        "semi": ["error", "always"],
+        "indent": ["error", 4, {
+            "SwitchCase": 1
+        }],
+        "quotes": ["error", "double"],
+        "brace-style": ["error", "1tbs"],
+        "curly": ["error", "all"],
+        "space-before-function-paren": ["error", {
+            "anonymous": "never",
+            "named": "never",
+            "asyncArrow": "always"
+        }],
+        "no-useless-escape": "error",
+        "yoda": ["error", "never"],
+        "eqeqeq": ["error", "always"],
+        "no-alert": "error",
+        "comma-dangle": ["error", "never"],
+        "camelcase": "error",
+        "no-buffer-constructor": "error",
+        "no-empty-function": "error",
+        "no-eval": "error",
+        "no-implied-eval": "error",
+        "no-path-concat": "error",
+        "no-script-url": "error",
+        "no-void": "error",
+        "no-mixed-requires": "error",
+        "no-use-before-define": "error",
+        "handle-callback-err": "error",
+        "no-lonely-if": "error",
+        "callback-return": "error",
+        "no-var": "error"
+    }
+}
