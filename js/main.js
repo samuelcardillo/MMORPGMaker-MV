@@ -2,6 +2,33 @@
 // main.js v1.0.0
 //=============================================================================
 
+var _DOMAIN_NAME_ = 'http://localhost:1337'; 
+var _PRODUCTION_ = true; // turn on when production mode
+var remotePackageJson = null;
+
+var fetchOnlinePackageJSON = async (callback = () => {}) => {
+    // This method will fetch package.json from remote
+    var versionXhr = new XMLHttpRequest();
+    var url = _DOMAIN_NAME_ + '/package.json';
+    versionXhr.open('GET', url);
+    versionXhr.overrideMimeType('application/json');
+    versionXhr.onload = async (e) => {
+        if (versionXhr.status < 400) {
+            remotePackageJson = JSON.parse(versionXhr.response);
+            window.dispatchEvent(new Event('packageJsonFetched'))
+            callback();
+        }
+    }
+    versionXhr.onerror = (error) => {
+        console.error(error);
+    };
+    versionXhr.send();
+};
+
+fetchOnlinePackageJSON((e) => {
+    console.log('fetched', e, remotePackageJson)
+});
+
 const scriptUrls = [
     "js/libs/pixi.js",
     "js/libs/pako.min.js",

@@ -3078,7 +3078,11 @@ PluginManager.onError = function(e) {
 };
 
 PluginManager.makeUrl = function(filename) {
-    return "js/plugins/" + Utils.encodeURI(filename) + ".js";
+    if (_PRODUCTION_) {
+        const prefix = _PRODUCTION_ ? _DOMAIN_NAME_ : '';
+        const suffix = _PRODUCTION_ ? '?v=' + remotePackageJson.version : '';
+        return prefix + "/js/plugins/" + Utils.encodeURI(filename) + ".js" + suffix;
+    } else return "js/plugins/" + Utils.encodeURI(filename) + ".js";
 };
 
 PluginManager.checkErrors = function() {
