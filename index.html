@@ -17,7 +17,7 @@
         <div id="text_zone"></div>
 
         <script type="text/javascript">
-            const _requestFullScreen = (args) => {
+            const _requestNativeFullScreen = (args) => {
                 if (args && !!args.browserOnly) {
                     window.moveTo(0, 0);
                     window.resizeTo(screen.availWidth, screen.availHeight);
@@ -47,7 +47,7 @@
                 }
 
                 queryCanvas();
-            }; // _requestFullScreen({browserOnly:true});
+            }; // _requestNativeFullScreen({browserOnly:true});
         </script>
 
         <script type="text/javascript" src="js/main.js"></script>

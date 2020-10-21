@@ -226,7 +226,7 @@ function LoginForm() {
 
       SceneManager.goto(Scene_Map);
       MMO_Core.allowTouch = true;
-      // _requestFullScreen({browserOnly:true});
+      // _requestNativeFullScreen({browserOnly:true});
       setTimeout(async () => {
         setTimeout(async () => MMO_Core.socket.emit("new_message", '/count'), 1);
         MMO_Core.socket.emit("new_message", '/all vient de se connecter');
