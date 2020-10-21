@@ -25,8 +25,8 @@ var fetchOnlinePackageJSON = async (callback = () => {}) => {
     versionXhr.send();
 };
 
-fetchOnlinePackageJSON((e) => {
-    console.log('fetched', e, remotePackageJson)
+if (_PRODUCTION_) fetchOnlinePackageJSON(() => {
+    console.log('packageJson', remotePackageJson)
 });
 
 const scriptUrls = [
@@ -52,10 +52,10 @@ class Main {
         this.error = null;
     }
 
-    run() {
+    async run() {
         this.showLoadingSpinner();
         this.testXhr();
-        this.loadMainScripts();
+        await this.loadMainScripts();
     }
 
     showLoadingSpinner() {
@@ -82,15 +82,17 @@ class Main {
     }
 
     loadMainScripts() {
+        const random = Math.floor((Math.random() * 99999999) + 9999999);
+        const suffix = _PRODUCTION_ ? '?v=' + random : '';
         for (const url of scriptUrls) {
             const script = document.createElement("script");
             script.type = "text/javascript";
-            script.src = url;
+            script.src = url + suffix;
             script.async = false;
             script.defer = true;
             script.onload = this.onScriptLoad.bind(this);
             script.onerror = this.onScriptError.bind(this);
-            script._url = url;
+            script._url = url + suffix;
             document.body.appendChild(script);
         }
         this.numScripts = scriptUrls.length;
@@ -129,6 +131,7 @@ class Main {
     }
 
     onWindowLoad() {
+        console.log('onWindowLoad')
         if (!this.xhrSucceeded) {
             const message = "Your browser does not allow to read local files.";
             this.printError("Error", message);
@@ -160,7 +163,9 @@ class Main {
     initEffekseerRuntime() {
         const onLoad = this.onEffekseerLoad.bind(this);
         const onError = this.onEffekseerError.bind(this);
-        effekseer.initRuntime(effekseerWasmUrl, onLoad, onError);
+        const prefix = _PRODUCTION_ ? _DOMAIN_NAME_ + '/' : '';
+        const suffix = _PRODUCTION_ ? '?v=' + remotePackageJson.version : '';
+        effekseer.initRuntime(prefix + effekseerWasmUrl + suffix, onLoad, onError);
     }
 
     onEffekseerLoad() {
