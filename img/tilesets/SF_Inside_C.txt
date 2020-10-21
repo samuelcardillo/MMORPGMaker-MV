@@ -4,16 +4,16 @@ Black Board|黒板
 White Board|ホワイトボード
 White Board|ホワイトボード
 White Board|ホワイトボード
-Cloth Partition A|布の衝立A
-Cloth Partition B|布の衝立B
+Partition A|衝立A
+Partition B|衝立B
 Black Board|黒板
 Black Board|黒板
 Black Board|黒板
 White Board|ホワイトボード
 White Board|ホワイトボード
 White Board|ホワイトボード
-Cloth Partition A|布の衝立A
-Cloth Partition B|布の衝立B
+Partition A|衝立A
+Partition B|衝立B
 Stool|腰掛けイス
 Skeleton Model|骨格模型
 Biological Specimen|生物標本
@@ -28,7 +28,7 @@ Biological Specimen|生物標本
 Fire Extinguisher|消火器
 Armchair|肘掛け椅子
 Room Plate|室名札
-EXIT Sign|EXITプレート
+EXIT Sign|EXIT
 Vent|通気口
 Painting A|絵画A
 Painting B|絵画B
@@ -227,17 +227,17 @@ Monument B|モニュメントB
 Huge Stele|巨大な石版
 Huge Stele|巨大な石版
 Huge Stele|巨大な石版
-Huge Iron Monument|巨大プレート
-Huge Iron Monument|巨大プレート
-Huge Iron Monument|巨大プレート
+Huge Display|巨大ディスプレイ
+Huge Display|巨大ディスプレイ
+Huge Display|巨大ディスプレイ
 Monument A|モニュメントA
 Monument B|モニュメントB
 Huge Stele|巨大な石版
 Huge Stele|巨大な石版
 Huge Stele|巨大な石版
-Huge Iron Monument|巨大プレート
-Huge Iron Monument|巨大プレート
-Huge Iron Monument|巨大プレート
+Huge Display|巨大ディスプレイ
+Huge Display|巨大ディスプレイ
+Huge Display|巨大ディスプレイ
 Monument C|モニュメントC
 Monument D|モニュメントD
 Sphere Machinery|球体機械

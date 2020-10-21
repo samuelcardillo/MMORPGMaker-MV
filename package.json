@@ -1,12 +1,12 @@
 {
-    "name": "",
+    "name": "rmmz-game",
     "main": "index.html",
-    "js-flags": "--expose-gc",
+    "chromium-args": "--force-color-profile=srgb",
     "window": {
-        "title": "",
-        "toolbar": false,
+        "title": "Project1",
         "width": 816,
         "height": 624,
+        "position": "center",
         "icon": "icon/icon.png"
     }
 }

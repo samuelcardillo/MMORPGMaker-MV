@@ -3,33 +3,33 @@ Stairs A (Up)|階段A（上り）
 Stairs B (Up)|階段B（上り）
 Stairs C (Up)|階段C（上り）
 Stairs D (Up)|階段D（上り）
-Metal Ladder|鉄ばしご
+Wood Ladder|木製はしご
 Metal Stairs|金属階段
-Rope|ロープ
+Crane Rope|クレーンロープ
 Hole|穴
 Stairs A (Down)|階段A（下り）
 Stairs B (Down)|階段B（下り）
 Stairs C (Down)|階段C（下り）
 Stairs D (Down)|階段D（下り）
-Metal Ladder|鉄ばしご
+Wood Ladder|木製はしご
 Metal Stairs|金属階段
-Rope|ロープ
+Crane Rope|クレーンロープ
 Midsize Window A|中型窓A
 Midsize Window B|中型窓B
 Large Window A|大型窓A
 Midsize Window C|中型窓C
 Large Window B|大型窓B
-Metal Ladder|鉄ばしご
+Wood Ladder|木製はしご
 Metal Stairs|金属階段
-Rope|ロープ
+Crane Rope|クレーンロープ
 Midsize Window A|中型窓A
 Midsize Window B|中型窓B
 Large Window A|大型窓A
 Midsize Window C|中型窓C
 Large Window B|大型窓B
-Hole A (Metal Ladder)|穴A（鉄ばしご）
+Hole A (Wood Ladder)|穴A（木製はしご）
 Hole B (Metal Stairs)|穴B（金属階段）
-Hole C (Rope)|穴C（ロープ）
+Hole C (Crane Rope)|穴C（クレーンロープ）
 Asphalt Bridge (V)|アスファルトの橋（縦）
 Asphalt Bridge (H)|アスファルトの橋（横）
 Stone Bridge (V)|石の橋（縦）
@@ -49,15 +49,15 @@ Bridge Spar B (Metal, Right)|橋げたB（金属・右）
 Metal Fence|金属フェンス
 Metal Fence|金属フェンス
 Metal Fence|金属フェンス
-Warning Plate (Keep Out)|警告プレート（KEEP OUT）
+Warning Plate A|警告プレートA
 Connecting Bridge (Metal)|連絡橋（金属）
 Connecting Bridge (Metal)|連絡橋（金属）
 Connecting Bridge (Metal)|連絡橋（金属）
 Connecting Bridge (Metal, Stairs)|連絡橋（金属・階段）
 Metal Fence|金属フェンス
-Warning Plate (Exclamation Mark)|警告プレート（！マーク）
+Warning Plate B|警告プレートB
 Metal Fence|金属フェンス
-Warning Plate (Radioactivity Mark)|警告プレート（放射能マーク）
+Warning Plate C|警告プレートC
 Connecting Bridge (Metal)|連絡橋（金属）
 Connecting Bridge (Metal)|連絡橋（金属）
 Connecting Bridge (Metal)|連絡橋（金属）
@@ -72,7 +72,7 @@ Connecting Bridge (Metal)|連絡橋（金属）
 Podium (H)|教壇机（横）
 Pillar A (Asphalt)|柱A（アスファルト）
 Pillar B (Metal)|柱B（金属）
-Pillar C (Machine)|柱C（機械）
+Pillar C (Display)|柱C（ディスプレイ）
 Pillar D (Decoration)|柱D（装飾）
 Pillar E (Metal)|柱E（金属）
 Pillar F (Brick)|柱F（レンガ）
@@ -80,7 +80,7 @@ Large Window C|大型窓C
 Podium (H)|教壇机（横）
 Pillar A (Asphalt)|柱A（アスファルト）
 Pillar B (Metal)|柱B（金属）
-Pillar C (Machine)|柱C（機械）
+Pillar C (Display)|柱C（ディスプレイ）
 Pillar D (Decoration)|柱D（装飾）
 Pillar E (Metal)|柱E（金属）
 Pillar F (Brick)|柱F（レンガ）
@@ -88,7 +88,7 @@ Large Window C|大型窓C
 Podium (V)|教壇机（縦）
 Broken Pillar A (Asphalt)|折れた柱A（アスファルト）
 Broken Pillar B (Metal)|折れた柱B（金属）
-Broken Pillar C (Machine)|折れた柱C（機械）
+Broken Pillar C (Display)|折れた柱C（ディスプレイ）
 Broken Pillar D (Decoration)|折れた柱D（装飾）
 Broken Pillar E (Metal)|折れた柱E（金属）
 Broken Pillar F (Brick)|折れた柱F（レンガ）
@@ -185,7 +185,7 @@ Locker B (School)|ロッカーB（学校）
 Refrigerator|冷蔵庫
 Bookshelf A|本棚A
 Chest of Drawers A|タンスA
-Miscellaneous Item Shelf |雑貨棚
+Miscellaneous Item Shelf|雑貨棚
 Locker A|ロッカーA
 Document Shelf|資料棚
 Medicine Shelf|薬品棚
@@ -227,7 +227,7 @@ Mattress|敷布団
 Large Bed|ダブルベッド
 Large Bed|ダブルベッド
 Pipe Frame Bed|パイプベッド
-Slot Machine |スロット
+Slot Machine|スロット
 Poker Table|ポーカー台
 Poker Table|ポーカー台
 Bed|ベッド

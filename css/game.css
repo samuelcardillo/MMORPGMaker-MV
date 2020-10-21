@@ -1,0 +1,116 @@
+body {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+#errorPrinter {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 640px;
+    height: 100px;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    text-shadow: 1px 1px 3px #000;
+    font-size: 20px;
+    color: #fff;
+    z-index: 9;
+}
+#errorName {
+    color: #ff0;
+    font-weight: bold;
+    -moz-user-select: text;
+    -webkit-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+#errorMessage {
+    color: #fff;
+    -moz-user-select: text;
+    -webkit-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+#retryButton {
+    font-size: 20px;
+    color: #fff;
+    background-color: #000;
+    border-radius: 8px;
+    margin: 20px;
+    padding: 10px;
+}
+#fpsCounterBox {
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    width: 90px;
+    height: 40px;
+    background: #222;
+    opacity: 0.8;
+    z-index: 8;
+}
+#fpsCounterLabel {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    padding: 5px 10px;
+    height: 30px;
+    line-height: 32px;
+    font-size: 12px;
+    font-family: rmmz-numberfont, sans-serif;
+    color: #fff;
+    text-align: left;
+}
+#fpsCounterNumber {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    padding: 5px 10px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 24px;
+    font-family: rmmz-numberfont, monospace;
+    color: #fff;
+    text-align: right;
+}
+#loadingSpinner {
+    margin: auto;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    width: 120px;
+    height: 120px;
+    z-index: 10;
+}
+#loadingSpinnerImage {
+    margin: 0px;
+    padding: 0px;
+    border-radius: 50%;
+    width: 96px;
+    height: 96px;
+    border: 12px solid rgba(255, 255, 255, 0.25);
+    border-top: 12px solid rgba(255, 255, 255, 1);
+    animation: fadein 2s ease, spin 1.5s linear infinite;
+}
+@keyframes fadein {
+    0% {
+        opacity: 0;
+    }
+    20% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}

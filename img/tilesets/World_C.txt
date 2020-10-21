@@ -1,4 +1,4 @@
-﻿Transparent|透明
+﻿Hole|穴
 Signboard A|看板A
 Signboard B|看板B
 Signboard C|看板C
@@ -9,8 +9,8 @@ Reservoir B|貯水池B
 Hut|小屋
 Shanty|掘っ立て小屋
 Signboard D|看板D
-Stele A|石碑A
-Stele B|石碑B
+Digital Signage A|電子看板A
+Digital Signage B|電子看板B
 Windmill|風車
 Parabolic Antenna|パラボラアンテナ
 Heliport|ヘリポート
@@ -25,34 +25,34 @@ Entrance E (Closed)|入口E（閉）
 Road|道路
 Road|道路
 Road Closed|通行止め
-Rocky Mountain|岩山
-Rocky Mountain|岩山
-Mountain|山
-Mountain|山
-Coniferous Tree A|針葉樹A
+Rocky Mountain A|岩山A
+Rocky Mountain A|岩山A
+Rocky Mountain B|岩山B
+Rocky Mountain B|岩山B
+Rocky Mountain C|岩山C
 Road|道路
 Road|道路
 Road|道路
-Rocky Mountain|岩山
-Rocky Mountain|岩山
-Mountain|山
-Mountain|山
-Coniferous Tree B|針葉樹B
+Rocky Mountain A|岩山A
+Rocky Mountain A|岩山A
+Rocky Mountain B|岩山B
+Rocky Mountain B|岩山B
+Rocky Mountain C|岩山C
 Road|道路
 Road|道路
 Road|道路
-Rocky Mountain|岩山
-Rocky Mountain|岩山
-Mountain|山
-Mountain|山
-Broadleaf Tree|広葉樹
+Rocky Mountain A|岩山A
+Rocky Mountain A|岩山A
+Rocky Mountain B|岩山B
+Rocky Mountain B|岩山B
+Rocky Mountain D|岩山D
 Road|道路
 Road|道路
 Road|道路
-Rocky Mountain|岩山
-Rocky Mountain|岩山
-Mountain|山
-Mountain|山
+Rocky Mountain A|岩山A
+Rocky Mountain A|岩山A
+Rocky Mountain B|岩山B
+Rocky Mountain B|岩山B
 Broken Buildings|壊れたビル街
 Town A|町A
 Town B|町B
@@ -132,32 +132,32 @@ Entertainment District A|歓楽街A
 Entertainment District A|歓楽街A
 Police Station|警察署
 Police Station|警察署
-Crater A|クレーターA
-Crater A|クレーターA
+Island A|島A
+Island A|島A
 Large Town A|大きな町A
 Large Town A|大きな町A
 Entertainment District A|歓楽街A
 Entertainment District A|歓楽街A
 Police Station|警察署
 Police Station|警察署
-Crater A|クレーターA
-Crater A|クレーターA
+Island A|島A
+Island A|島A
 Large Town B|大きな町B
 Large Town B|大きな町B
 Entertainment District B|歓楽街B
 Entertainment District B|歓楽街B
 Museum|博物館
 Museum|博物館
-Crater B|クレーターB
-Crater B|クレーターB
+Island B|島B
+Island B|島B
 Large Town B|大きな町B
 Large Town B|大きな町B
 Entertainment District B|歓楽街B
 Entertainment District B|歓楽街B
 Museum|博物館
 Museum|博物館
-Crater B|クレーターB
-Crater B|クレーターB
+Island B|島B
+Island B|島B
 Warehouse A|倉庫A
 Warehouse A|倉庫A
 Factory|工場
@@ -165,7 +165,7 @@ Factory|工場
 Warehouse B|倉庫B
 Gantry Crane|ガントリークレーン
 Park|公園
-Crater C|クレーターC
+Island C|島C
 Warehouse A|倉庫A
 Warehouse A|倉庫A
 Factory|工場
@@ -174,16 +174,16 @@ Warehouse B|倉庫B
 Gantry Crane|ガントリークレーン
 Statue A|像A
 Statue B|像B
-Fuel Tank|燃料タンク
-Fuel Tank|燃料タンク
+Laboratory|研究所
+Laboratory|研究所
 Construction Site|工事現場
 Construction Site|工事現場
 Watchtower|監視塔
 Steel Tower|鉄塔
 Tower A|タワーA
 Tower B|タワーB
-Fuel Tank|燃料タンク
-Fuel Tank|燃料タンク
+Laboratory|研究所
+Laboratory|研究所
 Construction Site|工事現場
 Construction Site|工事現場
 Watchtower|監視塔
