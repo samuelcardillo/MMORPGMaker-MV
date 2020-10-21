@@ -1,4 +1,4 @@
-# (MMO)RPG Maker MV
+# (MMO)RPG Maker MV (and MZ)
 
 ## Summary
 This is a project I started in 2016 and on which I worked for only few weeks. In 2019 I stumbled upon an old version of the code which I have tested & refactored (a little bit). I also decided to restart working on it on my free time - which I almost have not - and open source it with the hopes that some other cool people upgrade it!
@@ -11,6 +11,8 @@ With the release of RPG MAKER MV which allows usage of JavaScript and its HTML5 
 ## How to use ? 
 
 Video : [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/TcAmU2bdKvE/0.jpg)](https://www.youtube.com/watch?v=TcAmU2bdKvE)
+
+Working on RPG Maker MZ (by @Andaroth) : [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/opxhSfuf0-Q/0.jpg)](https://www.youtube.com/watch?v=opxhSfuf0-Q)
 
 ### Plugins requirement 
 
