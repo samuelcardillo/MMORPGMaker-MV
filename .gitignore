@@ -6,3 +6,6 @@ server/admin_dev/build/
 server/*.log
 server/package-lock.json
 server/tokens.json
+*.log
+
+tokens.json
