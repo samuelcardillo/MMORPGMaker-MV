@@ -2,8 +2,8 @@
 // main.js v1.0.0
 //=============================================================================
 
-var _DOMAIN_NAME_ = 'http://localhost:1337'; 
-var _PRODUCTION_ = true; // turn on when production mode
+var _DOMAIN_NAME_ = 'http://localhost:1337'; // Edit this before hosting your game
+var _PRODUCTION_ = window.location.href.includes(_DOMAIN_NAME_);
 var remotePackageJson = null;
 
 var fetchOnlinePackageJSON = async (callback = () => {}) => {
