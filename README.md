@@ -14,9 +14,13 @@ With the release of RPG MAKER MV which allows usage of JavaScript and its HTML5 
 
 Axel Fiolle joined the project in September 2020 and made the MZ update a few months later, after discovering it was easy to migrate basic MMO features to RPG Maker MZ)
 
+--- 
+
 ## How to use ? 
 
-(work in progress)
+Watch the [video](https://www.youtube.com/watch?v=4V4YhMcNRng) !
+
+---
 
 ### Plugins requirement 
 
@@ -25,14 +29,23 @@ Axel Fiolle joined the project in September 2020 and made the MZ update a few mo
 - Orange Custom Events : http://download.hudell.com/OrangeCustomEvents.js
 - Orange Custom Event Creator : http://download.hudell.com/OrangeCustomEventCreator.js
 
+---
+
 ### Launch steps
 1. `git clone` the repo
-2. Install [NodeJS](https://nodejs.org/en/) and `npm i` in the `server` folder
-3. Install [RethinkDB](https://rethinkdb.com/docs/install/) and `rethinkdb` in the `server` folder
-4. `node mmo.js` in the `server` folder
-5. Start the RPG Maker MZ project.
+2. Get to the `MMOMZ/develop` branch
+3. In the project root folder, copy `package.json.exemple` text content into `package.json`
+4. Install [NodeJS](https://nodejs.org/en/) and `npm i` in the `server` folder
+5. Install [RethinkDB](https://rethinkdb.com/docs/install/) and `rethinkdb` in the `server` folder
+6. `node mmo.js` in the `server` folder
+7. `php -S localhost:1337` in the root folder
+8. Visit `http://localhost:1337` on your browser
+
+### **Warning :** *If you run the game with the RPG Maker editor, it will delete your `package.json` and need to re-copy the example.*
 
 Congratulations! Your game is now an MMORPG. 
+
+---
 
 ### Documentation 
 
@@ -58,6 +71,8 @@ Congratulations! Your game is now an MMORPG.
 - Party combat system
 - Respawn system
 - In-game chat
+
+---
 
 **See the progress : https://trello.com/b/m4leXuBa/mmorpg-maker-mv-version-1-todo-list**
 

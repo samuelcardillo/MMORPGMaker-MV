@@ -104,7 +104,9 @@ DataManager.loadDatabase = function() {
 
 DataManager.loadDataFile = function(name, src) {
     const xhr = new XMLHttpRequest();
-    const url = "data/" + src;
+    const prefix = _PRODUCTION_ ? _DOMAIN_NAME_ + '/' : '';
+    const suffix = _PRODUCTION_ ? '?v=' + remotePackageJson.version : '';
+    const url = prefix + "data/" + src + suffix;
     window[name] = null;
     xhr.open("GET", url);
     xhr.overrideMimeType("application/json");
@@ -914,7 +916,9 @@ ImageManager.loadTitle2 = function(filename) {
 
 ImageManager.loadBitmap = function(folder, filename) {
     if (filename) {
-        const url = folder + Utils.encodeURI(filename) + ".png";
+        const prefix = _PRODUCTION_ ? _DOMAIN_NAME_ + '/' : '';
+        const suffix = _PRODUCTION_ ? '?v=' + remotePackageJson.version : '';
+        const url = prefix + folder + Utils.encodeURI(filename) + ".png" + suffix;
         return this.loadBitmapFromUrl(url);
     } else {
         return this._emptyBitmap;
@@ -1399,8 +1403,10 @@ AudioManager.makeEmptyAudioObject = function() {
 };
 
 AudioManager.createBuffer = function(folder, name) {
+    const prefix = _PRODUCTION_ ? _DOMAIN_NAME_ + '/' : '';
+    const suffix = _PRODUCTION_ ? '?v=' + remotePackageJson.version : '';
     const ext = this.audioFileExt();
-    const url = this._path + folder + Utils.encodeURI(name) + ext;
+    const url = prefix + this._path + folder + Utils.encodeURI(name) + ext + suffix;
     const buffer = new WebAudio(url);
     buffer.name = name;
     buffer.frameCount = Graphics.frameCount;
@@ -3078,7 +3084,11 @@ PluginManager.onError = function(e) {
 };
 
 PluginManager.makeUrl = function(filename) {
-    return "js/plugins/" + Utils.encodeURI(filename) + ".js";
+    if (_PRODUCTION_) {
+        const prefix = _PRODUCTION_ ? _DOMAIN_NAME_ + '/' : '';
+        const suffix = _PRODUCTION_ ? '?v=' + remotePackageJson.version : '';
+        return prefix + "js/plugins/" + Utils.encodeURI(filename) + ".js" + suffix;
+    } else return "js/plugins/" + Utils.encodeURI(filename) + ".js";
 };
 
 PluginManager.checkErrors = function() {

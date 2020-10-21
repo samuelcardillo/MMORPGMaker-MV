@@ -100,7 +100,7 @@
     };
     
     const register = (username,password) => {
-      const endpoint = ''; // TODO : Set your own server (domain name + port, ex : http://mynew.mmo:8097/ )
+      const endpoint = 'http://localhost:8097/'; // TODO : Set your own server (domain name + port, ex : http://mynew.mmo:8097/ )
       const socket = io.connect(endpoint);
       // Setting up UI behavior : 
       socket.on('login_error', (data,callback) => { // Display UI error when server returns any

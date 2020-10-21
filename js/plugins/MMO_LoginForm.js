@@ -6,17 +6,7 @@
  * @plugindesc MMORPG Maker MV - Login Form
  * @author Samuel LESPES CARDILLO
  *
- * @help
- * /!\ WARNING /!\
- * If you turn the "require account creation" to off, make sure to change the server
- * configuration "passwordRequired" to false.
- * 
- * @param allowAccountCreation
- * @text Require account creation
- * @type combo
- * @option Yes
- * @option No
- * @default Yes
+ * @help This plugin does not provide plugin commands.
  */
 
 function LoginForm() {
@@ -25,7 +15,6 @@ function LoginForm() {
 
 (function() {  
   LoginForm.Parameters = PluginManager.parameters('MMO_LoginForm');
-  LoginForm.Parameters["allowAccountCreation"] = (LoginForm.Parameters["allowAccountCreation"] === "Yes") ? true : false;
   LoginForm.connectionLost = false;
 
   document.addEventListener("mmorpg_core_lost_connection", function() {
@@ -78,21 +67,67 @@ function LoginForm() {
   };
 
   LoginForm.prototype.createLoginForm = function() {
-    // Generate the form depending on parameters (it is ugly but eh)
-    let html = `<div id="LoginForm" style="z-index: 999999999999999; /* yep it's a lot */ position: fixed; top: 50vh; left: 50vw; background-color: rgba(0, 0, 0, 0.4); border-radius: 8px; margin: 0 auto; width: 400px; padding: 8px; transform: translate(-50%, 0);">
-    <div style="color: white; text-align: center; width: 100%; margin-bottom: 16px;">Se connecter / S'inscrire</div>
-    <div>
-        <div id="loginErrBox" style="display: block; margin: 0 auto; text-align: center; width: 100%; font-family: Comic Sans, arial; font-size: 18px;"></div>
+    let html = `
+    <div id="LoginForm" 
+        style="
+            position: fixed; 
+            top: 50vh; 
+            left: 50vw; 
+            background-color: rgba(0, 0, 0, 0.4); 
+            border-radius: 8px; 
+            margin: 0 auto; 
+            width: 400px; 
+            padding: 8px; 
+            transform: translate(-50%, 0);
+            z-index: 999999999999999; /* yep it's a lot but eh */ 
+        "
+    >
         <div>
-            <input type="text" id="inputUsername" style="display: block; margin: 0 auto; font-size: 24px;" placeholder="Pseudo" class="login-input" /><br />
-            <input type="password" id="inputPassword" style="display: block; margin: 0 auto; font-size: 24px;" placeholder="Mot de passe" class="login-input" />
-        </div>
 
-        <br />
-        <button id="btnConnect" style="display: block; margin: 0 auto; border: 0; border-radius: 4px; padding: 8px; font-size: 24px;" class="">Jouer</button>
+            <div id="loginErrBox" 
+                style="
+                    display: block; 
+                    margin: 0 auto 16px auto; 
+                    text-align: center; 
+                    width: 100%; 
+                    font-family: Comic Sans, arial; 
+                    font-size: 18px;
+                "
+            />
+
+            <div style="margin-bottom: 16px;">
+                <input id="inputUsername" type="text" placeholder="Username" class="login-input"
+                    style="
+                        display: block; 
+                        margin: 0 auto 8px auto; 
+                        font-size: 24px;
+                    "
+                />
+                <input id="inputPassword" type="password" placeholder="Password" class="login-input"
+                    style="
+                        display: block; 
+                        margin: 0 auto; 
+                        font-size: 24px;
+                    "
+                />
+            </div>
+
+            <button id="btnConnect" 
+                style="
+                    display: block; 
+                    margin: 0 auto; 
+                    border: 0; 
+                    border-radius: 4px; 
+                    padding: 8px; 
+                    font-size: 24px;
+                "
+              >
+                  Play
+              </button>
+        </div>
+        <div style="text-align: center; margin-top: 8px;"><a style="color: white;" href="${_DOMAIN_NAME_}/register.html" target="_blank">Sign up</a></div>
     </div>
-    <div style="text-align: center; margin-top: 8px;"><a style="color: white;" href="./mmorpg/register.html" target="_blank">S'inscrire</a></div>
-</div>`;
+    `;
 
 
     document.getElementById('text_zone').innerHTML = html;
@@ -172,7 +207,7 @@ function LoginForm() {
     
     var that = this;
     let payload = { username: document.getElementById("inputUsername").value }
-    if(LoginForm.Parameters["allowAccountCreation"]) payload.password = document.getElementById("inputPassword").value;
+    payload.password = document.getElementById("inputPassword").value;
 
     if (payload.username.length < 4 || payload.username.length >= 25) return this.displayError("Vous devez rentrer un pseudo!");
     if(payload.username.includes(" ")) return this.displayError("Pas d'espace.");
@@ -191,7 +226,7 @@ function LoginForm() {
 
       SceneManager.goto(Scene_Map);
       MMO_Core.allowTouch = true;
-      // _requestFullScreen({browserOnly:true});
+      // _requestNativeFullScreen({browserOnly:true});
       setTimeout(async () => {
         setTimeout(async () => MMO_Core.socket.emit("new_message", '/count'), 1);
         MMO_Core.socket.emit("new_message", '/all vient de se connecter');

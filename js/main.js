@@ -2,6 +2,29 @@
 // main.js v1.0.0
 //=============================================================================
 
+var _DOMAIN_NAME_ = 'http://localhost:1337'; // Edit this before hosting your game
+var _PRODUCTION_ = true; // Just leave this to true all the time please
+var remotePackageJson = null;
+
+var fetchOnlinePackageJSON = async (callback = () => {}) => {
+    // This method will fetch package.json from remote
+    var versionXhr = new XMLHttpRequest();
+    var url = _DOMAIN_NAME_ + '/package.json';
+    versionXhr.open('GET', url);
+    versionXhr.overrideMimeType('application/json');
+    versionXhr.onload = async (e) => {
+        if (versionXhr.status < 400) {
+            remotePackageJson = JSON.parse(versionXhr.response);
+            window.dispatchEvent(new Event('packageJsonFetched'))
+            callback();
+        }
+    }
+    versionXhr.onerror = (error) => {
+        console.error(error);
+    };
+    versionXhr.send();
+};
+
 const scriptUrls = [
     "js/libs/pixi.js",
     "js/libs/pako.min.js",
@@ -25,10 +48,10 @@ class Main {
         this.error = null;
     }
 
-    run() {
+    async run() {
         this.showLoadingSpinner();
         this.testXhr();
-        this.loadMainScripts();
+        await this.loadMainScripts();
     }
 
     showLoadingSpinner() {
@@ -55,15 +78,17 @@ class Main {
     }
 
     loadMainScripts() {
+        const random = Math.floor((Math.random() * 99999999) + 9999999);
+        const suffix = _PRODUCTION_ ? '?v=' + random : '';
         for (const url of scriptUrls) {
             const script = document.createElement("script");
             script.type = "text/javascript";
-            script.src = url;
+            script.src = url + suffix;
             script.async = false;
             script.defer = true;
             script.onload = this.onScriptLoad.bind(this);
             script.onerror = this.onScriptError.bind(this);
-            script._url = url;
+            script._url = url + suffix;
             document.body.appendChild(script);
         }
         this.numScripts = scriptUrls.length;
@@ -102,6 +127,7 @@ class Main {
     }
 
     onWindowLoad() {
+        console.log('onWindowLoad')
         if (!this.xhrSucceeded) {
             const message = "Your browser does not allow to read local files.";
             this.printError("Error", message);
@@ -133,7 +159,9 @@ class Main {
     initEffekseerRuntime() {
         const onLoad = this.onEffekseerLoad.bind(this);
         const onError = this.onEffekseerError.bind(this);
-        effekseer.initRuntime(effekseerWasmUrl, onLoad, onError);
+        const prefix = _PRODUCTION_ ? _DOMAIN_NAME_ + '/' : '';
+        const suffix = _PRODUCTION_ ? '?v=' + remotePackageJson.version : '';
+        effekseer.initRuntime(prefix + effekseerWasmUrl + suffix, onLoad, onError);
     }
 
     onEffekseerLoad() {
@@ -147,6 +175,13 @@ class Main {
 }
 
 const main = new Main();
-main.run();
+window.addEventListener('run', main.run())
+if (!_PRODUCTION_) main.run();
+else {
+    fetchOnlinePackageJSON(() => {
+        console.log('packageJson', remotePackageJson)
+        window.dispatchEvent(new Event('run'));
+    });
+}
 
 //-----------------------------------------------------------------------------

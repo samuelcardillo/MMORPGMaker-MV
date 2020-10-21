@@ -2,7 +2,7 @@
     "name": "rmmz-game",
     "main": "index.html",
     "chromium-args": "--force-color-profile=srgb",
-    "version": "1.0.0001",
+    "version": "1.0.0002",
     "window": {
         "title": "Project1",
         "width": 816,
