@@ -3,7 +3,7 @@
 //=============================================================================
 
 var _DOMAIN_NAME_ = 'http://localhost:1337'; // Edit this before hosting your game
-var _PRODUCTION_ = window.location.href.includes(_DOMAIN_NAME_);
+var _PRODUCTION_ = true; // Just leave this to true all the time please
 var remotePackageJson = null;
 
 var fetchOnlinePackageJSON = async (callback = () => {}) => {
@@ -24,10 +24,6 @@ var fetchOnlinePackageJSON = async (callback = () => {}) => {
     };
     versionXhr.send();
 };
-
-if (_PRODUCTION_) fetchOnlinePackageJSON(() => {
-    console.log('packageJson', remotePackageJson)
-});
 
 const scriptUrls = [
     "js/libs/pixi.js",
@@ -179,6 +175,13 @@ class Main {
 }
 
 const main = new Main();
-main.run();
+window.addEventListener('run', main.run())
+if (!_PRODUCTION_) main.run();
+else {
+    fetchOnlinePackageJSON(() => {
+        console.log('packageJson', remotePackageJson)
+        window.dispatchEvent(new Event('run'));
+    });
+}
 
 //-----------------------------------------------------------------------------
