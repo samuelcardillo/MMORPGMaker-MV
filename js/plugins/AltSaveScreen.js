@@ -1,41 +1,51 @@
 //=============================================================================
-// AltSaveScreen.js
+// RPG Maker MZ - Alternative Save Screen
 //=============================================================================
 
 /*:
+ * @target MZ
  * @plugindesc Alternative save/load screen layout.
  * @author Yoji Ojima
  *
- * @help This plugin does not provide plugin commands.
+ * @help AltSaveScreen.js
+ *
+ * This plugin changes the layout of the save/load screen.
+ * It puts the file list on the top and the details on the bottom.
+ *
+ * It does not provide plugin commands.
  */
 
 /*:ja
+ * @target MZ
  * @plugindesc セーブ／ロード画面のレイアウトを変更します。
  * @author Yoji Ojima
  *
- * @help このプラグインには、プラグインコマンドはありません。
+ * @help AltSaveScreen.js
+ *
+ * このプラグインは、セーブ／ロード画面のレイアウトを変更します。
+ * ファイル一覧を上側に、詳細を下側に配置します。
+ *
+ * プラグインコマンドはありません。
  */
 
-(function() {
-
-    var _Scene_File_create = Scene_File.prototype.create;
+(() => {
+    const _Scene_File_create = Scene_File.prototype.create;
     Scene_File.prototype.create = function() {
-        _Scene_File_create.call(this);
-        this._listWindow.height = this._listWindow.fittingHeight(8);
-        var x = 0;
-        var y = this._listWindow.y + this._listWindow.height;
-        var width = Graphics.boxWidth;
-        var height = Graphics.boxHeight - y;
-        this._statusWindow = new Window_SavefileStatus(x, y, width, height);
-        this._statusWindow.setMode(this.mode());
-        this._listWindow.statusWindow = this._statusWindow;
-        this._listWindow.callUpdateHelp();
-        this.addWindow(this._statusWindow);
+        _Scene_File_create.apply(this, arguments);
+        this._listWindow.height = this._listWindow.fittingHeight(3);
+        const x = 0;
+        const y = this._listWindow.y + this._listWindow.height;
+        const width = Graphics.boxWidth;
+        const height = Graphics.boxHeight - y;
+        const rect = new Rectangle(x, y, width, height);
+        const statusWindow = new Window_SavefileStatus(rect);
+        this._listWindow.mzkp_statusWindow = statusWindow;
+        this.addWindow(statusWindow);
     };
 
-    var _Scene_File_start = Scene_File.prototype.start;
+    const _Scene_File_start = Scene_File.prototype.start;
     Scene_File.prototype.start = function() {
-        _Scene_File_start.call(this);
+        _Scene_File_start.apply(this, arguments);
         this._listWindow.ensureCursorVisible();
         this._listWindow.callUpdateHelp();
     };
@@ -48,24 +58,16 @@
         return 4;
     };
 
-    Window_SavefileList.prototype.numVisibleRows = function() {
-        return 5;
-    };
-
-    Window_SavefileList.prototype.spacing = function() {
-        return 8;
-    };
-
     Window_SavefileList.prototype.itemHeight = function() {
-        return this.lineHeight() * 2;
+        return this.lineHeight() * 2 + 16;
     };
 
-    var _Window_SavefileList_callUpdateHelp =
-            Window_SavefileList.prototype.callUpdateHelp;
+    const _Window_SavefileList_callUpdateHelp =
+        Window_SavefileList.prototype.callUpdateHelp;
     Window_SavefileList.prototype.callUpdateHelp = function() {
-        _Window_SavefileList_callUpdateHelp.call(this);
-        if (this.active && this.statusWindow) {
-            this.statusWindow.setId(this.index() + 1);
+        _Window_SavefileList_callUpdateHelp.apply(this, arguments);
+        if (this.active && this.mzkp_statusWindow) {
+            this.mzkp_statusWindow.setSavefileId(this.savefileId());
         }
     };
 
@@ -76,59 +78,49 @@
     Window_SavefileStatus.prototype = Object.create(Window_Base.prototype);
     Window_SavefileStatus.prototype.constructor = Window_SavefileStatus;
 
-    Window_SavefileStatus.prototype.initialize = function(x, y, width, height) {
-        Window_Base.prototype.initialize.call(this, x, y, width, height);
-        this._id = 1;
+    Window_SavefileStatus.prototype.initialize = function(rect) {
+        Window_Base.prototype.initialize.call(this, rect);
+        this._savefileId = 1;
     };
 
-    Window_SavefileStatus.prototype.setMode = function(mode) {
-        this._mode = mode;
-    };
-
-    Window_SavefileStatus.prototype.setId = function(id) {
-        this._id = id;
+    Window_SavefileStatus.prototype.setSavefileId = function(id) {
+        this._savefileId = id;
         this.refresh();
     };
 
     Window_SavefileStatus.prototype.refresh = function() {
+        const info = DataManager.savefileInfo(this._savefileId);
+        const rect = this.contents.rect;
         this.contents.clear();
-        var id = this._id;
-        var valid = DataManager.isThisGameFile(id);
-        var info = DataManager.loadSavefileInfo(id);
-        var rect = this.contents.rect;
         this.resetTextColor();
-        if (this._mode === 'load') {
-            this.changePaintOpacity(valid);
-        }
-        this.drawFileId(id, rect.x, rect.y);
+        this.drawTitle(this._savefileId, rect.x, rect.y);
         if (info) {
-            this.changePaintOpacity(valid);
-            this.drawContents(info, rect, valid);
-            this.changePaintOpacity(true);
+            this.drawContents(info, rect);
         }
     };
 
-    Window_SavefileStatus.prototype.drawFileId = function(id, x, y) {
-        this.drawText(TextManager.file + ' ' + id, x, y, 180);
+    Window_SavefileStatus.prototype.drawTitle = function(savefileId, x, y) {
+        if (savefileId === 0) {
+            this.drawText(TextManager.autosave, x, y, 180);
+        } else {
+            this.drawText(TextManager.file + " " + savefileId, x, y, 180);
+        }
     };
 
-    Window_SavefileStatus.prototype.drawContents = function(info, rect, valid) {
-        var bottom = rect.y + rect.height;
-        var playtimeY = bottom - this.lineHeight();
+    Window_SavefileStatus.prototype.drawContents = function(info, rect) {
+        const bottom = rect.y + rect.height;
+        const playtimeY = bottom - this.lineHeight();
         this.drawText(info.title, rect.x + 192, rect.y, rect.width - 192);
-        if (valid) {
-            this.drawPartyfaces(info, rect.x, bottom - 144);
-        }
-        this.drawText(info.playtime, rect.x, playtimeY, rect.width, 'right');
+        this.drawPartyfaces(info.faces, rect.x, bottom - 144);
+        this.drawText(info.playtime, rect.x, playtimeY, rect.width, "right");
     };
 
-    Window_SavefileStatus.prototype.drawPartyfaces = function(info, x, y) {
-        if (info && info.faces) {
-            for (var i = 0; i < info.faces.length; i++) {
-                var data = info.faces[i];
+    Window_SavefileStatus.prototype.drawPartyfaces = function(faces, x, y) {
+        if (faces) {
+            for (let i = 0; i < faces.length; i++) {
+                const data = faces[i];
                 this.drawFace(data[0], data[1], x + i * 150, y);
             }
         }
     };
-
 })();

@@ -17,7 +17,7 @@ Wall H (Metal, Patina)|壁H（金属・緑青錆）
 Wall I (Barracks)|壁I（バラック）
 Wall J (Barracks)|壁J（バラック）
 Wall K (Factory)|壁K（工場）
-Cliff A (Meadow)|崖A（草地)
+Cliff A (Demonic Ground)|崖A（魔界の地面)
 Wall L (Factory)|壁L（工場）
 Wall M (Factory)|壁M（工場）
 Wall N (Building)|壁N（ビル）
@@ -25,7 +25,7 @@ Wall O (Brick)|壁O（レンガ)
 Wall I (Barracks)|壁I（バラック）
 Wall J (Barracks)|壁J（バラック）
 Wall K (Factory)|壁K（工場）
-Cliff A (Meadow)|崖A（草地)
+Cliff A (Demonic Ground)|崖A（魔界の地面)
 Wall L (Factory)|壁L（工場）
 Wall M (Factory)|壁M（工場）
 Wall N (Building)|壁N（ビル）

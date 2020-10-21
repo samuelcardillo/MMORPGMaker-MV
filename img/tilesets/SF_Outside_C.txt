@@ -57,7 +57,7 @@ Gutter|側溝
 Demon Statue|悪魔像
 Goddess Statue|女神像
 Metal Fence|金属フェンス
-Warning Plate (Keep Out)|警告プレート（KEEP OUT）
+Warning Plate|警告プレート
 Metal Fence|金属フェンス
 Gutter|側溝
 Postal Box|ポスト
@@ -78,7 +78,7 @@ Pillar D (Decoration)|柱D（装飾）
 Pillar E (Metal)|柱E（金属）
 Pillar F (Brick)|柱F（レンガ）
 Food Waste|生ゴミ
-Warning Plate (Radioactivity Mark)|警告プレート（放射能マーク）
+Warning Plate|警告プレート
 Pillar A (Asphalt)|柱A（アスファルト）
 Pillar B (Metal)|柱B（金属）
 Pillar C (Machine)|柱C（機械）
@@ -86,7 +86,7 @@ Pillar D (Decoration)|柱D（装飾）
 Pillar E (Metal)|柱E（金属）
 Pillar F (Brick)|柱F（レンガ）
 Mysterious Liquid|謎の液体
-Warning Plate (Exclamation Mark)|警告プレート（！マーク）
+Warning Plate|警告プレート
 Broken Pillar A (Asphalt)|折れた柱A（アスファルト）
 Broken Pillar B (Metal)|折れた柱B（金属）
 Broken Pillar C (Machine)|折れた柱C（機械）

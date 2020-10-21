@@ -1,4 +1,4 @@
-﻿Decorative Pillar A (Stone)|装飾柱A（石）
+Decorative Pillar A (Stone)|装飾柱A（石）
 Decorative Pillar B (Stone)|装飾柱B（石）
 Decorative Pillar C (Temple)|装飾柱C（遺跡）
 Decorative Pillar D (Rock Cave)|装飾柱D（岩洞窟）

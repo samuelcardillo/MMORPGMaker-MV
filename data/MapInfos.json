@@ -1,5 +1,10 @@
 [
 null,
-{"id":1,"expanded":true,"name":"Global Map","order":1,"parentId":0,"scrollX":819,"scrollY":453},
-{"id":2,"expanded":false,"name":"Local Map","order":2,"parentId":0,"scrollX":832,"scrollY":640}
+{"id":1,"expanded":true,"name":"MAP001","order":1,"parentId":0,"scrollX":411.55555555555554,"scrollY":320.8888888888889},
+{"id":2,"expanded":true,"name":"MAP002","order":2,"parentId":1,"scrollX":411.55555555555554,"scrollY":320.8888888888889},
+{"id":3,"expanded":true,"name":"MAP003","order":3,"parentId":2,"scrollX":411.55555555555554,"scrollY":320.8888888888889},
+{"id":4,"expanded":true,"name":"MAP004","order":4,"parentId":3,"scrollX":411.55555555555554,"scrollY":320.8888888888889},
+{"id":5,"expanded":true,"name":"MAP005","order":5,"parentId":4,"scrollX":411.55555555555554,"scrollY":320.8888888888889},
+{"id":6,"expanded":true,"name":"MAP006","order":6,"parentId":5,"scrollX":411.55555555555554,"scrollY":320.8888888888889},
+{"id":7,"expanded":false,"name":"MAP007","order":7,"parentId":6,"scrollX":411.55555555555554,"scrollY":320.8888888888889}
 ]

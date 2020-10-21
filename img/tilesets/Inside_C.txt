@@ -1,107 +1,107 @@
-﻿Cup & Teapot A (Bottom)|カップとポットA（下）
-Cup & Teapot B (Top)|カップとポットB（上）
-Cup & Teapot C (Left)|カップとポットC（左）
-Cup & Teapot D (Right)|カップとポットD（右）
-Cup A (Bottom)|カップA（下）
-Cup B (Top)|カップB（上）
-Cup C (Left)|カップC（左）
-Cup D (Right)|カップD（右）
-Glass & Bottle A (Bottom)|グラスとボトルA（下）
-Glass & Bottle B (Top)|グラスとボトルB（上）
-Glass & Bottle C (Left)|グラスとボトルC（左）
-Glass & Bottle D (Right)|グラスとボトルD（右）
-Glass A (Bottom)|グラスA（下）
-Glass B (Top)|グラスB（上）
-Glass C (Left)|グラスC（左）
-Glass D (Right)|グラスD（右）
-Pint Mug & Ale Bottle A (Bottom)|ジョッキと瓶A（下）
-Pint Mug & Ale Bottles B (Top)|ジョッキと瓶B（上）
-Pint Mug & Ale Bottles C (Left)|ジョッキと瓶C（左）
-Pint Mug & Ale Bottle D (Right)|ジョッキと瓶D（右）
-Pint Mug A (Bottom)|ジョッキA（下）
-Pint Mug B (Top)|ジョッキB（上）
-Pint Mug C (Left)|ジョッキC（左）
-Pint Mug D (Right)|ジョッキD（右）
-Teapot|ポット
+﻿Teapot A|ティーポットA
+Teapot B|ティーポットB
+Cup (Lower Left)|カップ（左下）
+Cup (Upper Right)|カップ（右上）
+Pot A|ポットA
+Pot B|ポットB
+Glass A (Lower Left)|グラスA（左下）
+Glass A (Upper Right)|グラスA（右上）
 Bottle A|ボトルA
-Bottles B|ボトルB
-Bottles C|ボトルC
+Bottle B|ボトルB
+Glass B (Lower Left)|グラスB（左下）
+Glass B (Upper Right)|グラスB（右上）
+Glass C (Lower Left)|グラスC（左下）
+Glass C (Upper Right)|グラスC（右上）
+Glass D (Lower Left)|グラスD（左下）
+Glass D (Upper Right)|グラスD（右上）
+Pot C|ポットC
+Pot D|ポットD
+Pint Mug A (Lower Left)|ジョッキA（左下）
+Pint Mug A (Upper Right)|ジョッキA（右上）
+Pint Mug B (Lower Left)|ジョッキB（左下）
+Pint Mug B (Upper Right)|ジョッキB（右上）
+Glass E (Lower Left)|グラスE（左下）
+Glass E (Upper Right)|グラスE（右上）
+Bottle C|ボトルC
 Broken Bottle|割れたボトル
-Ale Bottle A|瓶A
-Ale Bottles B|瓶B
-Ale Bottles C|瓶C
-Meal (Fish)|魚料理
-Meal (Meat)|肉料理
+Bottle D|ボトルD
+Bottle E|ボトルE
+Bottle F|ボトルF
+Pint Mug C|ジョッキC
+Pint Mug D|ジョッキD
+Glass F|グラスF
 Side Dishes|副菜
-Fruit Bowl|フルーツ盛り合わせ
-Roast Pig|丸焼き
-Cake|ケーキ
-Pizza|ピザ
+Meal (Meat)|肉料理
+Assorted Vegetables|野菜盛り合わせ
+Assorted Fruitsl|フルーツ盛り合わせ
+Roast Chicken|丸焼き
 Meal (Fish)|魚料理
+Pasta|パスタ
+Assorted Cakes|ケーキ盛り合わせ
 Dinner Set A (Bottom)|夕食セットA（下）
 Dinner Set B (Top)|夕食セットB（上）
 Dinner Set C (Left)|夕食セットC（左）
 Dinner Set D (Right)|夕食セットD（右）
-Pie|パイ
+Gratin|グラタン
 Fried Rice|チャーハン
-Mystery Dishes|謎の料理
-Cooking Disaster|失敗料理
+Beef Stew|ビーフシチュー
+Paella|パエリア
 Breakfast Set A (Bottom)|朝食セットA（下）
 Breakfast Set B (Top)|朝食セットB（上）
 Breakfast Set C (Left)|朝食セットC（左）
 Breakfast Set D (Right)|朝食セットD（右）
+Assorted Cheeses|チーズ盛り合わせ
+Stew|シチュー
+Mushroom Dishes|きのこ料理
+Tart|タルト
+Beer Barrel A|ビール樽A
+Beer Barrel B|ビール樽B
 Plate A|皿A
-Bowl|ボウル
 Plates B|皿B
 Plates C|皿C
-Closed Book A (Bottom)|閉じた本A（下）
-Closed Book B (Top)|閉じた本B（上）
-Closed Book C (Left)|閉じた本C（左）
-Closed Book D (Right)|閉じた本D（右）
-Open Book A (Bottom)|開いた本A（下）
-Open Book B (Top)|開いた本B（上）
-Open Book C (Left)|開いた本C（左）
-Open Book D (Right)|開いた本D（右）
-Closed Old Book A (Bottom)|閉じた古文書A（下）
-Closed Old Book B (Top)|閉じた古文書B（上）
-Closed Old Book C (Left)|閉じた古文書C（左）
-Closed Old Book D (Right)|閉じた古文書D（右）
-Open Old Book A (Bottom)|開いた古文書A（下）
-Open Old Book B (Top)|開いた古文書B（上）
-Open Old Book C (Left)|開いた古文書C（左）
-Open Old Book D (Right)|開いた古文書D（右）
-Notes & Pen A (Bottom)|メモとペンA（下）
-Notes & Pen B (Top)|メモとペンB（上）
-Notes & Pen C (Left)|メモとペンC（左）
-Notes & Pen D (Right)|メモとペンD（右）
-Map A (Bottom)|地図A（下）
-Map B (Top)|地図B（上）
-Map C (Left)|地図C（左）
-Map D (Right)|地図D（右）
-Envelope & Letter|封筒と便箋
+Chopping Board|まな板
+Soup Bowl|スープボウル
+Paella Pan|パエリア鍋
+Closed Book A (V)|閉じた本A（縦）
+Closed Book A (H)|閉じた本A（横）
+Closed Book B (V)|閉じた本B（縦）
+Closed Book B (H)|閉じた本B（横）
+Open Book A (V)|開いた本A（縦）
+Open Book A (H)|開いた本A（横）
+Closed Books C|閉じた本C
+Closed Book D|閉じた本D
+Note A (V)|メモA（縦）
+Note A (H)|メモA（横）
+Notes B (V)|メモB（縦）
+Pen A|ペン
+Map A (V)|地図A（縦）
+Map B (H)|地図B（横）
+Note C (V)|メモC（縦）
+Note C (H)|メモC（横）
+Notes D|メモD
 Envelope|封筒
 Scrolls A|巻物A
 Scrolls B|巻物B
-Vase|花瓶
+Planter A|プランターA
+Planter B|プランターB
 Potted Plant A|植木鉢A
 Potted Plant B|植木鉢B
-Planter|プランター
 Case A|ケースA
 Case B|ケースB
-Letter Case|レターケース
-Cutting Board|まな板
+Case C|ケースC
+Hourglass|砂時計
 Small Box A|小箱A
 Small Box B|小箱B
 Small Box C|小箱C
 Small Box D|小箱D
 Sack A|袋A
 Sacks B|袋B
-Sacks C|袋C
 Medicine Bottle A|薬瓶A
 Medicine Bottles B|薬瓶B
-Medicine Bottles C|薬瓶C
 Potion A|液体入り瓶A
-Potions B|液体入り瓶B
+Potion B|液体入り瓶B
+Potion C|液体入り瓶C
+Potion D|液体入り瓶D
 Basket A|バスケットA
 Basket B|バスケットB
 Basket C|バスケットC
@@ -109,22 +109,22 @@ Basket D|バスケットD
 Rugs A|じゅうたんA
 Rugs B|じゅうたんB
 Rugs C|じゅうたんC
-Lab Equipment|実験器具
+Balance|天秤
 Stuffed Doll A|ぬいぐるみA
 Stuffed Doll B|ぬいぐるみB
 Stuffed Doll C|ぬいぐるみC
-Stuffed Doll D|ぬいぐるみD
 Doll A|人形A
 Doll B|人形B
+Doll C|人形C
 Gifts A|プレゼントA
 Gifts B|プレゼントB
-Shovel|スコップ
-Pickax|つるはし
-Rope A|ロープA
-Rope B|ロープB
-Pendant|ペンダント
+Globe|地球儀
+Bell|ベル
+Cloth (Magic Circle)|布（魔法陣）
+Crystal Ball|水晶玉
 Jewelry Case A|宝石ケースA
 Necklace|ネックレス
+Crown|王冠
 Jewelry Case B|宝石ケースB
 Sword A|剣A
 Swords B|剣B
@@ -135,7 +135,7 @@ Spears B|槍B
 Whip|鞭
 Knives|短剣
 Cooking Utensils|調理器具
-Dry Flowers|ドライフラワー
+Hanging Meat|吊るし肉
 Shield A|盾A
 Shield B|盾B
 Men's Clothing A (Hanging)|男物の服A（壁掛け）
@@ -156,44 +156,44 @@ Helmet C|兜C
 Hat A (Stand)|帽子A（スタンド）
 Hat B (Stand)|帽子B（スタンド）
 Hat C (Stand)|帽子C（スタンド）
-Women's Clothing (Stand)|女物の服（スタンド）
-Dress (Stand)|ドレス（スタンド）
+Women's Clothing A (Stand)|女物の服A（スタンド）
+Women's Clothing B (Stand)|女物の服B（スタンド）
 Armor A (Stand)|鎧A（スタンド）
 Armor B (Stand)|鎧B（スタンド）
 Armor C (Stand)|鎧C（スタンド）
 Armor D (Stand)|鎧D（スタンド）
-Men's Clothing (Stand)|男物の服（スタンド）
-Cape (Stand)|マント（スタンド）
-Robe A (Stand)|ローブA（スタンド）
-Robe B (Stand)|ローブB（スタンド）
+Women's Clothing C (Stand)|女物の服C（スタンド）
+Men's Clothing A (Stand)|男物の服A（スタンド）
+Men's Clothing B (Stand)|男物の服B（スタンド）
+Women's Clothing D (Stand)|女物の服D（スタンド）
 Church Symbol|教会のシンボル
-Angel Statue A|天使像A
-Angel Statue B|天使像B
 Goddess Statue|女神像
-Statue|石像
+God Statue|神像
+Statue A|石像A
+Statue B|石像B
 Dais|台座
 Repository of Swords|剣立て
 Repository of Spears|槍立て
 Church Symbol|教会のシンボル
-Angel Statue A|天使像A
-Angel Statue B|天使像B
 Goddess Statue|女神像
-Statue|石像
+God Statue|神像
+Statue A|石像A
+Statue B|石像B
 Broken Statue|壊れた像
 Repository of Swords|剣立て
 Repository of Spears|槍立て
-Church Table A|教会机A
-Church Table A|教会机A
-Church Table A|教会机A
-Church Table B|教会机B
+Church Table|教会机
+Church Table|教会机
+Church Table|教会机
+Decorative Pillar A|装飾柱A
 Decorative Pillar A|装飾柱A
 Decorative Pillar B|装飾柱B
 Decorative Pillar A (Ruins)|装飾柱A（廃墟）
 Decorative Pillar B (Ruins)|装飾柱B（廃墟）
-Church Table A|教会机A
-Church Table A|教会机A
-Church Table A|教会机A
-Church Table B|教会机B
+Church Table|教会机
+Church Table|教会机
+Church Table|教会机
+Decorative Pillar A (Ruins)|装飾柱A（廃墟）
 Decorative Pillar A|装飾柱A
 Decorative Pillar B|装飾柱B
 Decorative Pillar A (Ruins)|装飾柱A（廃墟）

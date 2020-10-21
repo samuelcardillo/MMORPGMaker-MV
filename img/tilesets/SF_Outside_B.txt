@@ -35,25 +35,25 @@ White Line|白線
 White Line|白線
 White Line|白線
 White Line|白線
-Yellow & Black Line|黄黒線
-Yellow & Black Line|黄黒線
-Yellow & Black Line|黄黒線
+Red & Black Line|赤黒線
+Red & Black Line|赤黒線
+Red & Black Line|赤黒線
 White Line|白線
 Traffic Lights (Car)|信号機（車）
 Traffic Lights (Pedestrian)|信号機（歩行者）
 Entrance A|入口A
 White Line (Crosswalk)|白線（横断歩道）
-Yellow & Black Line|黄黒線
+Red & Black Line|赤黒線
 Traffic Cone|通行止めコーン
-Yellow & Black Line|黄黒線
+Red & Black Line|赤黒線
 White Line|白線
 Traffic Lights (Car)|信号機（車）
-Traffic Lights (Walker)|信号機（歩行者）
+Traffic Lights (Pedestrian)|信号機（歩行者）
 Entrance B|入口B
-White Line (Crosswalk)|白線（横断歩道）
-Yellow & Black Line|黄黒線
-Yellow & Black Line|黄黒線
-Yellow & Black Line|黄黒線
+White Line|白線
+Red & Black Line|赤黒線
+Red & Black Line|赤黒線
+Red & Black Line|赤黒線
 Window A|窓A
 Window B|窓B
 Window C|窓C
@@ -109,22 +109,22 @@ Exhaust Port Wall|壁面用排気口
 Roof Window|屋根用出窓
 Stacked Crates|積まれた木箱
 Shipping Container|コンテナ
-Stacked Cardboard Boxes|積まれたダンボール
+Stacked Cardboard|積まれたダンボール
 Wall Poster|張り紙
 Signboard A|看板A
-Signboard C|看板C
+Signboard B|看板B
 Digital Signage A|電子看板A
 Digital Signage C|電子看板C
 Neon Shop Sign (CASINO)|ネオン看板（カジノ)
 Neon Shop Sign (CASINO)|ネオン看板（カジノ)
 Small Crane|小型クレーン
 Poster|ポスター
-Signboard B|看板B
+Signboard C|看板C
 Digital Signage B|電子看板B
 Digital Signage B|電子看板B
 Digital Signage C|電子看板C
 Iron Materials|鉄資材
-Helmet & Tool|ヘルメットと工具
+Helmet|ヘルメット
 Small Crane|小型クレーン
 Crate|木箱
 Shipping Container|コンテナ
@@ -152,8 +152,8 @@ Avenue Tree|街路樹
 Utility Pole|電柱
 Public Phone|公衆電話
 Machine Device|機械端末
-Planter (Flower)|プランター（花）
 Planter (Plant)|プランター（植物）
+Planter (Potted Plant)|プランター（盆栽）
 Potted Plant|植木鉢
 Tree (Loop)|木（ループ）
 Tombstone (Cross)|墓石（十字架）
@@ -187,8 +187,8 @@ Guardrail|ガードレール
 Timetable|時刻表
 Piled Up Tires|積まれたタイヤ
 Small Fuel Tank|小型燃料タンク
-Car (White)|車（白）
-Car (White)|車（白）
+Car (Red)|車（赤）
+Car (Red)|車（赤）
 Manhole|マンホール
 Bus|バス
 Bus|バス
@@ -203,8 +203,8 @@ Bus|バス
 Truck|トラック
 Truck|トラック
 Wrecked Car|壊れた車
-Car (Red)|車（赤）
-Car (Red)|車（赤）
+Car (Blue)|車（青）
+Car (Blue)|車（青）
 Oil Drum (Leak)|ドラム缶（液漏れ）
 Food Stalls|露店（食べ物）
 Food Stalls|露店（食べ物）
@@ -212,16 +212,16 @@ Food Stalls|露店（食べ物）
 Stall Goods A|露店商品A
 Stairs A (Up)|階段A（上り）
 Stairs B (Up)|階段B（上り）
-Stairs C (Up)|階段C（上り）
-Stairs D (Up)|階段D（上り）
+Stairs C (Down)|階段C（下り）
+Stairs D (Down)|階段D（下り）
 Food Stalls|露店（食べ物）
 Food Stalls|露店（食べ物）
 Food Stalls|露店（食べ物）
 Stall Goods B|露店商品B
+Stairs C (Up)|階段C（上り）
+Stairs D (Up)|階段D（上り）
 Stairs A (Down)|階段A（下り）
 Stairs B (Down)|階段B（下り）
-Stairs C (Down)|階段C（下り）
-Stairs D (Down)|階段D（下り）
 Food Stalls|露店（食べ物）
 Food Stalls|露店（食べ物）
 Food Stalls|露店（食べ物）
