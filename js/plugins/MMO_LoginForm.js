@@ -91,7 +91,7 @@ function LoginForm() {
         <br />
         <button id="btnConnect" style="display: block; margin: 0 auto; border: 0; border-radius: 4px; padding: 8px; font-size: 24px;" class="">Jouer</button>
     </div>
-    <div style="text-align: center; margin-top: 8px;"><a style="color: white;" href="http: //andaroth.art/mmorpg/register.html" target="_blank">S'inscrire</a></div>
+    <div style="text-align: center; margin-top: 8px;"><a style="color: white;" href="./mmorpg/register.html" target="_blank">S'inscrire</a></div>
 </div>`;
 
 
@@ -191,7 +191,7 @@ function LoginForm() {
 
       SceneManager.goto(Scene_Map);
       MMO_Core.allowTouch = true;
-      _requestFullScreen({browserOnly:true});
+      // _requestFullScreen({browserOnly:true});
       setTimeout(async () => {
         setTimeout(async () => MMO_Core.socket.emit("new_message", '/count'), 1);
         MMO_Core.socket.emit("new_message", '/all vient de se connecter');
