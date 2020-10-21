@@ -1,17 +1,17 @@
 ﻿Transparent|透明
-Beanstalk A|豆の木A
+Wall Moss|壁の苔
 Stairs A (Up)|階段A（上り）
 Stairs B (Up)|階段B（上り）
 Metal Ladder|鉄ばしご
-Rope Ladder|縄ばしご
+Wood Ladder|木製はしご
 Rope|ロープ
 Vines A|ツタA
-Beanstalk B (Snow)|豆の木B（雪）
-Beanstalk C (Dead)|豆の木C（枯れ）
+Fissures A|亀裂A
+Wall Fern|壁のシダ
 Stairs A (Down)|階段A（下り）
 Stairs B (Down)|階段B（下り）
 Metal Ladder|鉄ばしご
-Rope Ladder|縄ばしご
+Wood Ladder|木製はしご
 Rope|ロープ
 Vines A|ツタA
 Crumbling Wall|崩れた壁
@@ -19,7 +19,7 @@ Dug-Up Ground|掘られた床
 Stairs C (Up)|階段C（上り）
 Stairs D (Up)|階段D（上り）
 Metal Ladder|鉄ばしご
-Rope Ladder|縄ばしご
+Wood Ladder|木製はしご
 Rope|ロープ
 Vines B (Down)|ツタB（下り）
 Crumbling Wall|崩れた壁
@@ -27,25 +27,9 @@ Dug-Up Ground|掘られた床
 Stairs C (Down)|階段C（下り）
 Stairs D (Down)|階段D（下り）
 Hole A (Metal Ladder)|穴A（鉄ばしご）
-Hole B (Rope Ladder)|穴B（縄ばしご）
+Hole B (Wood Ladder)|穴B（木製はしご）
 Hole C (Rope)|穴C（ロープ）
 Hole D|穴D
-Log Bridge (V)|丸太の橋（縦）
-Log Bridge (H)|丸太の橋（横）
-Wood Bridge (V)|木の橋（縦）
-Wood Bridge (H)|木の橋（横）
-Stone Bridge (V)|石の橋（縦）
-Stone Bridge (H)|石の橋（横）
-Wood Bridge (V)|木の橋（縦）
-Wood Bridge (H)|木の橋（横）
-Bridge Spar (Wood, Center A)|橋げた（木・中央A）
-Bridge Spar (Wood, Left)|橋げた（木・左）
-Bridge Spar (Wood, Center B)|橋げた（木・中央B）
-Bridge Spar (Wood, Right)|橋げた（木・右）
-Bridge Spar (Stone, Center A)|橋げた（石・中央A）
-Bridge Spar (Stone, Left)|橋げた（石・左）
-Bridge Spar (Stone, Center B)||橋げた（石・中央B）
-Bridge Spar (Stone, Right)|橋げた（石・右）
 Gravel A (Dirt Cave)|砂利A（土洞窟）
 Gravel B (Rock Cave)|砂利B（岩洞窟）
 Gravel C (Lava Cave)|砂利C（溶岩洞窟）
@@ -78,34 +62,66 @@ Tall Rock D  (Grass Maze)|大きな岩D（草迷宮）
 Large Crystal|大きな水晶
 Large Growth|大型突起物
 Tall Rock E (Demonic World)|大きな岩E（魔界）
+Monument A|石碑A
+Monument B|石碑B
+Large Monument|大きな石碑
+Large Monument|大きな石碑
+Large Monument|大きな石碑
+Large Monument (Light)|大きな石碑（光）
+Large Monument (Light)|大きな石碑（光）
+Large Monument (Light)|大きな石碑（光）
+Monument A|石碑A
+Monument C|石碑C
+Large Monument|大きな石碑
+Large Monument|大きな石碑
+Large Monument|大きな石碑
+Large Monument (Light)|大きな石碑（光）
+Large Monument (Light)|大きな石碑（光）
+Large Monument (Light)|大きな石碑（光）
+Statue|石像
+Angel Statue|天使像
+Goddess Statue|女神像
+Dais|台座
+God Statue|神像
+Demon Statue|悪魔像
+Dragon Statue|竜像
+Dragon Statue|竜像
+Statue|石像
+Angel Statue|天使像
+Goddess Statue|女神像
+Broken Statue|壊れた像
+God Statue|神像
+Demon Statue|悪魔像
+Dragon Statue|竜像
+Dragon Statue|竜像
+Obelisk|オベリスク
 Stone Pillar A|石の柱A
 Stone Pillar B|石の柱B
+Stone Pillar B (Moss)|石の柱B（苔）
+Stone Pillar B (Ice)|石の柱B（氷）
 Stone Pillar C|石の柱C
-Stone Pillar C (Moss)|石の柱C（苔）
-Stone Pillar C (Ice)|石の柱C（氷）
-Wood Pillar|木の柱
 Stone Pillar D|石の柱D
 Orb Pillar|オーブの柱
+Obelisk|オベリスク
 Stone Pillar A|石の柱A
 Stone Pillar B|石の柱B
+Stone Pillar B (Moss)|石の柱B（苔）
+Stone Pillar B (Ice)|石の柱B（氷）
 Stone Pillar C|石の柱C
-Stone Pillar C (Moss)|石の柱C（苔）
-Stone Pillar C (Ice)|石の柱C（氷）
-Wood Pillar|木の柱
 Stone Pillar D|石の柱D
 Orb Pillar|オーブの柱
+Obelisk|オベリスク
 Broken Stone Pillar A|折れた石の柱A
 Broken Stone Pillar B|折れた石の柱B
-Broken Stone Pillar C|折れた石の柱C
-Broken Stone Pillar C (Moss)|折れた石の柱C（苔）
-Broken Stone Pillar C (Ice)|折れた石の柱C（氷）
-Broken Wood Pillar A|折れた木の柱A
+Broken Stone Pillar B (Moss)|折れた石の柱B（苔）
+Broken Stone Pillar B (Ice)|折れた石の柱B（氷）
+Stone Pillar C|石の柱C
 Broken Stone Pillar D|折れた石の柱D
 Broken Orb Pillar|折れたオーブの柱
 Rubble|瓦礫A
 Rubble (Moss)|瓦礫B（苔）
 Rubble (Ice)|瓦礫C（氷）
-Broken Wood Pillar B|折れた木の柱B
+Broken Stone Pillar C|折れた石の柱C
 Rubble (Dirt)|瓦礫D（土）
 Scrap Wood|端材
 Barricade A (H)|バリケードA（横）
@@ -126,6 +142,22 @@ Wall Bracing|壁の補強材
 Wall Bracing (Abandoned Mine)|壁の補強材（廃坑）
 Wall Bracing (Abandoned Mine)|壁の補強材（廃坑）
 Wall Bracing (Abandoned Mine)|壁の補強材（廃坑）
+Log Bridge (V)|丸太の橋（縦）
+Log Bridge (H)|丸太の橋（横）
+Wood Bridge (V)|木の橋（縦）
+Wood Bridge (H)|木の橋（横）
+Stone Bridge (V)|石の橋（縦）
+Stone Bridge (H)|石の橋（横）
+Wood Bridge (V)|木の橋（縦）
+Wood Bridge (H)|木の橋（横）
+Bridge Spar (Wood, Center A)|橋げた（木・中央A）
+Bridge Spar (Wood, Left)|橋げた（木・左）
+Bridge Spar (Wood, Center B)|橋げた（木・中央B）
+Bridge Spar (Wood, Right)|橋げた（木・右）
+Bridge Spar (Stone, Center A)|橋げた（石・中央A）
+Bridge Spar (Stone, Left)|橋げた（石・左）
+Bridge Spar (Stone, Center B)||橋げた（石・中央B）
+Bridge Spar (Stone, Right)|橋げた（石・右）
 Exit A|外への出口A
 Entrance A|入口A
 Exit B|外への出口B
@@ -153,51 +185,19 @@ Entrance A (Top Half B)|入口A（上半分B）
 Wall Vines A|壁のツタA
 Wall Vines B|壁のツタB
 Wall Vines C|壁のツタC
-Wall Fern|壁のシダ
-Fissures A|亀裂A
 Fissures B|亀裂B
 Fissures C|亀裂C
 Fissures D|亀裂D
+Fissures E|亀裂E
+Beanstalk A|豆の木A
 Wall Vines A|壁のツタA
 Wall Vines B|壁のツタB
 Wall Vines C|壁のツタC
-Wall Moss|壁の苔
-Fissures A|亀裂A
 Fissures B|亀裂B
 Fissures C|亀裂C
 Fissures D|亀裂D
-Monument A|石碑A
-Monument B|石碑B
-Large Monument|大きな石碑
-Large Monument|大きな石碑
-Large Monument|大きな石碑
-Large Monument (Lit)|大きな石碑（光）
-Large Monument (Lit)|大きな石碑（光）
-Large Monument (Lit)|大きな石碑（光）
-Monument A|石碑A
-Monument C|石碑C
-Large Monument|大きな石碑
-Large Monument|大きな石碑
-Large Monument|大きな石碑
-Large Monument (Lit)|大きな石碑（光）
-Large Monument (Lit)|大きな石碑（光）
-Large Monument (Lit)|大きな石碑（光）
-Statue A|石像A
-Angel Statue A|天使像A
-Angel Statue B|天使像B
-Dais|台座
-Statue B|石像B
-Demon Statue|悪魔像
-Dragon Statue|竜像
-Dragon Statue|竜像
-Statue A|石像A
-Angel Statue A|天使像A
-Angel Statue B|天使像B
-Dais|台座
-Statue B|石像B
-Demon Statue|悪魔像
-Dragon Statue|竜像
-Dragon Statue|竜像
+Beanstalk B (Snow)|豆の木B（雪）
+Beanstalk C (Dead)|豆の木C（枯れ）
 Large Gravel Mound A (Dirt)|大きな土砂A（土）
 Large Gravel Mound A (Dirt)|大きな土砂A（土）
 Large Gravel Mound B (Stone)|大きな土砂B（石）

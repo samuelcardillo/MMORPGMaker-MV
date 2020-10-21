@@ -1,27 +1,43 @@
 ﻿Darkness|暗闇
+Floating Floor A (Dirt)|浮かぶ床A（土）
+Floating Floor B (Rock)|浮かぶ床B（岩）
 Translucent Floor A|半透明の床A
 Translucent Floor B|半透明の床B
-Translucent Floor C|半透明の床C
-Translucent Floor D|半透明の床D
-Stairs A (Translucent)|階段A（半透明）
+Stairs A (Dirt)|階段A（土）
 Stairs B (Translucent)|階段B（半透明）
 Wire Mesh|金網
 Transparent|透明
+Floating Floor A (Dirt)|浮かぶ床A（土）
+Floating Floor B (Rock)|浮かぶ床B（岩）
 Translucent Floor A|半透明の床A
 Translucent Floor B|半透明の床B
-Translucent Floor C|半透明の床C
-Translucent Floor D|半透明の床D
-Stairs A (Translucent)|階段C（半透明）
-Stairs B (Translucent)|階段D（半透明）
+Stairs A (Rock)|階段A（岩）
+Stairs B (Translucent)|階段B（半透明）
 Wire Mesh|金網
-Ground A (Dirt Cave)|床A（土洞窟）
-Ground B (Rock Cave)|床B（岩洞窟）
-Ground C (Lava Cave)|床C（溶岩洞窟）
-Ground D (Ice Cave)|床D（氷洞窟）
-Ground E (Grass Maze)|床E（草迷宮）
-Ground F (Crystal)|床F（水晶）
-Ground G (In Body)|床G（体内）
-Ground H (Demonic World)|床H（魔界）
+Ground A (Wood)|床A（木製）
+Ground B (Wood)|床B（木製）
+Ground (Wood, Ruins)|床A（木製・廃墟）
+Ground (Wood, Ruins)|床B（木製・廃墟）
+Cobblestones A|石畳A
+Cobblestones B|石畳B
+Cobblestones C|石畳C
+Cobblestones D|石畳D
+Cobblestones E|石畳E
+Decorative Tile A|化粧タイルA
+Decorative Tile B|化粧タイルB
+Interior Floor A|内装床A
+Interior Floor B (Light)|内装床B（明かり）
+Tile Floor A|タイル床A
+Tile Floor B|タイル床B
+Tile Floor C|タイル床C
+Cobblestones F|石畳F
+Ground C (Rock Cave, Red Crystal)|床C（岩洞窟・赤水晶）
+Ground D (Rock Cave, Blue Crystal)|床D（岩洞窟・青水晶）
+Ground E (Rock Cave, Green Crystal)|床E（岩洞窟・緑水晶）
+Ground F (Dirt)|床F（土）
+Ground G (Demon Castle)|床G（魔王城）
+Ground H (Gold)|床H（黄金）
+Ground I (Ice)|床I（氷）
 Stairs A (Dirt Cave, Left)|階段A（土洞窟・左）
 Stairs A (Dirt Cave, Center)|階段A（土洞窟・中央）
 Stairs A (Dirt Cave, Right)|階段A（土洞窟・右）
@@ -30,14 +46,6 @@ Stairs B (Rock Cave, Left)|階段B（岩洞窟・左）
 Stairs B (Rock Cave, Center)|階段B（岩洞窟・中央）
 Stairs B (Rock Cave, Right)|階段B（岩洞窟・右）
 Stairs B (Rock Cave)|階段B（岩洞窟）
-Cobblestones A|石畳A
-Cobblestones B|石畳B
-Cobblestones C|石畳C
-Cobblestones D|石畳D
-Cobblestones E|石畳E
-Cobblestones F|石畳F
-Cobblestones G|石畳G
-Interior Floor A (Demon Castle)|内装床A（魔王城）
 Stairs C (Lava Cave, Left)|階段C（溶岩洞窟・左）
 Stairs C (Lava Cave, Center)|階段C（溶岩洞窟・中央）
 Stairs C (Lava Cave, Right)|階段C（溶岩洞窟・右）
@@ -46,14 +54,6 @@ Stairs D (Ice Cave, Left)|階段D（氷洞窟・左）
 Stairs D (Ice Cave, Center)|階段D（氷洞窟・中央）
 Stairs D (Ice Cave, Right)|階段D（氷洞窟・右）
 Stairs D (Ice Cave)|階段D（氷洞窟）
-Cobblestones H|石畳H
-Interior Floor B (Concrete)|内装床B（コンクリート）
-Icy Ground A|氷の床A
-Interior Floor C (Factory)|内装床C（工場）
-Decorative Tile|舗装床
-Cobblestones I|石畳I
-Cobblestones J|石畳J
-Decorative Tile|化粧タイル
 Stairs E (Grass Maze, Left)|階段E（草迷宮・左）
 Stairs E (Grass Maze, Center)|階段E（草迷宮・中央）
 Stairs E (Grass Maze, Right)|階段E（草迷宮・右）
@@ -99,29 +99,29 @@ Cobblestones B (Ruins)|石畳B（廃墟）
 Cobblestones C (Ruins)|石畳C（廃墟）
 Cobblestones D (Ruins)|石畳D（廃墟）
 Cobblestones E (Ruins)|石畳E（廃墟）
+Decorative Tile A (Ruins)|化粧タイルA（廃墟）
+Decorative Tile B (Ruins)|化粧タイルB（廃墟）
+Interior Floor A (Ruins)|内装床A（廃墟）
+Tile Floor A (Ruins)|タイル床A（廃墟）
+Tile Floor B (Ruins)|タイル床B（廃墟）
+Tile Floor C (Ruins)|タイル床C（廃墟）
 Cobblestones F (Ruins)|石畳F（廃墟）
-Cobblestones G (Ruins)|石畳G（廃墟）
-Interior Floor A (Demon Castle, Ruins)|内装床A（魔王城・廃墟）
-Cobblestones H (Ruins)|石畳H（廃墟）
-Interior Floor B (Concrete, Ruins)|内装床B（コンクリート・廃墟）
-Icy Ground B|氷の床B
-Interior Floor D (Factory)|内装床D（工場）
-Decorative Tile (Ruins)|舗装床（廃墟）
-Cobblestones I (Ruins)|石畳I（廃墟）
-Cobblestones J (Ruins)|石畳J（廃墟）
-Decorative Tile (Ruins)|化粧タイル（廃墟）
-Large Relief Floor Tile A|大きなレリーフ床A
-Large Relief Floor Tile A|大きなレリーフ床A
-Large Relief Floor Tile B|大きなレリーフ床B
-Large Relief Floor Tile B|大きなレリーフ床B
+Ground F (Dirt, Ruins)|床F（土・廃墟）
+Ground G (Demon Castle, Ruins)|床G（魔王城・廃墟）
+Ground I (Ice, Ruins)|床I（氷・廃墟）
+Relief Floor Tile (Silver)|レリーフ床（銀）
+Large Relief Floor Tile|大きなレリーフ床
+Large Relief Floor Tile|大きなレリーフ床
+Large Relief Floor Tile (Ruins)|大きなレリーフ床（廃墟）
+Large Relief Floor Tile (Ruins)|大きなレリーフ床（廃墟）
 Directional Floor Tile A (Down)|方向床A（下）
 Directional Floor Tile B (Up)|方向床B（上）
 Relief Floor Tile A (Gold)|レリーフ床A（金）
 Relief Floor Tile B (Gold)|レリーフ床B（金）
-Large Relief Floor Tile A|大きなレリーフ床A
-Large Relief Floor Tile A|大きなレリーフ床A
-Large Relief Floor Tile B|大きなレリーフ床B
-Large Relief Floor Tile B|大きなレリーフ床B
+Large Relief Floor Tile|大きなレリーフ床
+Large Relief Floor Tile|大きなレリーフ床
+Large Relief Floor Tile (Ruins)|大きなレリーフ床（廃墟）
+Large Relief Floor Tile (Ruins)|大きなレリーフ床（廃墟）
 Directional Floor Tile C (Left)|方向床C（左）
 Directional Floor Tile D (Right)|方向床D（右）
 Relief Floor Tile C (Gold)|レリーフ床C（金）
