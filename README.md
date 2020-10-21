@@ -1,18 +1,22 @@
-# (MMO)RPG Maker MV (and MZ)
+# (MMO)RPG Maker MZ 
+### (by [Axel FIOLLE](https://axelfiolle.be), and based on [MV version by Samuel Cardillo](https://github.com/samuelcardillo/MMORPGMaker-MV))
+
+## **Disclaimer :** *You HAVE to own an RPG Maker MV AND MZ in order to use this repack !!!*
+---
 
 ## Summary
 This is a project I started in 2016 and on which I worked for only few weeks. In 2019 I stumbled upon an old version of the code which I have tested & refactored (a little bit). I also decided to restart working on it on my free time - which I almost have not - and open source it with the hopes that some other cool people upgrade it!
 
 ## History
-I have used RPG Maker since its 2000 version. Discovered it when I was a kid and used it to make many (very bad) games. It clearly impacted a lot on my creativity and my development desires. Later on, as a French-speaking person, I discovered a (now dead) project named FROG Creator which was a dedicated at creating MMORPG in a RPG Maker-like environment. 
+Samuel Cardillo has used RPG Maker since its 2000 version. Discovered it when he was a kid and used it to make many (very bad he says) games. It clearly impacted a lot on his creativity and his development desires. Later on, as a French-speaking person, he discovered a (now dead) project named FROG Creator which was a dedicated at creating MMORPG in a RPG Maker-like environment. 
 
-With the release of RPG MAKER MV which allows usage of JavaScript and its HTML5 export, I decided to give it a try and discovered quickly that yes, RPG Maker MV could easily be used to create an MMORPG creator interface.
+With the release of RPG MAKER MV which allows usage of JavaScript and its HTML5 export, he decided to give it a try and discovered quickly that yes, RPG Maker MV could easily be used to create an MMORPG creator interface.
+
+Axel Fiolle joined the project in September 2020 and made the MZ update a few months later, after discovering it was easy to migrate basic MMO features to RPG Maker MZ)
 
 ## How to use ? 
 
-Video : [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/TcAmU2bdKvE/0.jpg)](https://www.youtube.com/watch?v=TcAmU2bdKvE)
-
-Working on RPG Maker MZ (by @Andaroth) : [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/opxhSfuf0-Q/0.jpg)](https://www.youtube.com/watch?v=opxhSfuf0-Q)
+(work in progress)
 
 ### Plugins requirement 
 
@@ -26,7 +30,7 @@ Working on RPG Maker MZ (by @Andaroth) : [![IMAGE ALT TEXT HERE](https://img.you
 2. Install [NodeJS](https://nodejs.org/en/) and `npm i` in the `server` folder
 3. Install [RethinkDB](https://rethinkdb.com/docs/install/) and `rethinkdb` in the `server` folder
 4. `node mmo.js` in the `server` folder
-5. Start the RPG Maker MV project.
+5. Start the RPG Maker MZ project.
 
 Congratulations! Your game is now an MMORPG. 
 
