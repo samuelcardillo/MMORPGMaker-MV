@@ -92,7 +92,7 @@ function LoginForm() {
             html = html + "<br><input type=\"password\" id=\"inputPassword\" placeholder=\"Password\" class=\"login-input\">";
         }
 
-        html = html + "</div><br>" +
+        html = html + "</div><br> <a style=\"color:white; margin-right: 20px;\" href=\"./register.html\" target=\"_blank\">Sign up</a>" +
         "<button id=\"btnConnect\">Connect</button>" +
       "</div>" +
     "</div>";
