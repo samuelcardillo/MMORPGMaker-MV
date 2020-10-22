@@ -24,7 +24,7 @@ Watch the [video](https://www.youtube.com/watch?v=4V4YhMcNRng) !
 
 ### Plugins requirement 
 
-**Disclaimer :** *All the files are already contained in the project.*
+**Disclaimer :** *The following files are already contained in the project.*
 
 - Orange Custom Events : http://download.hudell.com/OrangeCustomEvents.js
 - Orange Custom Event Creator : http://download.hudell.com/OrangeCustomEventCreator.js
@@ -33,17 +33,28 @@ Watch the [video](https://www.youtube.com/watch?v=4V4YhMcNRng) !
 
 ### Launch steps
 1. `git clone` the repo
+
 2. Get to the `MMOMZ/develop` branch
-3. In the project root folder, copy `package.json.exemple` text content into `package.json`
-4. Install [NodeJS](https://nodejs.org/en/) and `npm i` in the `server` folder
-5. Install [RethinkDB](https://rethinkdb.com/docs/install/) and `rethinkdb` in the `server` folder
-6. `node mmo.js` in the `server` folder
-7. `php -S localhost:1337` in the root folder
-8. Visit `http://localhost:1337` on your browser
 
-### **Warning :** *If you run the game with the RPG Maker editor, it will delete your `package.json` and need to re-copy the example.*
+3. Install [NodeJS](https://nodejs.org/en/) then run `npm install` in the `server/` folder
 
-Congratulations! Your game is now an MMORPG. 
+4. Install [RethinkDB](https://rethinkdb.com/docs/install/) then run `rethinkdb` in the `server/` folder, close the running script once it has finished
+
+5. WINDOWS only : 
+- Install [PHP](https://windows.php.net/download) (or put the game in Apache/Wamp, whatever)
+- Add PHP to path (if you don't know how, read [this](https://www.forevolve.com/en/articles/2016/10/27/how-to-add-your-php-runtime-directory-to-your-windows-10-path-environment-variable/))
+
+6. Launch the server :
+- Windows : Run `windows-start.bat`
+- Mac or Linux : Run `unix-start.sh` 
+
+7. Visit `http://localhost:1337` on your browser (or your wamp/apache page)
+
+8. > Congratulations ! You can now play, develop, improve, overcome and do your stuff :) 
+
+9. Once your done working, don't forget to close the server : 
+- Windows : Run `windows-stop.bat`
+- Mac or Linux : Run `unix-stop.sh`
 
 ---
 

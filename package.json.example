@@ -15,10 +15,12 @@
         "server": "pm2 start ./server/mmo.js --restart-delay 3000",
         "www": "php -S localhost:1337",
         "dev-linux": "npm run db-linux && sleep 3 && npm run server && npm run www",
+        "dev-win": "npm run db-linux && sleep 3 && npm run server",
         "dev-macos": "npm run dev-linux",
         "stop-linux": "pm2 stop mmo && pm2 stop rethinkdb",
         "stop-macos": "npm run stop-linux",
         "start": "npm run dev-macos",
+        "start-nophp": "npm run dev-win", 
         "stop": "npm run stop-macos"
     },
     "devDependencies": {

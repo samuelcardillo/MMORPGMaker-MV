@@ -4,17 +4,17 @@
 
 var _DOMAIN_NAME_ = 'http://localhost:1337'; // Edit this before hosting your game
 var _PRODUCTION_ = true; // Just leave this to true all the time please
-var remotePackageJson = null;
+var remoteVersionJson = null;
 
 var fetchOnlinePackageJSON = async (callback = () => {}) => {
     // This method will fetch package.json from remote
     var versionXhr = new XMLHttpRequest();
-    var url = _DOMAIN_NAME_ + '/package.json';
+    var url = _DOMAIN_NAME_ + '/version.json';
     versionXhr.open('GET', url);
     versionXhr.overrideMimeType('application/json');
     versionXhr.onload = async (e) => {
         if (versionXhr.status < 400) {
-            remotePackageJson = JSON.parse(versionXhr.response);
+            remoteVersionJson = JSON.parse(versionXhr.response);
             window.dispatchEvent(new Event('packageJsonFetched'))
             callback();
         }
@@ -160,7 +160,7 @@ class Main {
         const onLoad = this.onEffekseerLoad.bind(this);
         const onError = this.onEffekseerError.bind(this);
         const prefix = _PRODUCTION_ ? _DOMAIN_NAME_ + '/' : '';
-        const suffix = _PRODUCTION_ ? '?v=' + remotePackageJson.version : '';
+        const suffix = _PRODUCTION_ ? '?v=' + remoteVersionJson.version : '';
         effekseer.initRuntime(prefix + effekseerWasmUrl + suffix, onLoad, onError);
     }
 
@@ -179,7 +179,7 @@ window.addEventListener('run', main.run())
 if (!_PRODUCTION_) main.run();
 else {
     fetchOnlinePackageJSON(() => {
-        console.log('packageJson', remotePackageJson)
+        console.log('packageJson', remoteVersionJson)
         window.dispatchEvent(new Event('run'));
     });
 }
