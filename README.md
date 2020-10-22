@@ -1,30 +1,29 @@
 # (MMO)RPG Maker MZ 
-### (by [Axel FIOLLE](https://axelfiolle.be), and based on [MV version by Samuel Cardillo](https://github.com/samuelcardillo/MMORPGMaker-MV))
-
-## **Disclaimer :** *You HAVE to own an RPG Maker MV AND MZ in order to use this repack !!!*
+###  **Disclaimer :** *You have to own BOTH RPG Maker MV and MZ licenses in order to use this repack !*
 ---
 
 ## Summary
-This is a project I started in 2016 and on which I worked for only few weeks. In 2019 I stumbled upon an old version of the code which I have tested & refactored (a little bit). I also decided to restart working on it on my free time - which I almost have not - and open source it with the hopes that some other cool people upgrade it!
+I started this project in late 2020. I discovered the MMO plugin project by Samuel Cardillo and was quite impressed by the quality of the result. Samuel and his community have made good work on it. 
+It was running on RPG Maker MV –which runs in JavaScript– and as a web developer I decided to make my very own MMO with it because I'm quite good with the technos the project uses. 
+After some weeks working on my game, I started to feel the need to have a better engine so I decided to migrate the MMO_Core plugins on RPG Maker MV. 
+After some tricky fixes and "bandages" I finally produced something surprisingly stable. 
 
 ## History
 Samuel Cardillo has used RPG Maker since its 2000 version. Discovered it when he was a kid and used it to make many (very bad he says) games. It clearly impacted a lot on his creativity and his development desires. Later on, as a French-speaking person, he discovered a (now dead) project named FROG Creator which was a dedicated at creating MMORPG in a RPG Maker-like environment. 
 
 With the release of RPG MAKER MV which allows usage of JavaScript and its HTML5 export, he decided to give it a try and discovered quickly that yes, RPG Maker MV could easily be used to create an MMORPG creator interface.
 
-Axel Fiolle joined the project in September 2020 and made the MZ update a few months later, after discovering it was easy to migrate basic MMO features to RPG Maker MZ)
+I joined the project in September 2020 and made the MZ update a few months later, after discovering it was easy to migrate basic MMO features to RPG Maker MZ. 
 
 --- 
 
 ## How to use ? 
 
-Watch the [video](https://www.youtube.com/watch?v=4V4YhMcNRng) !
+1. Watch [the MV tutorial video](https://www.youtube.com/watch?v=TcAmU2bdKvE) to learn the basics
+2. Then take a look at [the MZ tutotrial](https://www.youtube.com/watch?v=TcAmU2bdKvE) :
+[![Watch the tutorial](https://img.youtube.com/vi/4V4YhMcNRng/0.jpg)](https://www.youtube.com/watch?v=TcAmU2bdKvE) 
 
----
-
-## Can I use it on RPG Maker MZ ? 
-
-Yes, please go on the MZ branch of this project: https://github.com/samuelcardillo/MMORPGMaker-MV/tree/MMOMZ/develop
+(Note : It's not needed to touch any package file anymore)
 
 ### Plugins requirement 
 
@@ -36,9 +35,10 @@ Yes, please go on the MZ branch of this project: https://github.com/samuelcardil
 ---
 
 ### Launch steps
+
 1. `git clone` the repo
 
-2. Get to the `MMOMZ/develop` branch
+2. Check that you're on to the `MMOMZ/develop` branch
 
 3. Install [NodeJS](https://nodejs.org/en/) then run `npm install` in the `server/` folder
 
@@ -52,13 +52,21 @@ Yes, please go on the MZ branch of this project: https://github.com/samuelcardil
 - Windows : Run `windows-start.bat`
 - Mac or Linux : Run `unix-start.sh` 
 
-7. Visit `http://localhost:1337` on your browser (or your wamp/apache page)
+7. Congratulations ! You can now play, develop, improve, overcome and do your stuff :) 
 
 8. > Congratulations ! You can now play, develop, improve, overcome and do your stuff :) 
 
 9. Once your done working, don't forget to close the server : 
 - Windows : Run `windows-stop.bat`
 - Mac or Linux : Run `unix-stop.sh`
+
+---
+
+### Keep the game up to date for your players
+
+1. Work on your game
+2. Once you're done, edit the `version.json` file at the project's root folder
+3. Upload/Update your game on a website
 
 ---
 
@@ -86,9 +94,12 @@ Yes, please go on the MZ branch of this project: https://github.com/samuelcardil
 - Party combat system
 - Respawn system
 - In-game chat
+- Registration page
 
 ---
 
 **See the progress : https://trello.com/b/m4leXuBa/mmorpg-maker-mv-version-1-todo-list**
 
 **Join us on Discord : https://discord.gg/GVqyAwp**
+
+**Check the original project : https://github.com/samuelcardillo/MMORPGMaker-MV**
