@@ -22,6 +22,10 @@ Watch the [video](https://www.youtube.com/watch?v=4V4YhMcNRng) !
 
 ---
 
+## Can I use it on RPG Maker MZ ? 
+
+Yes, please go on the MZ branch of this project: https://github.com/samuelcardillo/MMORPGMaker-MV/tree/MMOMZ/develop
+
 ### Plugins requirement 
 
 **Disclaimer :** *The following files are already contained in the project.*
