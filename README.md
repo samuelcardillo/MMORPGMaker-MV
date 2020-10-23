@@ -20,10 +20,11 @@ I joined the project in September 2020 and made the MZ update a few months later
 ## How to use ? 
 
 1. Watch [the MV tutorial video](https://www.youtube.com/watch?v=TcAmU2bdKvE) to learn the basics
-2. Then take a look at [the MZ tutotrial](https://www.youtube.com/watch?v=TcAmU2bdKvE) :
+2. Then take a look at [the MZ tutorial](https://www.youtube.com/watch?v=TcAmU2bdKvE) :
+
 [![Watch the tutorial](https://img.youtube.com/vi/4V4YhMcNRng/0.jpg)](https://www.youtube.com/watch?v=TcAmU2bdKvE) 
 
-(Note : It's not needed to touch any package file anymore)
+*Note : It's not needed to touch any package file anymore*
 
 ### Plugins requirement 
 
@@ -32,35 +33,21 @@ I joined the project in September 2020 and made the MZ update a few months later
 - Orange Custom Events : http://download.hudell.com/OrangeCustomEvents.js
 - Orange Custom Event Creator : http://download.hudell.com/OrangeCustomEventCreator.js
 
----
-
 ### Launch steps
 
 1. `git clone` the repo
 
 2. Check that you're on to the `MMOMZ/develop` branch
 
-3. Install [NodeJS](https://nodejs.org/en/) then run `npm install` in the `server/` folder
+3. Install [NodeJS](https://nodejs.org/en/)
 
-4. Install [RethinkDB](https://rethinkdb.com/docs/install/) then run `rethinkdb` in the `server/` folder, close the running script once it has finished
+4. Install [RethinkDB](https://rethinkdb.com/docs/install/)
 
-5. WINDOWS only : 
-- Install [PHP](https://windows.php.net/download) (or put the game in Apache/Wamp, whatever)
-- Add PHP to path (if you don't know how, read [this](https://www.forevolve.com/en/articles/2016/10/27/how-to-add-your-php-runtime-directory-to-your-windows-10-path-environment-variable/))
+5. Run `rethinkdb` in a terminal
 
-6. Launch the server :
-- Windows : Run `windows-start.bat`
-- Mac or Linux : Run `unix-start.sh` 
+6. Run `node mmo.js` in the `server/` folder
 
 7. Congratulations ! You can now play, develop, improve, overcome and do your stuff :) 
-
-8. > Congratulations ! You can now play, develop, improve, overcome and do your stuff :) 
-
-9. Once your done working, don't forget to close the server : 
-- Windows : Run `windows-stop.bat`
-- Mac or Linux : Run `unix-stop.sh`
-
----
 
 ### Keep the game up to date for your players
 
