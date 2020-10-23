@@ -26,12 +26,12 @@
             <div class="row">
               <div class="col s12">
                 <ol>
-                  <li id="allfields" style="color: black;">All fields are required</li>
-                  <li id="pseudoformat" style="color: black;">Username must be alphanumeric</li>
+                  <li id="allfieldsrequired" style="color: black;">All fields are required</li>
+                  <li id="usernameformat" style="color: black;">Username must be alphanumeric</li>
                 </ol>
               </div>
             </div>
-            <div class="row">
+            <div id="inputsZone" class="row">
               <form class="col s12">
                 <div class="row">
                   <div class="input-field col s6">
@@ -43,8 +43,7 @@
                     <label for="password">Password</label>
                   </div>
                 </div>
-                <div id="errZone" style="color: red; margin:0; text-align: right;" class="row"></div>
-                <div id="success" style="color: red; margin:0; text-align: right;" class="row"></div>
+                <div id="serverResponseZone" style="color: red; margin:0; text-align: right;" class="row"></div>
               </form>
             </div>
           </div>
@@ -63,57 +62,55 @@
     </div>
   </div>
 
-  <script type="text/javascript" src="js/libs/jquery.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.1/socket.io.js"></script>
+  <script type="text/javascript" src="./js/libs/materialize.min.js"></script>
+  <script type="text/javascript" src="./js/libs/socket.io.js"></script>
 
   <script>
-    // We first select the form inputs
+    // Select the form inputs :
     const userField = document.getElementById('username');
     const passField = document.getElementById('password');
     const registerBtn = document.getElementById('registerBtn');
-
-    let validForm = false;
+    let isFormValid = true; // declare a boolean to true to remember if the form datas are correct
 
     const checkInputs = () => {
-      // This unction will test username format
+      // This function will test the username format (from 4 to 25 alphanumeric characters)
       function isValidUsername(string) {
         return /^(?=[a-zA-Z0-9\s]{4,25}$)(?=[a-zA-Z0-9\s])(?:([\w\s*?])\1?(?!\1))+$/.test(string);
       }
 
-      validForm = true; // We first say the form is valid
       // Then if it's not, do the followings : 
       if (!userField || !userField.value || !isValidUsername(userField.value) ) { // No username or not valid
-        validForm = false;
-        document.getElementById('pseudoformat').style.color = 'red';
+        isFormValid = false;
+        document.getElementById('usernameformat').style.color = 'red';
       } else {
-        document.getElementById('pseudoformat').style.color = 'black';
+        document.getElementById('usernameformat').style.color = 'black';
       }
       if (!passField || !passField.value || passField.value.length < 1) { // No password
-        validForm = false;
-        document.getElementById('allfields').style.color = 'red';
+        isFormValid = false;
+        document.getElementById('allfieldsrequired').style.color = 'red';
       } else {
-        document.getElementById('allfields').style.color = 'black';
+        document.getElementById('allfieldsrequired').style.color = 'black';
       }
 
-      registerBtn.disabled = !validForm; // If form is not valid, disable Register button.
+      registerBtn.disabled = !isFormValid; // If form is not valid, disable Register button.
     };
     
     const register = (username,password) => {
-      const endpoint = 'http://localhost:8097/'; // TODO : Set your own server (domain name + port, ex : http://mynew.mmo:8097/ )
-      const socket = io.connect(endpoint);
+      const domain = 'http://localhost:8097'; // TODO : Set your own server (domain name + port, ex : http://mynew.mmo:8097/ )
+      const socket = io.connect(domain);
       // Setting up UI behavior : 
       socket.on('login_error', (data,callback) => { // Display UI error when server returns any
         if (data) {
-          document.getElementById('errZone').innerHTML = data.msg;
-          document.getElementById('errZone').style.color = "red";
+          document.getElementById('serverResponseZone').innerHTML = data.msg;
+          document.getElementById('serverResponseZone').style.color = "red";
         }
       });
       socket.on('register_success', (data,callback) => { // On succes, just display the success msg from backend
         if (data) {
-          console.log('hey it worked')
-          document.getElementById('errZone').innerHTML = data.msg;
-          document.getElementById('errZone').style.color = "green";
+          document.getElementById('serverResponseZone').innerHTML = data.msg;
+          document.getElementById('serverResponseZone').style.color = "green";
+          document.getElementById('inputsZone').style.display = 'none';
+          registerBtn.style.display = 'none';
         }
       });
       // Run the registration, passing username and password as payload. 
@@ -123,7 +120,7 @@
     const init = () => {
       registerBtn.addEventListener('click', (e) => { // On Registration btn press.
         checkInputs(); // Check the inputs one last time
-        if (validForm) {
+        if (isFormValid) {
           // if everything went fine, run the register function.
           register(userField.value,passField.value)
         }

@@ -59,7 +59,7 @@ function MMO_Core_Players() {
     } 
 
     // If MMO_Overhead exists, we force refresh
-    if(MMO_Overhead) MMO_Overhead.forceRefresh();
+    // if(MMO_Overhead) MMO_Overhead.forceRefresh();
   });
 
   MMO_Core.socket.on('player_moving', function(data){

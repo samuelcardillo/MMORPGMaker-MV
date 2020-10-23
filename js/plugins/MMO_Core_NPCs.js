@@ -122,7 +122,7 @@ function MMO_Core_Npcs() {
     MMO_Core_Npcs.Npcs[payload.npcId]._characterIndex = payload.npcData["skin"]["characterIndex"];
 
     // If MMO_Overhead exists, we force refresh
-    if(MMO_Overhead) MMO_Overhead.forceRefresh();
+    // if(MMO_Overhead) MMO_Overhead.forceRefresh();
   });
 
   MMO_Core.socket.on('npc_moving', function(data){
