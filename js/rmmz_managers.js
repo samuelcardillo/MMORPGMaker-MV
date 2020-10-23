@@ -105,7 +105,7 @@ DataManager.loadDatabase = function() {
 DataManager.loadDataFile = function(name, src) {
     const xhr = new XMLHttpRequest();
     const prefix = _PRODUCTION_ ? _DOMAIN_NAME_ + '/' : '';
-    const suffix = _PRODUCTION_ ? '?v=' + remotePackageJson.version : '';
+    const suffix = _PRODUCTION_ ? '?v=' + remoteVersionJson.version : '';
     const url = prefix + "data/" + src + suffix;
     window[name] = null;
     xhr.open("GET", url);
@@ -917,7 +917,7 @@ ImageManager.loadTitle2 = function(filename) {
 ImageManager.loadBitmap = function(folder, filename) {
     if (filename) {
         const prefix = _PRODUCTION_ ? _DOMAIN_NAME_ + '/' : '';
-        const suffix = _PRODUCTION_ ? '?v=' + remotePackageJson.version : '';
+        const suffix = _PRODUCTION_ ? '?v=' + remoteVersionJson.version : '';
         const url = prefix + folder + Utils.encodeURI(filename) + ".png" + suffix;
         return this.loadBitmapFromUrl(url);
     } else {
@@ -1404,7 +1404,7 @@ AudioManager.makeEmptyAudioObject = function() {
 
 AudioManager.createBuffer = function(folder, name) {
     const prefix = _PRODUCTION_ ? _DOMAIN_NAME_ + '/' : '';
-    const suffix = _PRODUCTION_ ? '?v=' + remotePackageJson.version : '';
+    const suffix = _PRODUCTION_ ? '?v=' + remoteVersionJson.version : '';
     const ext = this.audioFileExt();
     const url = prefix + this._path + folder + Utils.encodeURI(name) + ext + suffix;
     const buffer = new WebAudio(url);
@@ -3086,7 +3086,7 @@ PluginManager.onError = function(e) {
 PluginManager.makeUrl = function(filename) {
     if (_PRODUCTION_) {
         const prefix = _PRODUCTION_ ? _DOMAIN_NAME_ + '/' : '';
-        const suffix = _PRODUCTION_ ? '?v=' + remotePackageJson.version : '';
+        const suffix = _PRODUCTION_ ? '?v=' + remoteVersionJson.version : '';
         return prefix + "js/plugins/" + Utils.encodeURI(filename) + ".js" + suffix;
     } else return "js/plugins/" + Utils.encodeURI(filename) + ".js";
 };

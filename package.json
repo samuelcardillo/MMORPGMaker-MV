@@ -2,27 +2,11 @@
     "name": "rmmz-game",
     "main": "index.html",
     "chromium-args": "--force-color-profile=srgb",
-    "version": "1.0.0001",
     "window": {
         "title": "Project1",
         "width": 816,
         "height": 624,
         "position": "center",
         "icon": "icon/icon.png"
-    },
-    "scripts": {
-        "db-linux": "pm2 start ./server/rethinkdb.sh --restart-delay 1000",
-        "server": "pm2 start ./server/mmo.js --restart-delay 3000",
-        "www": "php -S localhost:1337",
-        "dev-linux": "npm run db-linux && sleep 3 && npm run server && npm run www",
-        "dev-macos": "npm run dev-linux",
-        "stop-linux": "pm2 stop mmo && pm2 stop rethinkdb",
-        "stop-macos": "npm run stop-linux",
-        "start": "npm run dev-macos",
-        "stop": "npm run stop-macos"
-    },
-    "devDependencies": {
-        "php": "^1.0.1",
-        "pm2": "^4.5.0"
     }
 }
