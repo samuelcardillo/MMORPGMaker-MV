@@ -56,6 +56,7 @@ Congratulations! Your game is now an MMORPG.
 - Party combat system
 - Respawn system
 - In-game chat
+- Registration page
 
 **See the progress : https://trello.com/b/m4leXuBa/mmorpg-maker-mv-version-1-todo-list**
 
