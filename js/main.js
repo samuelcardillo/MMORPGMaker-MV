@@ -3,8 +3,15 @@
 //=============================================================================
 
 var _DOMAIN_NAME_ = 'http://localhost:1337'; // Edit this before hosting your game
-var _PRODUCTION_ = true; // Just leave this to true all the time please
-var remoteVersionJson = null;
+var _PRODUCTION_ = false; // Set to true before hosting your game
+var remoteVersionJson = {
+    "version":'0'
+}; // default value
+
+if (!_PRODUCTION_) {
+    // If not in production, use the browser location with NWJS as fallback
+    _DOMAIN_NAME_ = location && location.href || 'chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl';
+}
 
 var fetchOnlinePackageJSON = async (callback = () => {}) => {
     // This method will fetch package.json from remote
@@ -13,7 +20,7 @@ var fetchOnlinePackageJSON = async (callback = () => {}) => {
     versionXhr.open('GET', url);
     versionXhr.overrideMimeType('application/json');
     versionXhr.onload = async (e) => {
-        if (versionXhr.status < 400) {
+        if (versionXhr.status < 400 && !!versionXhr.response && !!versionXhr.response.version) {
             remoteVersionJson = JSON.parse(versionXhr.response);
             window.dispatchEvent(new Event('packageJsonFetched'))
             callback();
@@ -82,6 +89,8 @@ class Main {
         const suffix = _PRODUCTION_ ? '?v=' + random : '';
         for (const url of scriptUrls) {
             const script = document.createElement("script");
+            script.id = url;
+            if (document.getElementById(url)) return; // don't load plugin twice
             script.type = "text/javascript";
             script.src = url + suffix;
             script.async = false;
@@ -175,13 +184,11 @@ class Main {
 }
 
 const main = new Main();
-window.addEventListener('run', main.run())
 if (!_PRODUCTION_) main.run();
 else {
-    fetchOnlinePackageJSON(() => {
-        console.log('packageJson', remoteVersionJson)
-        window.dispatchEvent(new Event('run'));
-    });
+    window.addEventListener('run', main.run()); // Run the engine after fetching remote package
+    fetchOnlinePackageJSON(() => window.dispatchEvent(new Event('run')));
+    window.removeEventListener('run',null,true); // Disallow game reload on event catch
 }
 
 //-----------------------------------------------------------------------------
