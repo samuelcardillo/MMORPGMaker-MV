@@ -89,10 +89,8 @@ class Main {
         const suffix = _PRODUCTION_ ? '?v=' + random : '';
         for (const url of scriptUrls) {
             const script = document.createElement("script");
-            console.log(_)
-            const tagId = url;
-            script.id = tagId;
-            if (document.getElementById(tagId)) return; // don't load plugin twice
+            script.id = url;
+            if (document.getElementById(url)) return; // don't load plugin twice
             script.type = "text/javascript";
             script.src = url + suffix;
             script.async = false;
