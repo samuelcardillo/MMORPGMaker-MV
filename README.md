@@ -34,7 +34,7 @@ Congratulations! Your game is now an MMORPG.
 
 ### Contribution
 
-This is an open source project supported by the community. We are always looking for more developers to help building MMONMV/MZ! Feel free to push commits and [join the community Discord](https://discord.gg/GVqyAwp). ** Beware: Commits that modify the core of RPG Maker MV/MZ are not accepted. **
+This is an open source project supported by the community. We are always looking for more developers to help building MMONMV/MZ! Feel free to push commits and [join the community Discord](https://discord.gg/GVqyAwp). **Beware: Commits that modify the core of RPG Maker MV/MZ are not accepted.**
 
 ### Documentation 
 
