@@ -32,6 +32,10 @@ Yes, please go on the MZ branch of this project: https://github.com/samuelcardil
 
 Congratulations! Your game is now an MMORPG. 
 
+### Contribution
+
+This is an open source project supported by the community. We are always looking for more developers to help building MMONMV/MZ! Feel free to push commits and [join the community Discord](https://discord.gg/GVqyAwp). ** Beware: Commits that modify the core of RPG Maker MV/MZ are not accepted. **
+
 ### Documentation 
 
 -Are you a developer ? [Read the developer documentation](https://github.com/samuelcardillo/MMORPGMaker-MV/wiki#developers-documentation)
