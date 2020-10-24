@@ -3,7 +3,7 @@
 //=============================================================================
 
 var _DOMAIN_NAME_ = 'http://localhost:1337'; // Edit this before hosting your game
-var _PRODUCTION_ = true; // Set to true before hosting your game
+var _PRODUCTION_ = false; // Set to true before hosting your game
 var remoteVersionJson = {
     "version":'0'
 }; // default value
