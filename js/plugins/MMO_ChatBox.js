@@ -231,7 +231,7 @@ function ChatBox() {
     textBox.style.borderColor     = textBox.style.backgroundColor;
     document.body.appendChild(textBox);
     let textZone = document.createElement('div');
-    textZone.id                   = 'text_zone';
+    textZone.id                   = 'text_container';
     textZone.style.position       = 'absolute';
     textZone.style.bottom         = '0';
     textZone.style.width          = '100%';
@@ -307,10 +307,10 @@ function ChatBox() {
                   + ':' + 
                   ( d.getMinutes().toString().length == 2 ? d.getMinutes() : '0' + d.getMinutes() );
     let message = document.createTextNode(time + " [" + messageData["username"] + "] " + messageData["msg"]);
-    console.log(message);
+    console.log(span,message);
 
     span.appendChild(message); 
-    if (document.querySelector("#text_zone")) document.querySelector("#text_zone").appendChild(span);
+    if (document.querySelector("#text_container")) document.querySelector("#text_container").appendChild(span);
     if (document.querySelector("#chatbox_box")) document.querySelector("#chatbox_box").scrollTop = document.querySelector("#chatbox_box").scrollHeight;
 
     if(!ChatBox.isFocused) {
