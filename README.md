@@ -47,7 +47,7 @@ I joined the project in September 2020 and made the MZ version a few weeks later
 
 5. Run `rethinkdb` in a terminal
 
-6. Run `node mmo.js` in the `server/` folder
+6. Run `npm install` then `node mmo.js` in the `server/` folder
 
 7. Congratulations ! You can now play, develop, improve, overcome and do your stuff :) 
 
