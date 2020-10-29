@@ -135,38 +135,20 @@ MMO_Overhead.Windows.prototype.gatherDisplayData = function() {
 };
 
 MMO_Overhead.Windows.prototype.extractNotedata = function(comment) {
-  if (comment === '') return;
-  var tag0 = /<(?:PLAYER):[ ](.*)>/i;
-  var tag1 = /<(?:NAME):[ ](.*)>/i;
-  var tag2 = /<(?:IS QUEST)>/i;
-  var tag3 = /<(?:IS ENEMY)>/i;
-  var tag4 = /<(?:IS EVIL)>/i;
-  var tag5 = /<(?:IS FRIEND)>/i;
-  var tag6 = /<(?:IS INFO)>/i;
-  var tag7 = /<(?:SIDE QUEST)>/i;
-  var tag8 = /<(?:IS IMPORTANT)>/i;
-  var notedata = comment.split(/[\r\n]+/);
-  var text = '';
-  for (var i = 0; i < notedata.length; ++i) {
-    var line = notedata[i];
-    var isPlayer = line.match(tag0);
-    if (line.match(tag1) || isPlayer) {
-      text = String(RegExp.$1);
-    } else if (line.match(tag2)) {
-      text = `\\C[20]<Scénario>\n` + text;
-    } else if (line.match(tag3)) {
-      text = "\\C[18]" + text;
-    } else if (line.match(tag4)) {
-      text = "\\C[20]" + text;
-    } else if (line.match(tag5)) {
-      text = "\\C[28]" + text;
-    } else if (line.match(tag6)) {
-      text = "\\C[23]" + text;
-    } else if (line.match(tag7)) {
-      text = `\\C[17]<Quête>\n` + text;
-    } else if (line.match(tag8)) {
-      text = '\\C[6]' + text;
-    }
+  if (comment === "") {
+      return;
+  }
+  const tag1 = /<(?:NAME):[ ](.*)>/i;
+  const tag2 = /<(?:IS QUEST)>/i;
+  const notedata = comment.split(/[\r\n]+/);
+  let text = "";
+  for (let i = 0; i < notedata.length; ++i) {
+      const line = notedata[i];
+      if (line.match(tag1)) {
+          text = String(RegExp.$1);
+      } else if (line.match(tag2)) {
+          text = "\\C[17]" + text;
+      }
   }
   this.setText(text);
   this._initialText = text;
