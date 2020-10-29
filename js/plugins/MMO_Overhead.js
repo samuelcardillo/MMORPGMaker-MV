@@ -58,21 +58,29 @@ MMO_Overhead.forceRefresh = function() {
 MMO_Overhead.Windows.prototype = Object.create(Window_Base.prototype);
 MMO_Overhead.Windows.prototype.constructor = MMO_Overhead.Windows;
 
+MMO_Overhead.standardPadding = function() {
+  return 18;
+};
+
+MMO_Overhead.textPadding = function() {
+  return 6;
+};
+
 MMO_Overhead.Windows.prototype.initialize = function() {
-    // this._bufferX = 0;
-    // this._bufferY = 36;
-    // this._fontSize = 14;
-    // this._alwaysShow = false;
-    // var width = 136;
-    // var height = this.windowHeight();
-    // this._range = 5;
-    // Window_Base.prototype.initialize.call(this, 0, 0, width, height);
-    // this.opacity = 0;
-    // this.contentsOpacity = 0;
-    // this._character = null;
-    // this._page = 0;
-    // this._text = '';
-    // this._initialText = '';
+    this._bufferX = 0;
+    this._bufferY = 36;
+    this._fontSize = 14;
+    this._alwaysShow = false;
+    var width = 136;
+    var height = this.windowHeight();
+    this._range = 5;
+    Window_Base.prototype.initialize.call(this, {x:0, y:0, width, height});
+    this.opacity = 0;
+    this.contentsOpacity = 0;
+    this._character = null;
+    this._page = 0;
+    this._text = '';
+    this._initialText = '';
 };
 
 MMO_Overhead.Windows.prototype.standardFontSize = function() {
@@ -82,7 +90,7 @@ MMO_Overhead.Windows.prototype.standardFontSize = function() {
 
 MMO_Overhead.Windows.prototype.windowHeight = function() {
     var height = this.fittingHeight(1)
-    height = Math.max(height, 48 + 8 * 2);
+    height = Math.max(height, 48 + MMO_Overhead.standardPadding() * 2);
     return height;
 };
 
@@ -180,15 +188,15 @@ MMO_Overhead.Windows.prototype.setText = function(text) {
 MMO_Overhead.Windows.prototype.refresh = function() {
     this.contents.clear();
     var txWidth = this.textWidthEx(this._text);
-    txWidth += this.textPadding() * 2;
+    txWidth += MMO_Overhead.textPadding() * 2;
     var width = txWidth;
     this.width = Math.max(width, 136);
-    this.width += 8 * 2;
+    this.width += MMO_Overhead.standardPadding() * 2;
     this.height = this.windowHeight();
     this.createContents();
     var wx = (this.contents.width - txWidth) / 2;
     var wy = 0;
-    this.drawTextEx(this._text, wx + this.textPadding(), wy);
+    this.drawTextEx(this._text, wx + MMO_Overhead.textPadding(), wy);
 };
 
 MMO_Overhead.Windows.prototype.forceRefresh = function() {
