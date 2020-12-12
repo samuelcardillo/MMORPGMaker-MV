@@ -138,7 +138,7 @@ function LoginForm() {
         if (payload.username.includes(" ")) {
             return this.displayError("Spaces are forbidden in username.");
         }
-        if (!payload.username.match(/^(?=[a-zA-Z\s]{2,25}$)(?=[a-zA-Z\s])(?:([\w\s*?])\1?(?!\1))+$/)) {
+        if (!payload.username.match(/^(?=[a-zA-Z0-9\s]{2,25}$)(?=[a-zA-Z\s])(?:([\w\s*?])\1?(?!\1))+$/)) {
             return this.displayError("You can't have special characters in your username.");
         }
 
