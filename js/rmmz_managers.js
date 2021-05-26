@@ -1,5 +1,5 @@
 //=============================================================================
-// rmmz_managers.js v1.0.0
+// rmmz_managers.js v1.2.1
 //=============================================================================
 
 //-----------------------------------------------------------------------------
@@ -104,9 +104,7 @@ DataManager.loadDatabase = function() {
 
 DataManager.loadDataFile = function(name, src) {
     const xhr = new XMLHttpRequest();
-    const prefix = _PRODUCTION_ ? _DOMAIN_NAME_ + '/' : '';
-    const suffix = _PRODUCTION_ ? '?v=' + remoteVersionJson.version : '';
-    const url = prefix + "data/" + src + suffix;
+    const url = "data/" + src;
     window[name] = null;
     xhr.open("GET", url);
     xhr.overrideMimeType("application/json");
@@ -690,8 +688,8 @@ StorageManager.saveToForage = function(saveName, zip) {
     setTimeout(() => localforage.removeItem(testKey));
     return localforage
         .setItem(testKey, zip)
-        .then(localforage.setItem(key, zip))
-        .then(this.updateForageKeys());
+        .then(() => localforage.setItem(key, zip))
+        .then(() => this.updateForageKeys());
 };
 
 StorageManager.loadFromForage = function(saveName) {
@@ -706,7 +704,7 @@ StorageManager.forageExists = function(saveName) {
 
 StorageManager.removeForage = function(saveName) {
     const key = this.forageKey(saveName);
-    return localforage.removeItem(key).then(this.updateForageKeys());
+    return localforage.removeItem(key).then(() => this.updateForageKeys());
 };
 
 StorageManager.updateForageKeys = function() {
@@ -916,9 +914,7 @@ ImageManager.loadTitle2 = function(filename) {
 
 ImageManager.loadBitmap = function(folder, filename) {
     if (filename) {
-        const prefix = _PRODUCTION_ ? _DOMAIN_NAME_ + '/' : '';
-        const suffix = _PRODUCTION_ ? '?v=' + remoteVersionJson.version : '';
-        const url = prefix + folder + Utils.encodeURI(filename) + ".png" + suffix;
+        const url = folder + Utils.encodeURI(filename) + ".png";
         return this.loadBitmapFromUrl(url);
     } else {
         return this._emptyBitmap;
@@ -1002,7 +998,7 @@ EffectManager.load = function(filename) {
 
 EffectManager.startLoading = function(url) {
     const onLoad = () => this.onLoad(url);
-    const onError = () => this.onError(url);
+    const onError = (message, url) => this.onError(url);
     const effect = Graphics.effekseer.loadEffect(url, 1, onLoad, onError);
     this._cache[url] = effect;
     return effect;
@@ -1403,10 +1399,8 @@ AudioManager.makeEmptyAudioObject = function() {
 };
 
 AudioManager.createBuffer = function(folder, name) {
-    const prefix = _PRODUCTION_ ? _DOMAIN_NAME_ + '/' : '';
-    const suffix = _PRODUCTION_ ? '?v=' + remoteVersionJson.version : '';
     const ext = this.audioFileExt();
-    const url = prefix + this._path + folder + Utils.encodeURI(name) + ext + suffix;
+    const url = this._path + folder + Utils.encodeURI(name) + ext;
     const buffer = new WebAudio(url);
     buffer.name = name;
     buffer.frameCount = Graphics.frameCount;
@@ -2748,6 +2742,7 @@ BattleManager.startAction = function() {
     this._phase = "action";
     this._action = action;
     this._targets = targets;
+    subject.cancelMotionRefresh();
     subject.useItem(action.item());
     this._action.applyGlobal();
     this._logWindow.startAction(subject, action, targets);
@@ -3084,11 +3079,7 @@ PluginManager.onError = function(e) {
 };
 
 PluginManager.makeUrl = function(filename) {
-    if (_PRODUCTION_) {
-        const prefix = _PRODUCTION_ ? _DOMAIN_NAME_ + '/' : '';
-        const suffix = _PRODUCTION_ ? '?v=' + remoteVersionJson.version : '';
-        return prefix + "js/plugins/" + Utils.encodeURI(filename) + ".js" + suffix;
-    } else return "js/plugins/" + Utils.encodeURI(filename) + ".js";
+    return "js/plugins/" + Utils.encodeURI(filename) + ".js";
 };
 
 PluginManager.checkErrors = function() {
