@@ -1,5 +1,5 @@
 //=============================================================================
-// rmmz_scenes.js v1.0.0
+// rmmz_scenes.js v1.2.1
 //=============================================================================
 
 //-----------------------------------------------------------------------------
@@ -1509,7 +1509,8 @@ Scene_ItemBase.prototype.itemTargetActors = function() {
 };
 
 Scene_ItemBase.prototype.canUse = function() {
-    return this.user().canUse(this.item()) && this.isItemEffectsValid();
+    const user = this.user();
+    return user && user.canUse(this.item()) && this.isItemEffectsValid();
 };
 
 Scene_ItemBase.prototype.isItemEffectsValid = function() {
@@ -1587,6 +1588,7 @@ Scene_Item.prototype.createItemWindow = function() {
     if (!this._categoryWindow.needsSelection()) {
         this._itemWindow.y -= this._categoryWindow.height;
         this._itemWindow.height += this._categoryWindow.height;
+        this._categoryWindow.update();
         this._categoryWindow.hide();
         this._categoryWindow.deactivate();
         this.onCategoryOk();

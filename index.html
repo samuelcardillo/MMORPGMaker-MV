@@ -16,40 +16,6 @@
 
         <div id="text_zone"></div>
 
-        <script type="text/javascript">
-            const _requestNativeFullScreen = (args) => {
-                if (args && !!args.browserOnly) {
-                    window.moveTo(0, 0);
-                    window.resizeTo(screen.availWidth, screen.availHeight);
-                    return;
-                }
-
-                let canvas = null;
-
-                const fullscr = () => {
-                    if (canvas.requestFullscreen) {
-                        canvas.requestFullscreen();
-                    } else if (canvas.mozRequestFullScreen) { /* Firefox */
-                        canvas.mozRequestFullScreen();
-                    } else if (canvas.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
-                        canvas.webkitRequestFullscreen();
-                    } else if (canvas.msRequestFullscreen) { /* IE/Edge */
-                        canvas.msRequestFullscreen();
-                    }
-                }
-
-                const queryCanvas = () => {
-                    setTimeout(() => {
-                        canvas = document.getElementsByTagName('body');
-                        if (canvas !== null) fullscr();
-                        else queryCanvas();
-                    },1000);
-                }
-
-                queryCanvas();
-            }; // _requestNativeFullScreen({browserOnly:true});
-        </script>
-
         <script type="text/javascript" src="js/main.js"></script>
     </body>
 </html>
