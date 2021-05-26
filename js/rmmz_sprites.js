@@ -1,5 +1,5 @@
 //=============================================================================
-// rmmz_sprites.js v1.0.0
+// rmmz_sprites.js v1.2.1
 //=============================================================================
 
 //-----------------------------------------------------------------------------
@@ -726,6 +726,7 @@ Sprite_Actor.prototype.setBattler = function(battler) {
             this.setActorHome(battler.index());
         } else {
             this._mainSprite.bitmap = null;
+            this._battlerName = "";
         }
         this.startEntryMotion();
         this._stateSprite.setup(battler);
@@ -1141,7 +1142,7 @@ Sprite_Enemy.prototype.revertToNormal = function() {
 };
 
 Sprite_Enemy.prototype.updateWhiten = function() {
-    const alpha = 128 - (16 - this._effectDuration) * 10;
+    const alpha = 128 - (16 - this._effectDuration) * 8;
     this.setBlendColor([255, 255, 255, alpha]);
 };
 
@@ -1424,6 +1425,9 @@ Sprite_Animation.prototype.targetPosition = function(renderer) {
 
 Sprite_Animation.prototype.targetSpritePosition = function(sprite) {
     const point = new Point(0, -sprite.height / 2);
+    if (this._animation.alignBottom) {
+        point.y = 0;
+    }
     sprite.updateTransform();
     return sprite.worldTransform.apply(point);
 };
@@ -1446,7 +1450,6 @@ Sprite_Animation.prototype.onBeforeRender = function(renderer) {
 };
 
 Sprite_Animation.prototype.onAfterRender = function(renderer) {
-    renderer.texture.contextChange();
     renderer.texture.reset();
     renderer.geometry.reset();
     renderer.state.reset();
@@ -2151,7 +2154,11 @@ Sprite_Gauge.prototype.gaugeHeight = function() {
 };
 
 Sprite_Gauge.prototype.gaugeX = function() {
-    return this._statusType === "time" ? 0 : 30;
+    if (this._statusType === "time") {
+        return 0;
+    } else {
+        return this.measureLabelWidth() + 6;
+    }
 };
 
 Sprite_Gauge.prototype.labelY = function() {
@@ -2430,6 +2437,13 @@ Sprite_Gauge.prototype.setupLabelFont = function() {
     this.bitmap.textColor = this.labelColor();
     this.bitmap.outlineColor = this.labelOutlineColor();
     this.bitmap.outlineWidth = this.labelOutlineWidth();
+};
+
+Sprite_Gauge.prototype.measureLabelWidth = function() {
+    this.setupLabelFont();
+    const labels = [TextManager.hpA, TextManager.mpA, TextManager.tpA];
+    const widths = labels.map(str => this.bitmap.measureTextWidth(str));
+    return Math.max(...widths);
 };
 
 Sprite_Gauge.prototype.labelOpacity = function() {
@@ -3320,7 +3334,7 @@ Spriteset_Base.prototype.removeAnimation = function(sprite) {
 };
 
 Spriteset_Base.prototype.removeAllAnimations = function() {
-    for (const sprite of this._animationSprites) {
+    for (const sprite of this._animationSprites.clone()) {
         this.removeAnimation(sprite);
     }
 };
@@ -3532,7 +3546,7 @@ Spriteset_Map.prototype.removeBalloon = function(sprite) {
 };
 
 Spriteset_Map.prototype.removeAllBalloons = function() {
-    for (const sprite of this._balloonSprites) {
+    for (const sprite of this._balloonSprites.clone()) {
         this.removeBalloon(sprite);
     }
 };

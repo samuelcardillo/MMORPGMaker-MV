@@ -12,5 +12,6 @@ var $plugins =
 {"name":"MMO_Core_Bank","status":true,"description":"MMORPG Maker MV - Core Handling Bank","parameters":{}},
 {"name":"MMO_ChatBox","status":true,"description":"MMORPG Maker MV - ChatBox","parameters":{"chatPosition":"TOP LEFT"}},
 {"name":"MMO_LoginForm","status":true,"description":"MMORPG Maker MV - Login Form","parameters":{"allowAccountCreation":"Yes"}},
-{"name":"MMO_Overhead","status":true,"description":"Add name over actors name","parameters":{}}
+{"name":"MMO_Overhead","status":true,"description":"Add name over actors name","parameters":{}},
+{"name":"CacheOverride","status":true,"description":"This allows to force users to re-load old files","parameters":{"gameVersion":"1.0.0"}}
 ];

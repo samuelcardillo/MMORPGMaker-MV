@@ -28,11 +28,7 @@ MMO_Core.allowTouch = true;
   MMO_Core.socket.on('disconnect', (reason) => {
     document.dispatchEvent(new Event('mmorpg_core_lost_connection')); // Dispatch event for connection lost.
     MMO_Core.socket.close();
-    setTimeout(() => {
-      const str = _ENGLISH_ ? 'The game will reload now.' : 'Le jeu va redémarrer.';
-      alert(str)
-      location.reload();
-    },1000)
+    alert(reason);
   });
 
   // Clean up the menu
