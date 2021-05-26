@@ -20,7 +20,7 @@ function MMO_Core_Players() {
     if(MMO_Core_Players.Players[data.id] !== undefined && $gameMap._events[MMO_Core_Players.Players[data.id]["_eventId"]] !== undefined) $gameMap.eraseEvent(MMO_Core_Players.Players[data.id]["_eventId"]);
 
     MMO_Core_Players.Players[data.id] = $gameMap.createNormalEventAt(data["playerData"]["skin"]["characterName"], data["playerData"]["skin"]["characterIndex"], data["playerData"]["x"], data["playerData"]["y"], 2, 0, true);
-    MMO_Core_Players.Players[data.id].headDisplay = MMO_Core_Players.Players[data.id].list().push({"code":108,"indent":0,"parameters":["<Player: " + data["playerData"]["username"] + ">"]});
+    MMO_Core_Players.Players[data.id].headDisplay = MMO_Core_Players.Players[data.id].list().push({"code":108,"indent":0,"parameters":["<Name: " + data["playerData"]["username"] + ">"]});
     MMO_Core_Players.Players[data.id]._priorityType = 0;
     MMO_Core_Players.Players[data.id]._stepAnime = false;
     MMO_Core_Players.Players[data.id]._moveSpeed = 4;

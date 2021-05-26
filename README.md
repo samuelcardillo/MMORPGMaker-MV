@@ -1,8 +1,10 @@
 # (MMO)RPG Maker MZ 
-###  **Disclaimer :** *You have to own BOTH RPG Maker MV and MZ licenses in order to use this repack !*
+###  **Disclaimer :** *You have to own both RPG Maker MV and MZ licenses in order to use this repack !*
 ---
 
 ## Summary
+Hello, my name is Axel Fiolle.
+
 I started this project in late 2020. I discovered the MMO plugin project by Samuel Cardillo and was quite impressed by the quality of the result. Samuel and his community have made good work on it. 
 It was running on RPG Maker MV –which runs in JavaScript– and as a web developer I decided to make my very own MMO with it because I'm quite good with the technos the project uses. 
 After some weeks working on my game, I started to feel the need to have a better engine so I decided to migrate the MMO_Core plugins from MV to RPG Maker MZ. 
@@ -13,14 +15,14 @@ Samuel Cardillo has used RPG Maker since its 2000 version. Discovered it when he
 
 With the release of RPG MAKER MV which allows usage of JavaScript and its HTML5 export, he decided to give it a try and discovered quickly that yes, RPG Maker MV could easily be used to create an MMORPG creator interface.
 
-I joined the project in September 2020 and made the MZ update a few months later, after discovering it was easy to migrate basic MMO features to RPG Maker MZ. 
+I joined the project in September 2020 and made the MZ version a few weeks later, after discovering it was easy to migrate basic MMO features to RPG Maker MZ. 
 
 --- 
 
 ## How to use ? 
 
 1. Watch [the MV tutorial video](https://www.youtube.com/watch?v=TcAmU2bdKvE) to learn the basics
-2. Then take a look at [the MZ tutorial](https://www.youtube.com/watch?v=TcAmU2bdKvE) :
+2. Then take a look at [the MZ tutorial](https://www.youtube.com/watch?v=VhUWKwOxv5Q) :
 
 [![Watch the tutorial](https://img.youtube.com/vi/4V4YhMcNRng/0.jpg)](https://www.youtube.com/watch?v=VhUWKwOxv5Q) 
 

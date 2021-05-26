@@ -16,18 +16,6 @@
  *
  *   <Is Quest>
  *   The event name will be displayed in yellow
- * 
- *   <Is Enemt>
- *   The event name will be displayed in red
- * 
- *   <Is Evil>
- *   The event name will be displayed in orange
- * 
- *   <Is Friend>
- *   The event name will be displayed in green
- * 
- *   <Is Info>
- *   The event name will be displayed in blue
  */
 //=============================================================================
 

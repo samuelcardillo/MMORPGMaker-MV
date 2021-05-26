@@ -63,7 +63,7 @@ function MMO_Core_Npcs() {
     if(MMO_Core_Npcs.Npcs[data.id] !== undefined && $gameMap._events[MMO_Core_Npcs.Npcs[data.id]["_eventId"]] !== undefined) $gameMap.eraseEvent(MMO_Core_Npcs.Npcs[data.id]["_eventId"]);
 
     MMO_Core_Npcs.Npcs[data.id] = $gameMap.createNormalEventAt(data["npcData"]["skin"]["characterName"], data["npcData"]["skin"]["skin"]["characterIndex"], data["npcData"]["x"], data["npcData"]["y"], 2, 0, true);
-    MMO_Core_Npcs.Npcs[data.id].headDisplay = MMO_Core_Npcs.Npcs[data.id].list().push({"code":108,"indent":0,"parameters":["<Player: " + data["npcData"]["name"] + ">"]});
+    MMO_Core_Npcs.Npcs[data.id].headDisplay = MMO_Core_Npcs.Npcs[data.id].list().push({"code":108,"indent":0,"parameters":["<Name: " + data["npcData"]["name"] + ">"]});
     MMO_Core_Npcs.Npcs[data.id]._priorityType = 1;
     MMO_Core_Npcs.Npcs[data.id]._stepAnime = false;
     MMO_Core_Npcs.Npcs[data.id]._moveSpeed = data["npcData"]["moveSpeed"];
