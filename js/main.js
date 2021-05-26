@@ -1,36 +1,6 @@
 //=============================================================================
-// main.js v1.0.0
+// main.js v1.2.1
 //=============================================================================
-
-var _DOMAIN_NAME_ = 'http://localhost:1337'; // Edit this before hosting your game
-var _PRODUCTION_ = false; // Set to true before hosting your game
-var remoteVersionJson = {
-    "version":'0'
-}; // default value
-
-if (!_PRODUCTION_) {
-    // If not in production, use the browser location with NWJS as fallback
-    _DOMAIN_NAME_ = location && location.href || 'chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl';
-}
-
-var fetchOnlinePackageJSON = async (callback = () => {}) => {
-    // This method will fetch package.json from remote
-    var versionXhr = new XMLHttpRequest();
-    var url = _DOMAIN_NAME_ + '/version.json';
-    versionXhr.open('GET', url);
-    versionXhr.overrideMimeType('application/json');
-    versionXhr.onload = async (e) => {
-        if (versionXhr.status < 400 && !!versionXhr.response && !!versionXhr.response.version) {
-            remoteVersionJson = JSON.parse(versionXhr.response);
-            window.dispatchEvent(new Event('packageJsonFetched'))
-            callback();
-        }
-    }
-    versionXhr.onerror = (error) => {
-        console.error(error);
-    };
-    versionXhr.send();
-};
 
 const scriptUrls = [
     "js/libs/pixi.js",
@@ -55,10 +25,10 @@ class Main {
         this.error = null;
     }
 
-    async run() {
+    run() {
         this.showLoadingSpinner();
         this.testXhr();
-        await this.loadMainScripts();
+        this.loadMainScripts();
     }
 
     showLoadingSpinner() {
@@ -85,19 +55,15 @@ class Main {
     }
 
     loadMainScripts() {
-        const random = Math.floor((Math.random() * 99999999) + 9999999);
-        const suffix = _PRODUCTION_ ? '?v=' + random : '';
         for (const url of scriptUrls) {
             const script = document.createElement("script");
-            script.id = url;
-            if (document.getElementById(url)) return; // don't load plugin twice
             script.type = "text/javascript";
-            script.src = url + suffix;
+            script.src = url;
             script.async = false;
             script.defer = true;
             script.onload = this.onScriptLoad.bind(this);
             script.onerror = this.onScriptError.bind(this);
-            script._url = url + suffix;
+            script._url = url;
             document.body.appendChild(script);
         }
         this.numScripts = scriptUrls.length;
@@ -136,7 +102,6 @@ class Main {
     }
 
     onWindowLoad() {
-        console.log('onWindowLoad')
         if (!this.xhrSucceeded) {
             const message = "Your browser does not allow to read local files.";
             this.printError("Error", message);
@@ -168,9 +133,7 @@ class Main {
     initEffekseerRuntime() {
         const onLoad = this.onEffekseerLoad.bind(this);
         const onError = this.onEffekseerError.bind(this);
-        const prefix = _PRODUCTION_ ? _DOMAIN_NAME_ + '/' : '';
-        const suffix = _PRODUCTION_ ? '?v=' + remoteVersionJson.version : '';
-        effekseer.initRuntime(prefix + effekseerWasmUrl + suffix, onLoad, onError);
+        effekseer.initRuntime(effekseerWasmUrl, onLoad, onError);
     }
 
     onEffekseerLoad() {
@@ -184,11 +147,6 @@ class Main {
 }
 
 const main = new Main();
-if (!_PRODUCTION_) main.run();
-else {
-    window.addEventListener('run', main.run()); // Run the engine after fetching remote package
-    fetchOnlinePackageJSON(() => window.dispatchEvent(new Event('run')));
-    window.removeEventListener('run',null,true); // Disallow game reload on event catch
-}
+main.run();
 
 //-----------------------------------------------------------------------------
