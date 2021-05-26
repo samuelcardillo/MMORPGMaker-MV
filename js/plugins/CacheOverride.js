@@ -22,11 +22,22 @@
 
 (() => {
   const _parameters     = PluginManager.parameters('CacheOverride');
-  const _storageVersion = localStorage.getItem('gameVersion') || "1.0.0"
+  const _storageVersion = localStorage.getItem('gameVersion')
       , _currentVersion = _parameters['gameVersion'] || "1.0.0";
 
+  // Force loading last file if browser version doesn't match with plugin
   if (_storageVersion != _currentVersion) {
     localStorage.setItem('gameVersion', _currentVersion);
-    window.location.href += '?v=' + _currentVersion;
+    DataManager.loadDataFile = function(name, src) {
+      const xhr = new XMLHttpRequest();
+      const url = "data/" + src + `?v=${_currentVersion}`;
+      window[name] = null;
+      xhr.open("GET", url);
+      xhr.overrideMimeType("application/json");
+      xhr.onload = () => this.onXhrLoad(xhr, name, src, url);
+      xhr.onerror = () => this.onXhrError(name, src, url);
+      xhr.send();
+    };
   }
+
 })();
