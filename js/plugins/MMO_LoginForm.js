@@ -23,7 +23,7 @@ function LoginForm() {
 
     if(wasLogged) SceneManager.goto(LoginForm);
     
-    LoginForm.prototype.disableForm();
+    LoginForm.prototype.displayError("Connection lost.");
   })
 
   LoginForm.prototype = Object.create(Scene_Base.prototype);
@@ -84,17 +84,6 @@ function LoginForm() {
     >
         <div>
 
-            <div id="loginErrBox" 
-                style="
-                    display: block; 
-                    margin: 0 auto 16px auto; 
-                    text-align: center; 
-                    width: 100%; 
-                    font-family: Comic Sans, arial; 
-                    font-size: 18px;
-                "
-            />
-
             <div style="margin-bottom: 16px;">
                 <input id="inputUsername" type="text" placeholder="Username" class="login-input"
                     style="
@@ -111,6 +100,17 @@ function LoginForm() {
                     "
                 />
             </div>
+
+            <div id="loginErrBox" 
+                style="
+                    display: block; 
+                    margin: 0 auto 16px auto; 
+                    text-align: center; 
+                    width: 100%; 
+                    font-family: Comic Sans, arial; 
+                    font-size: 18px;
+                "
+            ></div>
 
             <button id="btnConnect" 
                 style="
@@ -131,9 +131,7 @@ function LoginForm() {
 
 
     document.getElementById('text_zone').innerHTML = html;
-
-    if(LoginForm.connectionLost) this.disableForm();
-    else document.getElementById("inputUsername").focus();
+    document.getElementById("inputUsername").focus();
 
     const verifyPass = () => {
       const pwdField = document.getElementById('inputPassword');
@@ -185,10 +183,6 @@ function LoginForm() {
     document.getElementById("loginErrBox").innerHTML = `<div style="color: red;">${message}</div>`;
   }
 
-  LoginForm.prototype.disableForm = function() {
-    this.displayError("Connection avec le serveur perdue.")
-  }
-
   LoginForm.prototype.connectAttempt = function(){
     const verifyPass = () => {
       const pwdField = document.getElementById('inputPassword');
@@ -209,12 +203,12 @@ function LoginForm() {
     let payload = { username: document.getElementById("inputUsername").value }
     payload.password = document.getElementById("inputPassword").value;
 
-    if (payload.username.length < 4 || payload.username.length >= 25) return this.displayError("Vous devez rentrer un pseudo!");
-    if(payload.username.includes(" ")) return this.displayError("Pas d'espace.");
-    if(!payload.username.match(/^(?=[a-zA-Z0-9\s]{2,25}$)(?=[a-zA-Z0-9\s])(?:([\w\s*?])\1?(?!\1))+$/)) return this.displayError("Pas de caractères spéciaux.");
+    if (payload.username.length < 4 || payload.username.length >= 25) return this.displayError("Invalid username !");
+    if(payload.username.includes(" ")) return this.displayError("No spaces !");
+    if(!payload.username.match(/^(?=[a-zA-Z0-9\s]{2,25}$)(?=[a-zA-Z0-9\s])(?:([\w\s*?])\1?(?!\1))+$/)) return this.displayError("No special characters.");
 
     MMO_Core.socket.on("login_success", function(data){
-      if (data.err) return that.displayError("Erreur : " + data.err);
+      if (data.err) return that.displayError("Error : " + data.err);
       // $("#ErrorPrinter").fadeOut({duration: 1000}).html("");
 
       MMO_Core_Player.Player = data["msg"];
@@ -229,7 +223,7 @@ function LoginForm() {
       // _requestNativeFullScreen({browserOnly:true});
       setTimeout(async () => {
         setTimeout(async () => MMO_Core.socket.emit("new_message", '/count'), 1);
-        MMO_Core.socket.emit("new_message", '/all vient de se connecter');
+        MMO_Core.socket.emit("new_message", '/all logged in');
       }, 1000);
       return true;
     });
