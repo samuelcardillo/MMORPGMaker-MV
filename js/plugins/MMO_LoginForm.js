@@ -125,7 +125,7 @@ function LoginForm() {
                   Play
               </button>
         </div>
-        <div style="text-align: center; margin-top: 8px;"><a style="color: white;" href="${_DOMAIN_NAME_}/../register.html" target="_blank">Sign up</a></div>
+        <div style="text-align: center; margin-top: 8px;"><a style="color: white;" href="${ MMO_Core.Parameters['Server Location'] }/../register.html" target="_blank">Sign up</a></div>
     </div>
     `;
 
