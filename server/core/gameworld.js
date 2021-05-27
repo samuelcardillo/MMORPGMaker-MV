@@ -111,10 +111,10 @@ world.playerLeaveInstance = (playerId,mapId) => {
 world.fetchNpcsFromMap = (map) => {
   if (!world.isMapInstanced(map.id)) return;
   for (let npc of world.findInstanceById(map.id).events.filter(event => JSON.stringify(event).includes('<Sync>'))) {
-    const generatedNpc = world.makeConnectedNpc(npc,map);
-    if (generatedNpc.pages.find(p => p.list.find(l => l.code === 108 && l.parameters.includes('<Sync>')))) {
-      world.findInstanceById(map.id).npcsOnMap.push( generatedNpc );
-      console.log('Added synced NPC ' + generatedNpc.uniqueId + ' on map ' + map.id);
+    const _generatedNpc = world.makeConnectedNpc(npc,map);
+    if (_generatedNpc.pages.find(p => p.list.find(l => l.code === 108 && l.parameters.includes('<Sync>')))) {
+      world.findInstanceById(map.id).npcsOnMap.push( _generatedNpc );
+      console.log('Added synced NPC ' + _generatedNpc.uniqueId + ' on map ' + map.id);
     }
   }
 }
@@ -122,7 +122,7 @@ world.fetchNpcsFromMap = (map) => {
 world.makeConnectedNpc = (npc,instance) => {
   return Object.assign(npc, {
     uniqueId: `@${instance.id}#${instance.npcsOnMap.length}?${npc.id}`, // Every NPC has to be clearly differentiable
-    eventID: npc.id, // Event "ID" client-side
+    eventId: npc.id, // Event "ID" client-side
     absId: null, // Help to resolve ABS logic (if and when any)
   });
 }
