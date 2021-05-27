@@ -55,10 +55,11 @@ world.makeInstance = (map) => {
     mapId: map.id,
     height: map.height, 
     width: map.width,
-    npcsOnMap: [],
-    playersOnMap: [],
+    npcsOnMap: [], // Array of Objects
+    playersOnMap: [], // Array of String
     createdAt: new Date(),
-    lastPlayerLeftAt: null
+    lastPlayerLeftAt: null, // Date
+    dieAfter: 60000, // When no more players left, kill after X ms
   });
 }
 
@@ -80,9 +81,9 @@ world.killInstance = (mapId) => {
 
 world.playerJoinInstance = (playerId,mapId) => {
   if (!world.isMapInstanceable(world.getMapById(mapId))) return;
-  if (!world.isMapInstanced(mapId)) world.runInstance(mapId);
+  if (!world.isMapInstanced(mapId)) world.runInstance(mapId); // If instance not existing, run it before
   if (!world.findInstanceById(mapId)['playersOnMap'].includes(playerId)) {
-    world.findInstanceById(mapId).playersOnMap.push(playerId);
+    world.findInstanceById(mapId).playersOnMap.push(playerId); // Add playerId to Array
     console.log('playerJoinInstance', mapId, JSON.stringify(world.findInstanceById(mapId).playersOnMap) );
   }
 }
@@ -91,8 +92,8 @@ world.playerLeaveInstance = (playerId,mapId) => {
   if (!world.isMapInstanceable(world.getMapById(mapId))) return;
   if (world.findInstanceById(mapId) && world.findInstanceById(mapId).playersOnMap.includes(playerId)) {
     const _players = world.findInstanceById(mapId).playersOnMap;
-    world.findInstanceById(mapId).playersOnMap.splice(_players.indexOf(playerId), 1);
+    world.findInstanceById(mapId).playersOnMap.splice(_players.indexOf(playerId), 1); // Remove playerId from Array
     console.log('playerLeaveInstance', mapId, JSON.stringify(world.findInstanceById(mapId).playersOnMap) );
-    if (!world.findInstanceById(mapId).playersOnMap.length) world.killInstance(mapId);
+    setTimeout(() => world.killInstance(mapId), world.findInstanceById(mapId).dieAfter); // Kill the instance after X ms
   }
 }
