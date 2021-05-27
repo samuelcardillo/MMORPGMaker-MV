@@ -36,7 +36,8 @@ MMO_Core = {
     database: require("./core/database"),
     security: require("./core/security"),
     socket: require("./core/socket"),
-    routes: require("./core/routes")
+    routes: require("./core/routes"),
+    gameworld: require('./core/gameworld')
 };
 
 try {
@@ -46,8 +47,8 @@ try {
             server.listen(MMO_Core.database.SERVER_CONFIG.port); // Listen configured port
 
             MMO_Core.socket.initialize(io, MMO_Core.database.SERVER_CONFIG); // Initalizing the socket-side of the server
-            MMO_Core.routes.initialize(app, MMO_Core.database.SERVER_CONFIG, function(callback) { // Initializing the RESTFUL API
-                console.log(callback);
+            MMO_Core.routes.initialize(app, MMO_Core.database.SERVER_CONFIG, () => { // Initializing the RESTFUL API
+                MMO_Core["gameworld"].initialize(); // Initializing world environment 
             });
         });
     });

@@ -1,6 +1,7 @@
 /* global MMO_Core */
 exports.initialize = function() {
     const io = MMO_Core.socket.socketConnection;
+    const world = MMO_Core["gameworld"];
 
     io.on("connect", function(client) {
         // Handle players joining a map
@@ -14,6 +15,7 @@ exports.initialize = function() {
                     client.broadcast.to(client.lastMap).emit("map_exited", client.id);
                 }
                 client.leave(client.lastMap);
+                world.playerLeaveInstance(client.playerData.id, parseInt(client.playerData.mapId));
 
                 MMO_Core.security.createLog(client.playerData.username + " left " + client.lastMap);
             }
@@ -38,6 +40,7 @@ exports.initialize = function() {
 
             client.join("map-" + playerData.mapId);
             client.lastMap = "map-" + playerData.mapId;
+            world.playerJoinInstance(client.playerData.id, parseInt(client.playerData.mapId));
 
             if (MMO_Core.database.SERVER_CONFIG.offlineMaps[client.lastMap] === undefined) {
                 client.broadcast.to("map-" + playerData.mapId).emit("map_joined", { id: client.id, playerData: playerData });
