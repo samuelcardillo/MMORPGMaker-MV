@@ -4,11 +4,15 @@ var exports = module.exports = {}
 /*****************************
       GAME WORLD 
       by Axel Fiolle
+
+  - A connected map must include "<Sync>" inside its note.
+  - A connected NPC must include "<Sync>" anywhere
+
 *****************************/
 
 world.gameMaps         = []; // Formated exploitable files from gamedata
-world.instanceableMaps = []; // Maps where we you track players and npcs on maps
-world.instancedMaps    = []; // Maps that are currently served
+world.instanceableMaps = []; // Formated maps to track players and npcs
+world.instancedMaps    = []; // Maps that are currently up and synced
 
 // Global function
 world.getMapById         = (mapId) => world.gameMaps.find(map => map.id === mapId);
@@ -68,6 +72,7 @@ world.runInstance = (mapId) => {
   if (map && world.isMapInstanceable(map) && !world.isMapInstanced(mapId)) {
     world.instancedMaps.push( world.makeInstance(map) );
     console.log('[WORLD] # Started instance', mapId, 'at', new Date())
+    world.fetchNpcsFromMap(map);
   }
 }
 
@@ -96,4 +101,22 @@ world.playerLeaveInstance = (playerId,mapId) => {
     console.log('playerLeaveInstance', mapId, JSON.stringify(world.findInstanceById(mapId).playersOnMap) );
     setTimeout(() => world.killInstance(mapId), world.findInstanceById(mapId).dieAfter); // Kill the instance after X ms
   }
+}
+
+world.fetchNpcsFromMap = (map) => {
+  if (!world.isMapInstanced(map.id)) return false;
+  for (let event of world.findInstanceById(map.id).events.filter(e => JSON.stringify(e).includes('<Sync>'))) {
+    world.findInstanceById(map.id).npcsOnMap.push( world.makeConnectedNpc(event,map) );
+    console.log('Added synced NPC ' + event.id + ' on map ' + map.id);
+  }
+  return true;
+}
+
+world.makeConnectedNpc = (npc,instance) => {
+  console.log('makeConnectedNpc', `@${instance.id}#${instance.npcsOnMap.length}?${npc.id}`);
+  return Object.assign(npc, {
+    uniqueId: `@${instance.id}#${instance.npcsOnMap.length}?${npc.id}`, // Every NPC has to be clearly differentiable
+    eventID: npc.id, // Event "ID" client-side
+    absId: null, // Help to resolve ABS logic (if and when any)
+  });
 }
