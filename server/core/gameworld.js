@@ -19,7 +19,12 @@ world.getMapById         = (mapId) => world.gameMaps.find(map => map.id === mapI
 world.findInstanceById   = (id) => world.instancedMaps.find(instance => instance.id === id);
 // Testing functions
 world.isMapInstanced     = (mapId) => world.instancedMaps.find(i => i.mapId === mapId);
-world.isMapInstanceable  = (map) => map.note && map.note.toUpperCase().includes("<SYNC>");;
+world.isMapInstanceable  = (map) => map.note && map.note.toUpperCase().includes("<SYNC>");
+// NPC helpers
+world.getNpcMapId     = (uniqueId) => world.npcFinder(uniqueId).mapId;
+world.getNpcIndex     = (uniqueId) => world.npcFinder(uniqueId).npcIndex;
+world.getNpcEventId   = (uniqueId) => world.npcFinder(uniqueId).eventId;
+world.getNpcInstance  = (uniqueId) => world.findInstanceById( world.getNpcMapId(uniqueId) );
 
 world.initialize = () => {
   world.fetchMaps(); // Load gamedata maps
@@ -120,4 +125,12 @@ world.makeConnectedNpc = (npc,instance) => {
     eventID: npc.id, // Event "ID" client-side
     absId: null, // Help to resolve ABS logic (if and when any)
   });
+}
+
+world.npcFinder = (uniqueId) => {
+  return {
+    mapId: parseInt(uniqueId.split('#')[0].split('@')[1]),
+    npcIndex: parseInt(uniqueId.split('?')[0].split('#')[1]),
+    eventId: parseInt(uniqueId.split('?')[1]),
+  };
 }
