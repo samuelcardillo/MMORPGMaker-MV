@@ -6,7 +6,7 @@ var exports = module.exports = {}
       by Axel Fiolle
 
   - A connected map must include "<Sync>" inside its note.
-  - A connected NPC must include "<Sync>" anywhere
+  - A connected NPC must include "<Sync>" in a comment in any page.
 
 *****************************/
 
@@ -104,16 +104,17 @@ world.playerLeaveInstance = (playerId,mapId) => {
 }
 
 world.fetchNpcsFromMap = (map) => {
-  if (!world.isMapInstanced(map.id)) return false;
-  for (let event of world.findInstanceById(map.id).events.filter(e => JSON.stringify(e).includes('<Sync>'))) {
-    world.findInstanceById(map.id).npcsOnMap.push( world.makeConnectedNpc(event,map) );
-    console.log('Added synced NPC ' + event.id + ' on map ' + map.id);
+  if (!world.isMapInstanced(map.id)) return;
+  for (let npc of world.findInstanceById(map.id).events.filter(event => JSON.stringify(event).includes('<Sync>'))) {
+    const generatedNpc = world.makeConnectedNpc(npc,map);
+    if (generatedNpc.pages.find(p => p.list.find(l => l.code === 108 && l.parameters.includes('<Sync>')))) {
+      world.findInstanceById(map.id).npcsOnMap.push( generatedNpc );
+      console.log('Added synced NPC ' + generatedNpc.uniqueId + ' on map ' + map.id);
+    }
   }
-  return true;
 }
 
 world.makeConnectedNpc = (npc,instance) => {
-  console.log('makeConnectedNpc', `@${instance.id}#${instance.npcsOnMap.length}?${npc.id}`);
   return Object.assign(npc, {
     uniqueId: `@${instance.id}#${instance.npcsOnMap.length}?${npc.id}`, // Every NPC has to be clearly differentiable
     eventID: npc.id, // Event "ID" client-side
