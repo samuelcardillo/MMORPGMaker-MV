@@ -73,11 +73,11 @@ world.makeInstance = (map) => {
 }
 
 world.runInstance = (mapId) => {
-  const map = world.getMapById(mapId);
-  if (map && world.isMapInstanceable(map) && !world.isMapInstanced(mapId)) {
-    world.instancedMaps.push( world.makeInstance(map) );
+  const _map = world.getMapById(mapId);
+  if (_map && world.isMapInstanceable(_map) && !world.isMapInstanced(mapId)) {
+    world.instancedMaps.push( world.makeInstance(_map) );
     console.log('[WORLD] # Started instance', mapId, 'at', new Date())
-    world.fetchNpcsFromMap(map);
+    world.fetchNpcsFromMap(_map);
   }
 }
 
@@ -129,8 +129,8 @@ world.makeConnectedNpc = (npc,instance) => {
 
 world.npcFinder = (uniqueId) => {
   return {
-    mapId: parseInt(uniqueId.split('#')[0].split('@')[1]),
-    npcIndex: parseInt(uniqueId.split('?')[0].split('#')[1]),
+    mapId: parseInt(uniqueId.split('@')[1].split('#')[0]),
+    npcIndex: parseInt(uniqueId.split('#')[1].split('?')[0]),
     eventId: parseInt(uniqueId.split('?')[1]),
   };
 }
