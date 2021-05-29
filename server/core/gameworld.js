@@ -195,7 +195,7 @@ world.startInstanceLifecycle = (instanceId) => {
     } else if (world.findInstanceById(instanceId).playersOnMap.length) {
       // Plays only if players on map :
       _instance.actionsOnMap.map(action => world.handleInstanceAction(action, _instance, currentTime)); // Play Actions
-      world.findInstanceById(instanceId).npcsOnMap.map(npc => world.handleNpcTurn(npc, currentTime, tick)); // Animate NPCS
+      world.findInstanceById(instanceId).npcsOnMap.map(npc => world.handleNpcTurn(npc, currentTime, interval)); // Animate NPCS
     } 
     if (!world.findInstanceById(instanceId).playersOnMap.length) {
       // If no more players on map :
