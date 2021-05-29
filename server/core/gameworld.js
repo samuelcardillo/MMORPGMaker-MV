@@ -73,6 +73,7 @@ world.makeInstance = (map) => {
     dieAfter: 60000, // When no more players left, kill after X ms
     permanent: false, // Make the instance never die
     pauseAfter: 30000, // When no more player, interrupt lifecycle after X ms
+    paused: false,
   });
 }
 
@@ -97,6 +98,7 @@ world.killInstance = (mapId) => {
 world.playerJoinInstance = (playerId,mapId) => {
   if (!world.isMapInstanceable(world.getMapById(mapId))) return;
   if (!world.isMapInstanced(mapId)) world.runInstance(mapId); // If instance not existing, run it before
+  if (world.findInstanceById(mapId).paused) world.startInstanceLifecycle(mapId); // If paused, restart
   if (!world.findInstanceById(mapId)['playersOnMap'].includes(playerId)) {
     world.findInstanceById(mapId).playersOnMap.push(playerId); // Add playerId to Array
     console.log('[WORLD] playerJoinInstance', mapId, JSON.stringify(world.findInstanceById(mapId).playersOnMap) );
@@ -109,6 +111,7 @@ world.playerLeaveInstance = (playerId,mapId) => {
     const _players = world.findInstanceById(mapId).playersOnMap;
     world.findInstanceById(mapId).playersOnMap.splice(_players.indexOf(playerId), 1); // Remove playerId from Array
     console.log('[WORLD] playerLeaveInstance', mapId, JSON.stringify(world.findInstanceById(mapId).playersOnMap) );
+    if (!world.findInstanceById(mapId).playersOnMap.length) world.findInstanceById(mapId).lastPlayerLeftAt = new Date();
     if (!world.findInstanceById(mapId).permanent) {
       setTimeout(() => world.killInstance(mapId), world.findInstanceById(mapId).dieAfter); // Kill the instance after X ms
     }
@@ -172,34 +175,40 @@ world.handleNpcTurn = (npc,currentTime,cooldown) => {
   // This function will read basic NPC behavior and mock it on
   // server-side then replicate it on every concerned player
   if (!npc || !currentTime || !cooldown) return;
-  // console.log('[WORLD] handleNpcTurn', npc.uniqueId);
-
+  
   // read NPCs infos (speed, rate, etc, ...)
   const delayedActionTime = currentTime.getTime() - npc.lastActionTime.getTime();
   const delayedMoveTime = currentTime.getTime() - npc.lastMoveTime.getTime();
-
+  
   // make NPCs behavior
-  let canActionThisTurn = delayedActionTime < cooldown;
-  let canMoveThisTurn = npc._moveType;
-
+  let canActionThisTurn = delayedActionTime > cooldown;
+  let canMoveThisTurn = npc._moveType !== 0 && (delayedMoveTime < cooldown);
+  
+  // console.log('[WORLD] handleNpcTurn', world.npcFinder(npc.uniqueId), new Date());
 }
 
 world.startInstanceLifecycle = (instanceId) => {
   const interval = 1000 / 60; // Tick 1 action every RPG Maker Frame (60f = 1s)
-  const tick = setInterval(() => { 
+  const tick = setInterval(() => {
     const currentTime = new Date(); // Use precise tick time
     const _instance = world.findInstanceById(instanceId); // Memorize state at tick time
-    if (!_instance) {
+
+    if (!_instance) { // If no instance, stop everything
       clearInterval(tick);
       return;
-    } else if (world.findInstanceById(instanceId).playersOnMap.length) {
-      // Plays only if players on map :
+    } else {
+      world.findInstanceById(instanceId).paused = false;
       _instance.actionsOnMap.map(action => world.handleInstanceAction(action, _instance, currentTime)); // Play Actions
       world.findInstanceById(instanceId).npcsOnMap.map(npc => world.handleNpcTurn(npc, currentTime, interval)); // Animate NPCS
-    } 
-    if (!world.findInstanceById(instanceId).playersOnMap.length) {
-      // If no more players on map :
-      setTimeout(() => clearInterval(tick), world.findInstanceById(instanceId).pauseAfter); // Will suspend instance (not kill)
+    }
+    if (!world.findInstanceById(instanceId).playersOnMap.length) { // If no players on map :
+      setTimeout(() => {
+        // check again after timeout if still no more players, or if instance is dead :
+        if (!world.findInstanceById(instanceId) || !world.findInstanceById(instanceId).playersOnMap.length) { 
+          clearInterval(tick);
+          if (world.findInstanceById(instanceId)) world.findInstanceById(instanceId).paused = true;
+        }
+      }, world.findInstanceById(instanceId).pauseAfter); // Will suspend instance (not kill)
     }
   }, interval);
 }
