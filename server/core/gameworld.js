@@ -99,7 +99,7 @@ world.playerJoinInstance = (playerId,mapId) => {
   if (!world.isMapInstanced(mapId)) world.runInstance(mapId); // If instance not existing, run it before
   if (!world.findInstanceById(mapId)['playersOnMap'].includes(playerId)) {
     world.findInstanceById(mapId).playersOnMap.push(playerId); // Add playerId to Array
-    console.log('playerJoinInstance', mapId, JSON.stringify(world.findInstanceById(mapId).playersOnMap) );
+    console.log('[WORLD] playerJoinInstance', mapId, JSON.stringify(world.findInstanceById(mapId).playersOnMap) );
   }
 }
 
@@ -108,7 +108,7 @@ world.playerLeaveInstance = (playerId,mapId) => {
   if (world.findInstanceById(mapId) && world.findInstanceById(mapId).playersOnMap.includes(playerId)) {
     const _players = world.findInstanceById(mapId).playersOnMap;
     world.findInstanceById(mapId).playersOnMap.splice(_players.indexOf(playerId), 1); // Remove playerId from Array
-    console.log('playerLeaveInstance', mapId, JSON.stringify(world.findInstanceById(mapId).playersOnMap) );
+    console.log('[WORLD] playerLeaveInstance', mapId, JSON.stringify(world.findInstanceById(mapId).playersOnMap) );
     if (!world.findInstanceById(mapId).permanent) {
       setTimeout(() => world.killInstance(mapId), world.findInstanceById(mapId).dieAfter); // Kill the instance after X ms
     }
@@ -121,7 +121,7 @@ world.fetchNpcsFromMap = (map) => {
     const _generatedNpc = world.makeConnectedNpc(npc,map);
     if (_generatedNpc.pages.find(p => p.list.find(l => l.code === 108 && l.parameters.includes('<Sync>')))) {
       world.findInstanceById(map.id).npcsOnMap.push( _generatedNpc );
-      console.log('Added synced NPC ' + _generatedNpc.uniqueId + ' on map ' + map.id);
+      console.log('[WORLD] Added synced NPC ' + _generatedNpc.uniqueId + ' on map ' + map.id);
     }
   }
 }
