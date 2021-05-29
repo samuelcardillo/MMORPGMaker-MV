@@ -25,7 +25,7 @@ world.getNpcMapId     = (uniqueId) => world.npcFinder(uniqueId).mapId;
 world.getNpcIndex     = (uniqueId) => world.npcFinder(uniqueId).npcIndex;
 world.getNpcEventId   = (uniqueId) => world.npcFinder(uniqueId).eventId;
 world.getNpcInstance  = (uniqueId) => world.findInstanceById( world.getNpcMapId(uniqueId) );
-world.getNpcByUniqueId  = (uniqueId) => world.getNpcInstance(uniqueId).npcsOnMap[ world.getNpcIndex(uniqueId) ] || null;
+world.getNpcByUniqueId  = (uniqueId) => world.getNpcInstance(uniqueId).npcsOnMap[ world.getNpcIndex(uniqueId) ];
 
 world.initialize = () => {
   world.fetchMaps(); // Load gamedata maps
@@ -119,7 +119,7 @@ world.playerLeaveInstance = (playerId,mapId) => {
 }
 
 world.fetchNpcsFromMap = (map) => {
-  if (!world.isMapInstanced(map.id)) return;
+  if (!map || !world.isMapInstanced(map.id)) return;
   for (let npc of world.findInstanceById(map.id).events.filter(event => JSON.stringify(event).includes('<Sync>'))) {
     const _generatedNpc = world.makeConnectedNpc(npc,map);
     if (_generatedNpc.pages.find(p => p.list.find(l => l.code === 108 && l.parameters.includes('<Sync>')))) {
@@ -193,22 +193,27 @@ world.startInstanceLifecycle = (instanceId) => {
     const currentTime = new Date(); // Use precise tick time
     const _instance = world.findInstanceById(instanceId); // Memorize state at tick time
 
-    if (!_instance) { // If no instance, stop everything
+    if (!_instance) { // If no instance, interrupt lifecycle
       clearInterval(tick);
       return;
-    } else {
-      world.findInstanceById(instanceId).paused = false;
-      _instance.actionsOnMap.map(action => world.handleInstanceAction(action, _instance, currentTime)); // Play Actions
-      world.findInstanceById(instanceId).npcsOnMap.map(npc => world.handleNpcTurn(npc, currentTime, interval)); // Animate NPCS
     }
-    if (!world.findInstanceById(instanceId).playersOnMap.length) { // If no players on map :
+
+    world.findInstanceById(instanceId).paused = false; // Flag as running
+    _instance.actionsOnMap.map(action => world.handleInstanceAction(action, _instance, currentTime)); // Play Actions
+    world.findInstanceById(instanceId).npcsOnMap.map(npc => world.handleNpcTurn(npc, currentTime, interval)); // Animate NPCS
+
+    if (!world.findInstanceById(instanceId).playersOnMap.length) { // If no players on map at tick :
       setTimeout(() => {
-        // check again after timeout if still no more players, or if instance is dead :
-        if (!world.findInstanceById(instanceId) || !world.findInstanceById(instanceId).playersOnMap.length) { 
+        if (!world.findInstanceById(instanceId)) {
+          // If instance is not loaded anymore :
           clearInterval(tick);
-          if (world.findInstanceById(instanceId)) world.findInstanceById(instanceId).paused = true;
+          return;
+        } else if (!world.findInstanceById(instanceId).playersOnMap.length) {
+          // If instance alive && no more players in it
+          clearInterval(tick); // Will suspend instance (not kill)
+          world.findInstanceById(instanceId).paused = true; // Flag paused
         }
-      }, world.findInstanceById(instanceId).pauseAfter); // Will suspend instance (not kill)
+      }, world.findInstanceById(instanceId).pauseAfter); 
     }
   }, interval);
 }

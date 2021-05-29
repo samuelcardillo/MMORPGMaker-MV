@@ -59,7 +59,7 @@ exports.initialize = function() {
                 return;
             }
 
-            MMO_Core.gameworld.playerLeaveInstance(client.playerData.id, parseInt(client.playerData.mapId));
+            MMO_Core["gameworld"].playerLeaveInstance(client.playerData.id, parseInt(client.playerData.mapId));
 
             // ANTI-CHEAT : Deleting some entries before saving the character.
             delete (client.playerData.permission); // Avoid permission elevation exploit
