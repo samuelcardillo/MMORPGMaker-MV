@@ -66,9 +66,12 @@ world.makeInstance = (map) => {
     width: map.width,
     npcsOnMap: [], // Array of Objects
     playersOnMap: [], // Array of String
+    actionsOnMap: [], // Array of Objects -> Actions currently running in instance
     createdAt: new Date(),
     lastPlayerLeftAt: null, // Date
     dieAfter: 60000, // When no more players left, kill after X ms
+    permanent: false, // Make the instance never die
+    pauseAfter: 30000, // When no more player, interrupt lifecycle after X ms
   });
 }
 
@@ -119,11 +122,30 @@ world.fetchNpcsFromMap = (map) => {
   }
 }
 
-world.makeConnectedNpc = (npc,instance) => {
+world.makeConnectedNpc = (npc,instance,pageIndex) => {
+  if (!npc || !instance) return;
+  // Target selected or first page to assign helpers :
+  const _page = npc.pages && npc.pages[(pageIndex && !isNaN(pageIndex)) ? parseInt(pageIndex) : 0] || npc.pages[0];
   return Object.assign(npc, {
     uniqueId: `@${instance.id}#${instance.npcsOnMap.length}?${npc.id}`, // Every NPC has to be clearly differentiable
     eventId: npc.id, // Event "ID" client-side
     absId: null, // Help to resolve ABS logic (if and when any)
+    lastActionTime: new Date(), 
+    lastMoveTime: new Date(),
+    // _ helpers
+    _conditions: _page.conditions,
+    _directionFix: _page.directionFix,
+    _image: _page.image,
+    _list: _page.list,
+    _moveFrequency: _page.moveFrequency,
+    _moveRoute: _page.moveRoute,
+    _moveSpeed: _page.moveSpeed,
+    _moveType: _page.moveType,
+    _priorityType: _page.priorityType,
+    _stepAnime: _page.stepAnime,
+    _through: _page.through,
+    _trigger: _page.trigger,
+    _walkAnime: _page.walkAnime,
   });
 }
 
@@ -133,4 +155,47 @@ world.npcFinder = (uniqueId) => {
     npcIndex: parseInt(uniqueId.split('#')[1].split('?')[0]),
     eventId: parseInt(uniqueId.split('?')[1]),
   };
+}
+
+world.handleInstanceAction = (action,instance,currentTime) => {
+  // This function will interpret/mock a game script then emit 
+  // an event to replicate it on every concerned player
+  if (!action || !instance || !currentTime) return;
+  return;
+}
+
+world.handleNpcTurn = (npc,currentTime,cooldown) => {
+  // This function will read basic NPC behavior and mock it on
+  // server-side then replicate it on every concerned player
+  if (!npc || !currentTime || !cooldown) return;
+  // console.log('[WORLD] handleNpcTurn', npc.uniqueId);
+
+  // read NPCs infos (speed, rate, etc, ...)
+  const delayedActionTime = currentTime.getTime() - npc.lastActionTime.getTime();
+  const delayedMoveTime = currentTime.getTime() - npc.lastMoveTime.getTime();
+
+  // make NPCs behavior
+  let canActionThisTurn = delayedActionTime < cooldown;
+  let canMoveThisTurn = npc._moveType;
+
+}
+
+world.startInstanceLifecycle = (instanceId) => {
+  const interval = 1000 / 60; // Tick 1 action every RPG Maker Frame (60f = 1s)
+  const tick = setInterval(() => { 
+    const currentTime = new Date(); // Use precise tick time
+    const _instance = world.findInstanceById(instanceId); // Memorize state at tick time
+    if (!_instance) {
+      clearInterval(tick);
+      return;
+    } else if (world.findInstanceById(instanceId).playersOnMap.length) {
+      // Plays only if players on map :
+      _instance.actionsOnMap.map(action => world.handleInstanceAction(action, _instance, currentTime)); // Play Actions
+      world.findInstanceById(instanceId).npcsOnMap.map(npc => world.handleNpcTurn(npc, currentTime, tick)); // Animate NPCS
+    } 
+    if (!world.findInstanceById(instanceId).playersOnMap.length) {
+      // If no more players on map :
+      setTimeout(() => clearInterval(tick), world.findInstanceById(instanceId).pauseAfter); // Will suspend instance (not kill)
+    }
+  }, interval);
 }
