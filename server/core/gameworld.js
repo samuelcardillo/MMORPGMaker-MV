@@ -63,17 +63,15 @@ world.makeInstance = (map) => {
   return Object.assign(map, {  // an Instance is an extends of a GameMap
     id: map.id,
     mapId: map.id,
-    height: map.height, 
-    width: map.width,
-    npcsOnMap: [], // Array of Objects
-    playersOnMap: [], // Array of String
-    actionsOnMap: [], // Array of Objects -> Actions currently running in instance
     createdAt: new Date(),
     lastPlayerLeftAt: null, // Date
     dieAfter: 60000, // When no more players left, kill after X ms
     permanent: false, // Make the instance never die
     pauseAfter: 30000, // When no more player, interrupt lifecycle after X ms
     paused: false,
+    npcsOnMap: [], // Array of Objects
+    playersOnMap: [], // Array of String
+    actionsOnMap: [], // Array of Objects -> Actions currently running in instance
   });
 }
 
@@ -134,7 +132,7 @@ world.makeConnectedNpc = (npc,instance,pageIndex) => {
   // Target selected or first page to assign helpers :
   const _page = npc.pages && npc.pages[(pageIndex && !isNaN(pageIndex)) ? parseInt(pageIndex) : 0] || npc.pages[0];
   // If page contains a comment with "<Sync>" as parameter, return ConnectedNpc :
-  if (_page.list.find(l => l.code === 108 && l.parameters.includes('<Sync>'))) {
+  if (_page.list.find(l => l.code === 108 && l.parameters.find(p => p.toUpperCase().includes('<SYNC>')))) {
     return Object.assign(npc, {
       uniqueId: `@${instance.id}#${instance.npcsOnMap.length}?${npc.id}`, // Every NPC has to be clearly differentiable
       eventId: npc.id, // Event "ID" client-side
