@@ -122,7 +122,7 @@ world.fetchNpcsFromMap = (map) => {
   if (!map || !world.isMapInstanced(map.id)) return;
   for (let npc of world.findInstanceById(map.id).events.filter(event => JSON.stringify(event).includes('<Sync>'))) {
     const _generatedNpc = world.makeConnectedNpc(npc,map);
-    if (_generatedNpc.pages.find(p => p.list.find(l => l.code === 108 && l.parameters.includes('<Sync>')))) {
+    if (_generatedNpc) {
       world.findInstanceById(map.id).npcsOnMap.push( _generatedNpc );
       console.log('[WORLD] Added synced NPC ' + _generatedNpc.uniqueId + ' on map ' + map.id);
     }
@@ -133,27 +133,30 @@ world.makeConnectedNpc = (npc,instance,pageIndex) => {
   if (!npc || !instance) return;
   // Target selected or first page to assign helpers :
   const _page = npc.pages && npc.pages[(pageIndex && !isNaN(pageIndex)) ? parseInt(pageIndex) : 0] || npc.pages[0];
-  return Object.assign(npc, {
-    uniqueId: `@${instance.id}#${instance.npcsOnMap.length}?${npc.id}`, // Every NPC has to be clearly differentiable
-    eventId: npc.id, // Event "ID" client-side
-    absId: null, // Help to resolve ABS logic (if and when any)
-    lastActionTime: new Date(), 
-    lastMoveTime: new Date(),
-    // _ helpers
-    _conditions: _page.conditions,
-    _directionFix: _page.directionFix,
-    _image: _page.image,
-    _list: _page.list,
-    _moveFrequency: _page.moveFrequency,
-    _moveRoute: _page.moveRoute,
-    _moveSpeed: _page.moveSpeed,
-    _moveType: _page.moveType,
-    _priorityType: _page.priorityType,
-    _stepAnime: _page.stepAnime,
-    _through: _page.through,
-    _trigger: _page.trigger,
-    _walkAnime: _page.walkAnime,
-  });
+  // If page contains a comment with "<Sync>" as parameter, return ConnectedNpc :
+  if (_page.list.find(l => l.code === 108 && l.parameters.includes('<Sync>'))) {
+    return Object.assign(npc, {
+      uniqueId: `@${instance.id}#${instance.npcsOnMap.length}?${npc.id}`, // Every NPC has to be clearly differentiable
+      eventId: npc.id, // Event "ID" client-side
+      absId: null, // Help to resolve ABS logic (if and when any)
+      lastActionTime: new Date(),
+      lastMoveTime: new Date(),
+      // _ helpers
+      _conditions: _page.conditions,
+      _directionFix: _page.directionFix,
+      _image: _page.image,
+      _list: _page.list,
+      _moveFrequency: _page.moveFrequency,
+      _moveRoute: _page.moveRoute,
+      _moveSpeed: _page.moveSpeed,
+      _moveType: _page.moveType,
+      _priorityType: _page.priorityType,
+      _stepAnime: _page.stepAnime,
+      _through: _page.through,
+      _trigger: _page.trigger,
+      _walkAnime: _page.walkAnime,
+    });
+  }
 }
 
 world.npcFinder = (uniqueId) => {
