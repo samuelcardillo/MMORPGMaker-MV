@@ -81,6 +81,7 @@ world.runInstance = (mapId) => {
     world.instancedMaps.push( world.makeInstance(_map) );
     console.log('[WORLD] # Started instance', mapId, 'at', new Date())
     world.fetchNpcsFromMap(_map);
+    world.startInstanceLifecycle(_map.id);
   }
 }
 
@@ -107,7 +108,9 @@ world.playerLeaveInstance = (playerId,mapId) => {
     const _players = world.findInstanceById(mapId).playersOnMap;
     world.findInstanceById(mapId).playersOnMap.splice(_players.indexOf(playerId), 1); // Remove playerId from Array
     console.log('playerLeaveInstance', mapId, JSON.stringify(world.findInstanceById(mapId).playersOnMap) );
-    setTimeout(() => world.killInstance(mapId), world.findInstanceById(mapId).dieAfter); // Kill the instance after X ms
+    if (!world.findInstanceById(mapId).permanent) {
+      setTimeout(() => world.killInstance(mapId), world.findInstanceById(mapId).dieAfter); // Kill the instance after X ms
+    }
   }
 }
 
