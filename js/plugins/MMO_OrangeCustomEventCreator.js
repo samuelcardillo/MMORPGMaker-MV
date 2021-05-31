@@ -355,14 +355,14 @@
      return this.createNormalEventAt($gameActors.actor(actorId).characterName(), $gameActors.actor(actorId).characterIndex(), x, y, d, scriptOrCommonEventId, temporary);
    }
  
-   function createNormalEventAt(characterName, characterIndex, x, y, d, scriptOrCommonEventId, temporary, pages) {
+   function createNormalEventAt(characterName, characterIndex, x, y, d, scriptOrCommonEventId, temporary, _page) {
      var eventData = new CustomEventData();
      eventData.page.image.direction = d;
      eventData.page.image.characterName = characterName;
      eventData.page.image.characterIndex = characterIndex;
-     if (!!pages) {
-      eventData.page.trigger = pages[0].trigger || 0;
-      Object.assign(eventData.page.list, pages[0].list);
+     if (!!_page) {
+      eventData.page.trigger = _page.trigger || 0;
+      Object.assign(eventData.page.list, _page.list);
       Object.assign(eventData.page.moveRoute, { // Remove behavior
         list: [{ code: 0, parameters: [] }],
         repeat: false,

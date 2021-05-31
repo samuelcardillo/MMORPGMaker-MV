@@ -53,7 +53,7 @@ function MMO_Core_Npcs() {
     const spriteName = data._image.characterName;
     const spriteDir = data._image.characterIndex;
     
-    MMO_Core_Npcs.Npcs[data.id] = $gameMap.createNormalEventAt(spriteName, spriteDir, data.x, data.y, 2, 0, true, data.pages);
+    MMO_Core_Npcs.Npcs[data.id] = $gameMap.createNormalEventAt(spriteName, spriteDir, data.x, data.y, 2, 0, true, data.pages[data._selectedPageIndex]);
     MMO_Core_Npcs.Npcs[data.id]._stepAnime = data._stepAnime;
     MMO_Core_Npcs.Npcs[data.id]._walkAnime = data._walkAnime;
     MMO_Core_Npcs.Npcs[data.id].setPosition(data.x, data.y);

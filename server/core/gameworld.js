@@ -131,7 +131,8 @@ world.fetchNpcsFromMap = (map) => {
 world.makeConnectedNpc = (npc,instance,pageIndex) => {
   if (!npc || !instance) return;
   // Target selected or first page to assign helpers :
-  const _page = npc.pages && npc.pages[(pageIndex && !isNaN(pageIndex)) ? parseInt(pageIndex) : 0] || npc.pages[0];
+  const formatedPageIndex = (pageIndex && !isNaN(pageIndex)) ? parseInt(pageIndex) : 0;
+  const _page = npc.pages && npc.pages[formatedPageIndex] || npc.pages[0];
   // If page contains a comment with "<Sync>" as parameter, return ConnectedNpc :
   if (_page.list.find(l => l.code === 108 && l.parameters.find(p => p.toUpperCase().includes('<SYNC>')))) {
     return Object.assign(npc, {
@@ -159,6 +160,7 @@ world.makeConnectedNpc = (npc,instance,pageIndex) => {
       _through: _page.through,
       _trigger: _page.trigger,
       _walkAnime: _page.walkAnime,
+      _selectedPageIndex: formatedPageIndex
     });
   }
 }
