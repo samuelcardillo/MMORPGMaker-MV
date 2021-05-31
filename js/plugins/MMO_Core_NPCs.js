@@ -54,13 +54,6 @@ function MMO_Core_Npcs() {
     const spriteDir = data._image.characterIndex;
     
     MMO_Core_Npcs.Npcs[data.id] = $gameMap.createNormalEventAt(spriteName, spriteDir, data.x, data.y, 2, 0, true, data.pages);
-    // MMO_Core_Npcs.Npcs[data.id].headDisplay = MMO_Core_Npcs.Npcs[data.id].list().push({"code":108,"indent":0,"parameters":[npcName]});
-    MMO_Core_Npcs.Npcs[data.id]._moveRoute = { // Remove behavior
-      list: [{ code: 0, parameters: [] }],
-      repeat: false,
-      skippable: false,
-      wait: false
-    };
     MMO_Core_Npcs.Npcs[data.id]._stepAnime = data._stepAnime;
     MMO_Core_Npcs.Npcs[data.id]._walkAnime = data._walkAnime;
     MMO_Core_Npcs.Npcs[data.id].setPosition(data.x, data.y);
