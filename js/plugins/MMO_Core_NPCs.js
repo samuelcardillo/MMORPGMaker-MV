@@ -53,8 +53,13 @@ function MMO_Core_Npcs() {
     // })
     
     console.log("data", data)
+    const matchPage = data.pages.find(page => page.list.find(l => l.code === 108));
+    const comments = matchPage && matchPage.list.filter(l => l.code === 108);
+    const matchParameter = comments && comments.find(c => c.parameters.find(p => p.includes('<Name')));
+    const npcName = matchParameter && matchParameter.parameters || "<Name: " + data["name"] + ">";
+
     MMO_Core_Npcs.Npcs[data.id] = $gameMap.createNormalEventAt(data._image.characterName, data.x, data.y, data._image.direction, 0, true);
-    MMO_Core_Npcs.Npcs[data.id].headDisplay = MMO_Core_Npcs.Npcs[data.id].list().push({"code":108,"indent":0,"parameters":["<Name: " + data["name"] + ">"]});
+    MMO_Core_Npcs.Npcs[data.id].headDisplay = MMO_Core_Npcs.Npcs[data.id].list().push({"code":108,"indent":0,"parameters":[npcName]});
     MMO_Core_Npcs.Npcs[data.id].setPosition(data.x, data.y);
     console.log('MMO_Core_Npcs.Npcs[data.id]', MMO_Core_Npcs.Npcs[data.id])
   }
