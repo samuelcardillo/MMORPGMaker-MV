@@ -26,6 +26,7 @@ world.getNpcIndex     = (uniqueId) => world.npcFinder(uniqueId).npcIndex;
 world.getNpcEventId   = (uniqueId) => world.npcFinder(uniqueId).eventId;
 world.getNpcInstance  = (uniqueId) => world.findInstanceById( world.getNpcMapId(uniqueId) );
 world.getNpcByUniqueId  = (uniqueId) => world.getNpcInstance(uniqueId).npcsOnMap[ world.getNpcIndex(uniqueId) ];
+world.getAllNpcsByInstance = (id) => world.findInstanceById(id) && world.findInstanceById(id).npcsOnMap || [];
 
 world.initialize = () => {
   world.fetchMaps(); // Load gamedata maps

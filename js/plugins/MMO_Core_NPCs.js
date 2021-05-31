@@ -3,8 +3,8 @@
 //=============================================================================
 
 /*:
- * @plugindesc MMORPG Maker MV - Core Handling Players
- * @author Samuel LESPES CARDILLO
+ * @plugindesc MMORPG Maker MV - Core Handling Sync NPCs
+ * @author Axel Fiolle
  *
  * @help This plugin does not provide plugin commands.
  */
@@ -17,57 +17,46 @@ function MMO_Core_Npcs() {
   MMO_Core_Npcs.Npcs = {};
 
   /* npcModel : 
-  {
-    "id": int | string,
-    "_eventId": int,
-    "mapId": int,
-    "npcData": {
-      "name": string,
-      "skin": {
-        "characterName": string,
-        "characterIndex": int,
-      },
-      "x": int,
-      "y": int,
-      "moveSpeed": int,
-      "moveFrequency": int
-      "isEnemy": bool,
-      "stats": {
-        "maxHp": int,
-        "hp": int,
-        "maxMp": int,
-        "mp": int,
-        "atk": int,
-        "def": int,
-        "mag": int,
-        "defMag": int,
-        "agi": int,
-        "luc": int
-      },
-      "reward": {
-        "exp": int,
-        "gold": int,
-      },
-      "ABS_Props": {
-        "level": int,
-        "viewRadius": int,
-        "tVisor": int,
-        "sideVisor": bool,
-        "teamId": int,
-        "cEonDeath": int,
-      }
+    ConnectedNpc: {
+      uniqueId: string, // `@${instance.id}#${instance.npcsOnMap.length}?${npc.id}` // Every NPC has to be clearly differentiable
+      eventId: number, // Event "ID" client-side
+      absId: number || null, // Help to resolve PKD logic
+      lastActionTime: Date,
+      lastMoveTime: Date,
+      x: number,
+      y: number,
+      _conditions: [Object],
+      _directionFix: boolean,
+      _image: Object,
+      _list: [Object],
+      _moveFrequency: number,
+      _moveRoute: Object,
+      _moveSpeed: number,
+      _moveType: number,
+      _priorityType: number,
+      _stepAnime: boolean,
+      _through: boolean,
+      _trigger: number,
+      _walkAnime: boolean
     }
-  } */
+  */
 
   MMO_Core_Npcs.addNpc = (data) => {
-    if(MMO_Core_Npcs.Npcs[data.id] !== undefined && $gameMap._events[MMO_Core_Npcs.Npcs[data.id]["_eventId"]] !== undefined) $gameMap.eraseEvent(MMO_Core_Npcs.Npcs[data.id]["_eventId"]);
-
-    MMO_Core_Npcs.Npcs[data.id] = $gameMap.createNormalEventAt(data["npcData"]["skin"]["characterName"], data["npcData"]["skin"]["skin"]["characterIndex"], data["npcData"]["x"], data["npcData"]["y"], 2, 0, true);
-    MMO_Core_Npcs.Npcs[data.id].headDisplay = MMO_Core_Npcs.Npcs[data.id].list().push({"code":108,"indent":0,"parameters":["<Name: " + data["npcData"]["name"] + ">"]});
-    MMO_Core_Npcs.Npcs[data.id]._priorityType = 1;
-    MMO_Core_Npcs.Npcs[data.id]._stepAnime = false;
-    MMO_Core_Npcs.Npcs[data.id]._moveSpeed = data["npcData"]["moveSpeed"];
-    MMO_Core_Npcs.Npcs[data.id]._moveFrequency = data["npcData"]["moveFrequency"];
+    if ($gameMap._events && $gameMap._events.find(event => event && event["_eventId"] === data.eventId)) {
+      $gameMap.eraseEvent(data.eventId);
+    }
+    
+    // Object.keys(data).map(key => {
+    //   if (key.includes('_')) {
+    //     data[key.split('_')[1]] = data[key];
+    //   }
+    // })
+    
+    console.log("data", data)
+    MMO_Core_Npcs.Npcs[data.id] = $gameMap.createNormalEventAt(data._image.characterName, data.x, data.y, data._image.direction, 0, true);
+    MMO_Core_Npcs.Npcs[data.id].headDisplay = MMO_Core_Npcs.Npcs[data.id].list().push({"code":108,"indent":0,"parameters":["<Name: " + data["name"] + ">"]});
+    MMO_Core_Npcs.Npcs[data.id].setPosition(data.x, data.y);
+    console.log('MMO_Core_Npcs.Npcs[data.id]', MMO_Core_Npcs.Npcs[data.id])
   }
 
   MMO_Core_Npcs.removeNpc = (data) => {
@@ -76,6 +65,10 @@ function MMO_Core_Npcs() {
     
     $gameMap.eraseEvent(MMO_Core_Npcs.Npcs[data]["_eventId"]);
   }
+
+  MMO_Core.socket.on("npcsFetched", async (data) => {
+    if (data.playerId === MMO_Core_Player.Player["id"]) data.npcs.map(npc => MMO_Core_Npcs.addNpc(npc));
+  });
 
   MMO_Core.socket.on("npcs_get", async (data) => {
     for (let id in Object.keys(MMO_Core_Npcs.Npcs)) {
@@ -91,23 +84,13 @@ function MMO_Core_Npcs() {
     // TODO : play animation
   });
 
-  MMO_Core.socket.on("npc_dead",function(npc,killAuthor){
-    // if killAuthor === currentPlayer
-    //   TODO : Turn on dead switch for this 
-    // else 
-    // MMO_Core_Npcs.removeNpc(npc);
-  });
-
   MMO_Core.socket.on("npc_looted",function(data){
     if (!MMO_Core_Npcs.Npcs[data.id]) return;
     MMO_Core_Npcs.removeNpc(data);
   });
 
   MMO_Core.socket.on("npc_dead",function(data){
-    if(MMO_Core_Npcs.Npcs[data] === undefined) return;
-    if($gameMap._events[MMO_Core_Npcs.Npcs[data]["_eventId"]] === undefined) return;
-    
-    $gameMap.eraseEvent(MMO_Core_Npcs.Npcs[data]["_eventId"]);
+    MMO_Core_Npcs.removeNpc(data);
   });
 
   // I dont get the point of this
