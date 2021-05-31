@@ -46,29 +46,34 @@ function MMO_Core_Npcs() {
       $gameMap.eraseEvent(data.eventId);
     }
     
-    // Object.keys(data).map(key => {
-    //   if (key.includes('_')) {
-    //     data[key.split('_')[1]] = data[key];
-    //   }
-    // })
-    
-    console.log("data", data)
     const matchPage = data.pages.find(page => page.list.find(l => l.code === 108));
     const comments = matchPage && matchPage.list.filter(l => l.code === 108);
     const matchParameter = comments && comments.find(c => c.parameters.find(p => p.includes('<Name')));
     const npcName = matchParameter && matchParameter.parameters || "<Name: " + data["name"] + ">";
-
-    MMO_Core_Npcs.Npcs[data.id] = $gameMap.createNormalEventAt(data._image.characterName, data.x, data.y, data._image.direction, 0, true);
-    MMO_Core_Npcs.Npcs[data.id].headDisplay = MMO_Core_Npcs.Npcs[data.id].list().push({"code":108,"indent":0,"parameters":[npcName]});
+    const spriteName = data._image.characterName;
+    const spriteDir = data._image.characterIndex;
+    
+    MMO_Core_Npcs.Npcs[data.id] = $gameMap.createNormalEventAt(spriteName, spriteDir, data.x, data.y, 2, 0, true, data.pages);
+    // MMO_Core_Npcs.Npcs[data.id].headDisplay = MMO_Core_Npcs.Npcs[data.id].list().push({"code":108,"indent":0,"parameters":[npcName]});
+    MMO_Core_Npcs.Npcs[data.id]._moveRoute = { // Remove behavior
+      list: [{ code: 0, parameters: [] }],
+      repeat: false,
+      skippable: false,
+      wait: false
+    };
+    MMO_Core_Npcs.Npcs[data.id]._stepAnime = data._stepAnime;
+    MMO_Core_Npcs.Npcs[data.id]._walkAnime = data._walkAnime;
     MMO_Core_Npcs.Npcs[data.id].setPosition(data.x, data.y);
+    // Object.keys(data).filter(k => k.startsWith('_')).map(key => {
+    //   console.log('key', key)
+    //   if (key === "_moveRoute") return;
+    //   MMO_Core_Npcs.Npcs[data.id][key] = data[key]
+    // });
     console.log('MMO_Core_Npcs.Npcs[data.id]', MMO_Core_Npcs.Npcs[data.id])
   }
 
   MMO_Core_Npcs.removeNpc = (data) => {
-    if(MMO_Core_Npcs.Npcs[data] === undefined) return;
-    if($gameMap._events[MMO_Core_Npcs.Npcs[data]["_eventId"]] === undefined) return;
-    
-    $gameMap.eraseEvent(MMO_Core_Npcs.Npcs[data]["_eventId"]);
+    if ($gameMap._events.find(event => event && event["_eventId"] === data.eventId)) $gameMap.eraseEvent(data.eventId);
   }
 
   MMO_Core.socket.on("npcsFetched", async (data) => {

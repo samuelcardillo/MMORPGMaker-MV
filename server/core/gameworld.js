@@ -146,7 +146,12 @@ world.makeConnectedNpc = (npc,instance,pageIndex) => {
       _image: _page.image,
       _list: _page.list,
       _moveFrequency: _page.moveFrequency,
-      _moveRoute: _page.moveRoute,
+      _moveRoute: { // Remove behavior
+        list: [{ code: 0, parameters: [] }],
+        repeat: false,
+        skippable: false,
+        wait: false
+      },
       _moveSpeed: _page.moveSpeed,
       _moveType: _page.moveType,
       _priorityType: _page.priorityType,
