@@ -73,6 +73,7 @@ world.makeInstance = (map) => {
     npcsOnMap: [], // Array of Objects
     playersOnMap: [], // Array of String
     actionsOnMap: [], // Array of Objects -> Actions currently running in instance
+    mapInfos: world._mapDataProvider(map) // Array of rows
   });
 }
 
@@ -82,7 +83,7 @@ world.runInstance = (mapId) => {
     world.instancedMaps.push( world.makeInstance(_map) );
     console.log('[WORLD] # Started instance', mapId, 'at', new Date())
     world.fetchNpcsFromMap(_map);
-    world.startInstanceLifecycle(_map.id);
+    world.startInstanceLifecycle(mapId);
   }
 }
 
@@ -139,8 +140,8 @@ world.makeConnectedNpc = (npc,instance,pageIndex) => {
       uniqueId: `@${instance.id}#${instance.npcsOnMap.length}?${npc.id}`, // Every NPC has to be clearly differentiable
       eventId: npc.id, // Event "ID" client-side
       absId: null, // Help to resolve ABS logic (if and when any)
-      lastActionTime: new Date(),
-      lastMoveTime: new Date(),
+      lastActionTime: new Date('1970-01-01T00:00:00'),
+      lastMoveTime: new Date('1970-01-01T00:00:00'),
       // _ helpers
       _conditions: _page.conditions,
       _directionFix: _page.directionFix,
@@ -185,10 +186,14 @@ world.handleNpcTurn = (npc,currentTime,cooldown) => {
   const delayedMoveTime = currentTime.getTime() - npc.lastMoveTime.getTime();
   
   // make NPCs behavior
-  let canActionThisTurn = delayedActionTime > cooldown;
-  let canMoveThisTurn = npc._moveType !== 0 && (delayedMoveTime < cooldown);
+  let canMoveThisTurn = delayedMoveTime > cooldown;
+
+  if (npc._moveType === 1 && canMoveThisTurn) {
+    const didMove = world.npcMoveRandom(world.getNpcByUniqueId(npc.uniqueId));
+    if (didMove) world.getNpcByUniqueId(npc.uniqueId).lastMoveTime = new Date();
+    // console.log('[WORLD] handleNpcTurn', npc.uniqueId, world.getNpcByUniqueId(npc.uniqueId).lastMoveTime);
+  }
   
-  // console.log('[WORLD] handleNpcTurn', world.npcFinder(npc.uniqueId), new Date());
 }
 
 world.startInstanceLifecycle = (instanceId) => {
@@ -203,8 +208,8 @@ world.startInstanceLifecycle = (instanceId) => {
     }
 
     world.findInstanceById(instanceId).paused = false; // Flag as running
-    _instance.actionsOnMap.map(action => world.handleInstanceAction(action, _instance, currentTime)); // Play Actions
-    world.findInstanceById(instanceId).npcsOnMap.map(npc => world.handleNpcTurn(npc, currentTime, interval)); // Animate NPCS
+    // _instance.actionsOnMap.map(action => world.handleInstanceAction(action, _instance, currentTime)); // Play Actions
+    world.findInstanceById(instanceId).npcsOnMap.map(npc => world.handleNpcTurn(npc, currentTime, 1000 * (npc._moveFrequency + 1))); // Animate NPCS
 
     if (!world.findInstanceById(instanceId).playersOnMap.length) { // If no players on map at tick :
       setTimeout(() => {
@@ -220,4 +225,91 @@ world.startInstanceLifecycle = (instanceId) => {
       }, world.findInstanceById(instanceId).pauseAfter); 
     }
   }, interval);
+}
+
+world.npcCanPass = (npc, direction) => {
+  const _coords = {
+    x: npc.x,
+    y: npc.y
+  };
+  const _mapId = world.getNpcMapId(npc.uniqueId)
+  const x2 = world.getCoordsAfterMove(_coords, direction).x;
+  const y2 = world.getCoordsAfterMove(_coords, direction).y;
+  if (!world._isValid(_mapId, x2, y2)) {
+      return false;
+  }
+  if (!world._isMapPassable(_mapId, npc.x, npc.y, direction)) {
+      return false;
+  }
+  if (world._isCollidedWithCharacters(_mapId, x2, y2)) {
+      return false;
+  }
+  return true;
+};
+
+world.npcMoveStraight = (npc,direction) => {
+  // console.log('[WORLD] npcMoveStraight (1/2)', npc.uniqueId, { x: npc.x,y: npc.y }, direction);
+  if (world.npcCanPass(npc,direction)) {
+    const _coords = {
+      x: npc.x,
+      y: npc.y
+    };
+    world.getNpcByUniqueId(npc.uniqueId).x = world.getCoordsAfterMove(_coords, direction).x;
+    world.getNpcByUniqueId(npc.uniqueId).y = world.getCoordsAfterMove(_coords, direction).y;
+    const _map = world.getNpcInstance(npc.uniqueId);
+    // emit("npc_moving", { 
+    //   mapId: _map.id,
+    //   id: npc.id,
+    //   moveSpeed: npc._moveSpeed,
+    //   moveFrequency: 4, // instantaneous
+    //   direction: npc._direction,
+    // });
+    // console.log('[WORLD] npcMoveStraight (2/2)', npc.uniqueId, { x: world.getNpcByUniqueId(npc.uniqueId).x,y: world.getNpcByUniqueId(npc.uniqueId).y });
+    return true;
+  } else return false;
+}
+
+world.npcMoveRandom = (npc) => {
+  const direction = 2 + Math.randomInt(4) * 2;
+  return world.npcMoveStraight(npc, direction);
+};
+
+world.getCoordsAfterMove = (coords,direction) => {
+  // coords: { x: number, y: number }
+  // direction : 2 = down, 4 = left, 6 = right, 8 = up
+  if (!coords || !direction) return;
+  const _XY = coords;
+  if (direction === 2) _XY.y += 1;
+  if (direction === 4) _XY.x -= 1;
+  if (direction === 6) _XY.x += 1;
+  if (direction === 8) _XY.y -= 1;
+  return _XY;
+  // TODO : 8 directions (1,3,7,9)
+}
+world.getReverseDir = (direction) => {
+  if (direction === 2) return 8;
+  if (direction === 4) return 6;
+  if (direction === 6) return 4;
+  if (direction === 8) return 2;
+}
+
+world._isValid = (mapId,targetX,targetY) => {
+  if (targetX < 0 || targetY < 0) return false;
+  const _map = world.getMapById(mapId);
+  if (targetX >= _map.width || targetY >= _map.height) return false;
+  return true;
+}
+world._isMapPassable = (mapId,x,y,d) => {
+  const x2 = world.getCoordsAfterMove({x,y}, d);
+  const y2 = world.getCoordsAfterMove({x,y}, d);
+  const d2 = world.getReverseDir(d);
+  return true; // world._isPassable(mapId,x, y, d) && world._isPassable(mapId,x2, y2, d2);
+}
+world._isCollidedWithCharacters = (mapId,x,y) => {
+  if (!world.isMapInstanced(mapId)) return true; // return collide to prevent move
+  // for (let userId of world.findInstanceById(mapId).playersOnMap) {
+  //   const _player = MMO_Core["database"].findUserById(userId);
+  //   if (_player.x === x && _player.y === y) return true;
+  // }
+  return false;
 }

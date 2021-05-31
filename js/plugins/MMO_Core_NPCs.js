@@ -37,7 +37,8 @@ function MMO_Core_Npcs() {
       _stepAnime: boolean,
       _through: boolean,
       _trigger: number,
-      _walkAnime: boolean
+      _walkAnime: boolean,
+      _selectedPageIndex: number
     }
   */
 
@@ -46,10 +47,6 @@ function MMO_Core_Npcs() {
       $gameMap.eraseEvent(data.eventId);
     }
     
-    const matchPage = data.pages.find(page => page.list.find(l => l.code === 108));
-    const comments = matchPage && matchPage.list.filter(l => l.code === 108);
-    const matchParameter = comments && comments.find(c => c.parameters.find(p => p.includes('<Name')));
-    const npcName = matchParameter && matchParameter.parameters || "<Name: " + data["name"] + ">";
     const spriteName = data._image.characterName;
     const spriteDir = data._image.characterIndex;
     
@@ -57,12 +54,7 @@ function MMO_Core_Npcs() {
     MMO_Core_Npcs.Npcs[data.id]._stepAnime = data._stepAnime;
     MMO_Core_Npcs.Npcs[data.id]._walkAnime = data._walkAnime;
     MMO_Core_Npcs.Npcs[data.id].setPosition(data.x, data.y);
-    // Object.keys(data).filter(k => k.startsWith('_')).map(key => {
-    //   console.log('key', key)
-    //   if (key === "_moveRoute") return;
-    //   MMO_Core_Npcs.Npcs[data.id][key] = data[key]
-    // });
-    console.log('MMO_Core_Npcs.Npcs[data.id]', MMO_Core_Npcs.Npcs[data.id])
+    // console.log('MMO_Core_Npcs.Npcs[data.id]', MMO_Core_Npcs.Npcs[data.id])
   }
 
   MMO_Core_Npcs.removeNpc = (data) => {
@@ -112,6 +104,7 @@ function MMO_Core_Npcs() {
   });
 
   MMO_Core.socket.on('npc_moving', function(data){
+    if($gameMap._mapId !== data.mapId) return;
     if(!SceneManager._scene._spriteset || SceneManager._scene instanceof Scene_Battle) return;
     if(MMO_Core_Npcs.Npcs[data.id] === undefined) return;
 
