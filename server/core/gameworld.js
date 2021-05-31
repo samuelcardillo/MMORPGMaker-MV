@@ -73,7 +73,6 @@ world.makeInstance = (map) => {
     npcsOnMap: [], // Array of Objects
     playersOnMap: [], // Array of String
     actionsOnMap: [], // Array of Objects -> Actions currently running in instance
-    mapInfos: world._mapDataProvider(map) // Array of rows
   });
 }
 
