@@ -355,14 +355,14 @@
      return this.createNormalEventAt($gameActors.actor(actorId).characterName(), $gameActors.actor(actorId).characterIndex(), x, y, d, scriptOrCommonEventId, temporary);
    }
  
-   function createNormalEventAt(characterName, characterIndex, x, y, d, scriptOrCommonEventId, temporary, _page) {
+   function createNormalEventAt(characterName, characterIndex, x, y, d, scriptOrCommonEventId, temporary, _pages) {
      var eventData = new CustomEventData();
      eventData.page.image.direction = d;
      eventData.page.image.characterName = characterName;
      eventData.page.image.characterIndex = characterIndex;
-     if (!!_page) {
-      eventData.page.trigger = _page.trigger || 0;
-      Object.assign(eventData.page.list, _page.list);
+     if (_pages && _pages[0]) {
+      Object.assign(eventData.page.conditions, _pages[0].conditions);
+      Object.assign(eventData.page.list, _pages[0].list);
       Object.assign(eventData.page.moveRoute, { // Remove behavior
         list: [{ code: 0, parameters: [] }],
         repeat: false,
@@ -370,8 +370,33 @@
         wait: false
       });
     }
-     
-     eventData.page.callScriptOrCommonEvent(scriptOrCommonEventId);
+
+     if (_pages && _pages.length) {
+      for (let i = 1; i < _pages.length; i++) {
+        eventData.addPage(new CustomEventData_Page(_pages[i]));
+      }
+      for (let i = 0; i < _pages.length; i++) {
+        eventData.pages[i].stepAnime = _pages[i].stepAnime;
+        eventData.pages[i].walkAnime = _pages[i].walkAnime;
+        eventData.pages[i].priorityType = _pages[i].priorityType;
+        eventData.pages[i].moveFrequency = _pages[i].moveFrequency;
+        eventData.pages[i].moveSpeed = _pages[i].moveSpeed;
+        // eventData.pages[i].moveType = _pages[i].moveType; // excluded
+        eventData.pages[i].through = _pages[i].through;
+        eventData.pages[i].trigger = _pages[i].trigger;
+        Object.assign(eventData.pages[i].conditions, _pages[i].conditions);
+        Object.assign(eventData.pages[i].list, _pages[i].list);
+        Object.assign(eventData.pages[i].image, _pages[i].image);
+        Object.assign(eventData.pages[i].moveRoute, { // Remove behavior
+          list: [{ code: 0, parameters: [] }],
+          repeat: false,
+          skippable: false,
+          wait: false
+        });
+      }
+    }
+
+    eventData.page.callScriptOrCommonEvent(scriptOrCommonEventId);
  
      return $gameMap.addEventAt(eventData, x, y, temporary);
    }
