@@ -246,7 +246,7 @@ world.npcCanPass = (npc, direction) => {
   return true;
 };
 
-world.npcMoveStraight = (npc,direction) => {
+world.npcMoveStraight = (npc,direction,animSkip) => {
   // console.log('[WORLD] npcMoveStraight (1/2)', npc.uniqueId, { x: npc.x,y: npc.y }, direction);
   if (world.npcCanPass(npc,direction)) {
     const _coords = {
@@ -256,13 +256,17 @@ world.npcMoveStraight = (npc,direction) => {
     world.getNpcByUniqueId(npc.uniqueId).x = world.getCoordsAfterMove(_coords, direction).x;
     world.getNpcByUniqueId(npc.uniqueId).y = world.getCoordsAfterMove(_coords, direction).y;
     const _map = world.getNpcInstance(npc.uniqueId);
-    // emit("npc_moving", { 
-    //   mapId: _map.id,
-    //   id: npc.id,
-    //   moveSpeed: npc._moveSpeed,
-    //   moveFrequency: 4, // instantaneous
-    //   direction: npc._direction,
-    // });
+    MMO_Core["socket"].emitToAll("npc_moving", {
+      uniqueId: npc.uniqueId,
+      mapId: _map.id,
+      id: npc.id,
+      moveSpeed: npc._moveSpeed,
+      moveFrequency: npc._moveFrequency,
+      direction: direction,
+      x: world.getNpcByUniqueId(npc.uniqueId).x,
+      y: world.getNpcByUniqueId(npc.uniqueId).y,
+      skip: animSkip || false
+    });
     // console.log('[WORLD] npcMoveStraight (2/2)', npc.uniqueId, { x: world.getNpcByUniqueId(npc.uniqueId).x,y: world.getNpcByUniqueId(npc.uniqueId).y });
     return true;
   } else return false;

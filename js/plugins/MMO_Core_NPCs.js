@@ -104,14 +104,16 @@ function MMO_Core_Npcs() {
   });
 
   MMO_Core.socket.on('npc_moving', function(data){
-    if($gameMap._mapId !== data.mapId) return;
+    if(!$gameMap || $gameMap._mapId !== data.mapId) return;
     if(!SceneManager._scene._spriteset || SceneManager._scene instanceof Scene_Battle) return;
     if(MMO_Core_Npcs.Npcs[data.id] === undefined) return;
 
     // Update movement speed and frequenzy
-    MMO_Core_Npcs.Npcs[data.id].setMoveSpeed(data.moveSpeed);
-    MMO_Core_Npcs.Npcs[data.id].setMoveFrequency(data.moveFrequency);
-    MMO_Core_Npcs.Npcs[data.id].moveStraight(data.direction);
+    if (!data.skip) {
+      MMO_Core_Npcs.Npcs[data.id].setMoveSpeed(data.moveSpeed);
+      MMO_Core_Npcs.Npcs[data.id].setMoveFrequency(data.moveFrequency);
+      MMO_Core_Npcs.Npcs[data.id].moveStraight(data.direction);
+    }
     if (MMO_Core_Npcs.Npcs[data.id].x !== data.x || MMO_Core_Npcs.Npcs[data.id].y !== data.y) MMO_Core_Npcs.Npcs[data.id].setPosition(data.x, data.y);
   });
 })();
