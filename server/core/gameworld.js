@@ -273,7 +273,7 @@ world.npcMoveStraight = (npc,direction,animSkip) => {
 }
 
 world.npcMoveRandom = (npc) => {
-  const direction = 2 + Math.randomInt(4) * 2;
+  const direction = 2 + Math.floor(Math.random() * 4) * 2;
   return world.npcMoveStraight(npc, direction);
 };
 
@@ -282,10 +282,10 @@ world.getCoordsAfterMove = (coords,direction) => {
   // direction : 2 = down, 4 = left, 6 = right, 8 = up
   if (!coords || !direction) return;
   const _XY = coords;
-  if (direction === 2) _XY.y += 1;
+  if (direction === 2) _XY.y += .5;
   if (direction === 4) _XY.x -= 1;
   if (direction === 6) _XY.x += 1;
-  if (direction === 8) _XY.y -= 1;
+  if (direction === 8) _XY.y -= .5;
   return _XY;
   // TODO : 8 directions (1,3,7,9)
 }
