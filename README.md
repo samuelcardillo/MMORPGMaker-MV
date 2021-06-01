@@ -33,7 +33,6 @@ I joined the project in September 2020 and made the MZ version a few weeks later
 **Disclaimer :** *The following files are already contained in the project.*
 
 - Orange Custom Events : http://download.hudell.com/OrangeCustomEvents.js
-- Orange Custom Event Creator : http://download.hudell.com/OrangeCustomEventCreator.js
 
 ### Launch steps
 
