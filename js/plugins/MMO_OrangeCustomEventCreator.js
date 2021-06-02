@@ -370,6 +370,7 @@
         wait: false
       });
     }
+    eventData.page.callScriptOrCommonEvent(scriptOrCommonEventId);
 
      if (_pages && _pages.length) {
       for (let i = 1; i < _pages.length; i++) {
@@ -393,10 +394,10 @@
           skippable: false,
           wait: false
         });
+        eventData.pages[i].callScriptOrCommonEvent(scriptOrCommonEventId);
       }
     }
 
-    eventData.page.callScriptOrCommonEvent(scriptOrCommonEventId);
  
      return $gameMap.addEventAt(eventData, x, y, temporary);
    }
