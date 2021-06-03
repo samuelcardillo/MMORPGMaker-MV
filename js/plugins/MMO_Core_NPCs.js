@@ -42,11 +42,13 @@ function MMO_Core_Npcs() {
     }
   */
 
+  // helpers :
+  MMO_Core_Npcs.findNpcBy         = (name,prop) => prop && name && $gameMap && $gameMap._events && $gameMap._events.find(event => event && event[name] && event[name] === prop);
+  MMO_Core_Npcs.findConnectedNpc  = (npc) => npc && MMO_Core_Npcs.findNpcBy("uniqueId",npc.uniqueId);
+  MMO_Core_Npcs.findMapNpc        = (npc) => npc && MMO_Core_Npcs.findNpcBy("_eventId",npc.eventId);
+  MMO_Core_Npcs.isNpcFromGameMap  = (npc) => npc && JSON.stringify(npc).includes('<Sync>');
+  
   MMO_Core_Npcs.addNpc = (data) => {
-    if ($gameMap._events && $gameMap._events.find(event => event && event["_eventId"] === data.eventId)) {
-      $gameMap.eraseEvent(data.eventId);
-    }
-    
     const spriteName = data._image.characterName;
     const spriteDir = data._image.characterIndex;
     
@@ -55,50 +57,39 @@ function MMO_Core_Npcs() {
     // console.log('MMO_Core_Npcs.Npcs[data.id]', MMO_Core_Npcs.Npcs[data.id])
   }
 
-  MMO_Core_Npcs.removeNpc = (data) => {
-    if ($gameMap._events.find(event => event && event["_eventId"] === data.eventId)) $gameMap.eraseEvent(data.eventId);
+  MMO_Core_Npcs.removeNpc = (npc) => {
+    if (npc.eventId && MMO_Core_Npcs.findMapNpc(npc)) $gameMap.eraseEvent(npc.eventId);
+    if (npc.uniqueId && MMO_Core_Npcs.findConnectedNpc(npc)) $gameMap.eraseConnectedEvent(npc.uniqueId);
   }
 
   MMO_Core.socket.on("npcsFetched", async (data) => {
-    if (data.playerId === MMO_Core_Player.Player["id"]) data.npcs.map(npc => MMO_Core_Npcs.addNpc(npc));
+    if (data.playerId !== MMO_Core_Player.Player["id"]) return;
+    else data.npcs.map(npc => {
+      MMO_Core_Npcs.removeNpc(npc);
+      MMO_Core_Npcs.addNpc(npc)
+    });
   });
 
-  MMO_Core.socket.on("npcs_get", async (data) => {
-    for (let id in Object.keys(MMO_Core_Npcs.Npcs)) {
-      $gameMap.eraseEvent(MMO_Core_Npcs.Npcs[id]["_eventId"]);
-    }
-    for (let npc in data.npcs) {
-      MMO_Core_Npcs.addNpc(npc);
-    }
+  MMO_Core.socket.on("npcSpawn", async (data) => {
+    if(!$gameMap || $gameMap._mapId !== data.mapId) return;
+    if (data.summonable) MMO_Core_Npcs.addNpc(data);
   });
   
-  MMO_Core.socket.on("npc_respawn", (data) => {
+  MMO_Core.socket.on("npcRespawn", (data) => {
+    if(!$gameMap || $gameMap._mapId !== data.mapId) return;
     MMO_Core_Npcs.addNpc(data);
     // TODO : play animation
   });
 
-  MMO_Core.socket.on("npc_looted",function(data){
-    if (!MMO_Core_Npcs.Npcs[data.id]) return;
+  MMO_Core.socket.on("npcLooted",function(data){
+    if(!$gameMap || $gameMap._mapId !== data.mapId) return;
+    if (!MMO_Core_Npcs.Npcs[data.uniqueId]) return;
     MMO_Core_Npcs.removeNpc(data);
   });
 
-  MMO_Core.socket.on("npc_dead",function(data){
+  MMO_Core.socket.on("npcRemove",function(data){
+    if(!$gameMap || $gameMap._mapId !== data.mapId) return;
     MMO_Core_Npcs.removeNpc(data);
-  });
-
-  // I dont get the point of this
-  // MMO_Core.socket.on("refresh_npcs_on_map",function(data){
-  //   MMO_Core.socket.emit("refresh_npcs_on_map",{id: data, npcData: MMO_Core_Npc.getNpcPos()});
-  // }); 
-
-  MMO_Core.socket.on("refresh_npcs_on_map", function(payload) {
-    if(MMO_Core_Npcs.Npcs[payload.npcId] === undefined) return;
-
-    MMO_Core_Npcs.Npcs[payload.npcId]._characterName = payload.npcData["skin"]["characterName"];
-    MMO_Core_Npcs.Npcs[payload.npcId]._characterIndex = payload.npcData["skin"]["characterIndex"];
-
-    // If MMO_Overhead exists, we force refresh
-    // if(MMO_Overhead) MMO_Overhead.forceRefresh();
   });
 
   MMO_Core.socket.on('npc_moving', function(data){

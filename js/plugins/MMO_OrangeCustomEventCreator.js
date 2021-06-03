@@ -398,9 +398,13 @@
       }
     }
 
- 
-     return $gameMap.addEventAt(eventData, x, y, temporary);
-   }
+    
+    return $gameMap.addEventAt(eventData, x, y, temporary);
+  }
+
+  function eraseConnectedEvent(uniqueId) {
+    this._events.find(_e => _e.uniqueId === uniqueId).erase();
+  }
  
    function createTriggerEventAt(x, y, scriptOrCommonEventId, temporary) {
      var eventData = new CustomEventData();
@@ -470,6 +474,9 @@
    // EXPORT SECTION                               |
    //----------------------------------------------|
    //----------------------------------------------|
+
+   Game_Map.prototype.eraseConnectedEvent = eraseConnectedEvent;
+   $.eraseConnectedEvent = eraseConnectedEvent;
  
    Game_Map.prototype.createActorAt = createActorAt;
    $.createActorAt = createActorAt;

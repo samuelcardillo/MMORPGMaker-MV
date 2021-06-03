@@ -8,6 +8,10 @@ var exports = module.exports = {}
   - A connected map must include "<Sync>" inside its note.
   - A connected NPC must include "<Sync>" in a comment in any page.
 
+  - The Spawn map must have "<Summon>" inside its note
+  - DO NOT USE "<Sync>" on the summonable NPCs
+  - You will be able to summon an NPC from spawn map anywhere
+
 *****************************/
 
 world.gameMaps         = []; // Formated exploitable files from gamedata
@@ -18,14 +22,17 @@ world.tileSets         = []; // Needed to test collisions
 // Global function
 world.getMapById         = (mapId) => world.gameMaps.find(map => map.id === mapId);
 world.findInstanceById   = (id) => world.instancedMaps.find(instance => instance.id === id);
+world.getSummonMap       = () => world.gameMaps.find(map => map.isSummonMap);
 // Testing functions
 world.isMapInstanced     = (mapId) => world.instancedMaps.find(i => i.mapId === mapId);
+world.isSummonMap        = (map) => map.note && map.note.toUpperCase().includes("<SUMMON>");
 world.isMapInstanceable  = (map) => map.note && map.note.toUpperCase().includes("<SYNC>");
 // NPC helpers
 world.getNpcMapId     = (uniqueId) => world.npcFinder(uniqueId).mapId;
 world.getNpcIndex     = (uniqueId) => world.npcFinder(uniqueId).npcIndex;
 world.getNpcEventId   = (uniqueId) => world.npcFinder(uniqueId).eventId;
 world.getNpcInstance  = (uniqueId) => world.findInstanceById( world.getNpcMapId(uniqueId) );
+world.removeNpc       = (uniqueId) => world.getNpcByUniqueId(uniqueId) ? world.removeConnectedNpc( uniqueId ) : null;
 world.getNpcByUniqueId  = (uniqueId) => world.getNpcInstance(uniqueId).npcsOnMap[ world.getNpcIndex(uniqueId) ];
 world.getAllNpcsByInstance = (id) => world.findInstanceById(id) && world.findInstanceById(id).npcsOnMap || [];
 
@@ -62,8 +69,10 @@ world.getDatasFromGameFile = (gameMap, fileName) => {
   // a GameMap is a raw map file + some additional useful datas
   return Object.assign(gameMap, {
     id: Number(fileName.slice(3)),
+    mapId: Number(fileName.slice(3)),
     fileName,
-    allNpcs: []
+    allNpcs: [],
+    isSummonMap: world.isSummonMap(gameMap),
   });
 }
 
@@ -71,7 +80,6 @@ world.makeInstance = (map) => {
   // Assign needed props to make Instance :
   return Object.assign(map, {  // an Instance is an extends of a GameMap
     id: map.id,
-    mapId: map.id,
     createdAt: new Date(),
     lastPlayerLeftAt: null, // Date
     dieAfter: 60000, // When no more players left, kill after X ms
@@ -104,7 +112,7 @@ world.killInstance = (mapId) => {
 }
 
 world.playerJoinInstance = (playerId,mapId) => {
-  if (!world.isMapInstanceable(world.getMapById(mapId))) return;
+  if (!world.isMapInstanceable(world.getMapById(mapId)) || world.isSummonMap(world.getMapById(mapId))) return;
   if (!world.isMapInstanced(mapId)) world.runInstance(mapId); // If instance not existing, run it before
   if (world.findInstanceById(mapId).paused) world.startInstanceLifecycle(mapId); // If paused, restart
   if (!world.findInstanceById(mapId)['playersOnMap'].includes(playerId)) {
@@ -129,8 +137,8 @@ world.playerLeaveInstance = (playerId,mapId) => {
 world.fetchNpcsFromMap = (map) => {
   if (!map || !world.isMapInstanced(map.id)) return;
   for (let npc of world.findInstanceById(map.id).events.filter(event => JSON.stringify(event).includes('<Sync>'))) {
-    const _generatedNpc = world.makeConnectedNpc(npc,map);
-    world.getMapById(map.id).allNpcs.push( world.makeConnectedNpc(npc,map,0,true) );
+    const _generatedNpc = world._makeConnectedNpc(npc,map);
+    world.getMapById(map.id).allNpcs.push( world._makeConnectedNpc(npc,map,0,true) );
     if (_generatedNpc) {
       world.findInstanceById(map.id).npcsOnMap.push( _generatedNpc );
       console.log('[WORLD] Added synced NPC ' + _generatedNpc.uniqueId + ' on map ' + map.id);
@@ -138,44 +146,90 @@ world.fetchNpcsFromMap = (map) => {
   }
 }
 
-world.makeConnectedNpc = (npc,instance,pageIndex,force) => {
+world._makeConnectedNpc = (npc,instance,pageIndex) => {
   if (!npc || !instance) return;
   // Target selected or first page to assign helpers :
   const formatedPageIndex = (pageIndex && !isNaN(pageIndex)) ? parseInt(pageIndex) : 0;
   const _page = npc.pages && npc.pages[formatedPageIndex] || npc.pages[0];
-  // If page contains a comment with "<Sync>" as parameter, return ConnectedNpc :
-  if (force || _page.list.find(l => l.code === 108 && l.parameters.find(p => p.toUpperCase().includes('<SYNC>')))) {
-    return Object.assign(npc, {
-      uniqueId: `@${instance.id}#${instance.npcsOnMap.length}?${npc.id}`, // Every NPC has to be clearly differentiable
-      eventId: npc.id, // Event "ID" client-side
-      absId: null, // Help to resolve ABS logic (if and when any)
-      lastActionTime: new Date('1970-01-01T00:00:00'),
-      lastMoveTime: new Date('1970-01-01T00:00:00'),
-      // _ helpers
-      _conditions: _page.conditions,
-      _directionFix: _page.directionFix,
-      _image: _page.image,
-      _list: _page.list,
-      _moveFrequency: _page.moveFrequency,
-      _moveRoute: _page.moveRoute,
-      _moveSpeed: _page.moveSpeed,
-      _moveType: _page.moveType,
-      _priorityType: _page.priorityType,
-      _stepAnime: _page.stepAnime,
-      _through: _page.through,
-      _trigger: _page.trigger,
-      _walkAnime: _page.walkAnime,
-      _selectedPageIndex: formatedPageIndex
-    });
-  }
+  return Object.assign(npc, {
+    uniqueId: `@${instance.id}#${instance.npcsOnMap.length}?${npc.id}`, // Every NPC has to be clearly differentiable
+    eventId: npc.id, // Event "ID" client-side
+    absId: null, // Help to resolve ABS logic (if and when any)
+    lastActionTime: new Date('1970-01-01T00:00:00'),
+    lastMoveTime: new Date('1970-01-01T00:00:00'),
+    summonable: false,
+    mapId: instance.id,
+    // _ helpers
+    _conditions: _page.conditions,
+    _directionFix: _page.directionFix,
+    _image: _page.image,
+    _list: _page.list,
+    _moveFrequency: _page.moveFrequency,
+    _moveRoute: _page.moveRoute,
+    _moveSpeed: _page.moveSpeed,
+    _moveType: _page.moveType,
+    _priorityType: _page.priorityType,
+    _stepAnime: _page.stepAnime,
+    _through: _page.through,
+    _trigger: _page.trigger,
+    _walkAnime: _page.walkAnime,
+    _selectedPageIndex: formatedPageIndex
+  });
+}
+
+world.spawnNpc = (npcSummonId, coords, pageIndex) => {
+  // coords = { mapId, x, y }
+  if (!coords || !coords.mapId || !coords.x || !coords.y || !world.getSummonMap()) return;
+
+  const _npcToReplicate = world.getSummonMap().events.find(npc => npc && (npc.id === npcSummonId || (npc.summonId && npc.summonId === npcSummonId)));
+  const _targetInstance = world.findInstanceById(coords.mapId);
+  if (!_npcToReplicate || !_targetInstance) return;
+  const _generatedNpc = world._makeConnectedNpc(_npcToReplicate,_targetInstance,pageIndex || 0);
+  if (!_generatedNpc) return
+  const uniqueIntegerId = 99999 + Math.floor(Math.random() * 99999); // Prevents event id conflicts
+  Object.assign(_generatedNpc, {
+    uniqueId: `@${coords.mapId}#${world.findInstanceById(coords.mapId).npcsOnMap.length}?${uniqueIntegerId}`,
+    summonId: npcSummonId,
+    id: uniqueIntegerId,
+    eventId: uniqueIntegerId,
+    summonable: true
+  });
+
+  world.findInstanceById(coords.mapId).npcsOnMap.push( _generatedNpc );
+  
+  world.getNpcByUniqueId(_generatedNpc.uniqueId).x = coords.x || 1;
+  world.getNpcByUniqueId(_generatedNpc.uniqueId).y = coords.y || 1;
+  
+  MMO_Core.security.createLog(`[WORLD] Spawned NPC ${_generatedNpc.uniqueId} to map ${coords.mapId} (${coords.x};${coords.y}) at ${new Date()}`)
+  MMO_Core["socket"].emitToAll("npcSpawn", world.getNpcByUniqueId(_generatedNpc.uniqueId));
+
+  return _generatedNpc.uniqueId;
+}
+world.removeConnectedNpc = (uniqueId) => {
+  const _parentInstance = world.getNpcInstance(uniqueId);
+  if (!_parentInstance) return;
+  const _index = _parentInstance.npcsOnMap.indexOf( world.getNpcByUniqueId(uniqueId) );
+  const eventId = world.getNpcByUniqueId(uniqueId).id;
+  world.npcTpTo(world.getNpcByUniqueId(uniqueId),-1,-1);
+  world.getNpcInstance(uniqueId).npcsOnMap.splice(_index, 1);
+  MMO_Core.security.createLog(`[WORLD] Removed NPC ${uniqueId} at ${new Date()}`)
+  MMO_Core["socket"].emitToAll("npcRemove", {
+    eventId,
+    mapId: _parentInstance.id
+  });
+  return uniqueId;
 }
 
 world.npcFinder = (uniqueId) => {
-  return {
-    mapId: parseInt(uniqueId.split('@')[1].split('#')[0]),
-    npcIndex: parseInt(uniqueId.split('#')[1].split('?')[0]),
-    eventId: parseInt(uniqueId.split('?')[1]),
-  };
+  try {
+    return {
+      mapId: parseInt(uniqueId.split('@')[1].split('#')[0]),
+      npcIndex: parseInt(uniqueId.split('#')[1].split('?')[0]),
+      eventId: parseInt(uniqueId.split('?')[1]),
+    };
+  } catch (_) {
+    return { mapId: -1, npcIndex: -1, eventId: -1 };
+  }
 }
 
 world.handleInstanceAction = (action,instance,currentTime) => {
@@ -280,6 +334,18 @@ world.npcMoveStraight = (npc,direction,animSkip) => {
     // console.log('[WORLD] npcMoveStraight (2/2)', npc.uniqueId, { x: world.getNpcByUniqueId(npc.uniqueId).x,y: world.getNpcByUniqueId(npc.uniqueId).y });
     return true;
   } else return false;
+}
+world.npcTpTo = (npc,x,y) => {
+  world.getNpcByUniqueId(npc.uniqueId).x = x;
+  world.getNpcByUniqueId(npc.uniqueId).y = y;
+  MMO_Core["socket"].emitToAll("npc_moving", {
+    uniqueId: world.getNpcByUniqueId(npc.uniqueId).uniqueId,
+    mapId: world.getNpcByUniqueId(npc.uniqueId).mapId,
+    id: world.getNpcByUniqueId(npc.uniqueId).id,
+    x: world.getNpcByUniqueId(npc.uniqueId).x,
+    y: world.getNpcByUniqueId(npc.uniqueId).y,
+    skip: true,
+  });
 }
 
 world.npcMoveRandom = (npc) => {
