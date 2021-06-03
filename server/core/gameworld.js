@@ -193,7 +193,8 @@ world.spawnNpc = (npcSummonId, coords, pageIndex) => {
     summonId: npcSummonId,
     id: uniqueIntegerId,
     eventId: uniqueIntegerId,
-    summonable: true
+    summonable: true,
+    mapId: coords.mapId
   });
 
   world.spawnedUniqueIds.push( _generatedNpc.uniqueId );
@@ -251,7 +252,7 @@ world.handleInstanceAction = (action,instance,currentTime) => {
 world.handleNpcTurn = (npc,currentTime,cooldown) => {
   // This function will read basic NPC behavior and mock it on
   // server-side then replicate it on every concerned player
-  if (!npc || !currentTime || !cooldown) return;
+  if (!npc || !currentTime || !cooldown || !world.getNpcByUniqueId(npc.uniqueId)) return;
   
   // read NPCs infos (speed, rate, etc, ...)
   const delayedActionTime = currentTime.getTime() - npc.lastActionTime.getTime();
@@ -325,7 +326,7 @@ world.npcCanPass = (npc, direction) => {
 };
 
 world.npcMoveStraight = (npc,direction,animSkip) => {
-  if (!npc) return
+  if (!npc || !world.getNpcByUniqueId(npc.uniqueId)) return
   // console.log('[WORLD] npcMoveStraight (1/2)', npc.uniqueId, { x: npc.x,y: npc.y }, {direction});
   if (world.npcCanPass(npc,direction)) {
     const _map = world.getNpcInstance(npc.uniqueId);
@@ -347,6 +348,7 @@ world.npcMoveStraight = (npc,direction,animSkip) => {
   } else return false;
 }
 world.npcTpTo = (npc,x,y) => {
+  if (!npc || !x || !y || !world.getNpcByUniqueId(npc.uniqueId))
   world.getNpcByUniqueId(npc.uniqueId).x = x;
   world.getNpcByUniqueId(npc.uniqueId).y = y;
   MMO_Core["socket"].emitToAll("npc_moving", {
