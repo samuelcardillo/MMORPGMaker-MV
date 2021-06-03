@@ -21,6 +21,6 @@ exports.initialize = function() {
 
         const summonedId = MMO_Core["gameworld"].spawnNpc(summonId, coords, pageIndex);
 
-        return MMO_Core.socket.modules.messages.sendToPlayer(initiator, "System", `Removed NPC ${summonedId}`, "action");
+        return MMO_Core.socket.modules.messages.sendToPlayer(initiator, "System", `Spawned NPC ${summonedId}`, "action");
     };
 };

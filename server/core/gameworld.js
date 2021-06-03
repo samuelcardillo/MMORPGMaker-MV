@@ -18,6 +18,7 @@ world.gameMaps         = []; // Formated exploitable files from gamedata
 world.instanceableMaps = []; // Formated maps to track players and npcs
 world.instancedMaps    = []; // Maps that are currently up and synced
 world.tileSets         = []; // Needed to test collisions
+world.spawnedUniqueIds = []; // Helper to find spawned NPCs without uniqueId
 
 // Global function
 world.getMapById         = (mapId) => world.gameMaps.find(map => map.id === mapId);
@@ -195,23 +196,30 @@ world.spawnNpc = (npcSummonId, coords, pageIndex) => {
     summonable: true
   });
 
+  world.spawnedUniqueIds.push( _generatedNpc.uniqueId );
+  const _spawnedIndex = world.spawnedUniqueIds.indexOf(_generatedNpc.uniqueId);
   world.findInstanceById(coords.mapId).npcsOnMap.push( _generatedNpc );
   
   world.getNpcByUniqueId(_generatedNpc.uniqueId).x = coords.x || 1;
   world.getNpcByUniqueId(_generatedNpc.uniqueId).y = coords.y || 1;
   
-  MMO_Core.security.createLog(`[WORLD] Spawned NPC ${_generatedNpc.uniqueId} to map ${coords.mapId} (${coords.x};${coords.y}) at ${new Date()}`)
+  MMO_Core.security.createLog(`[WORLD] Spawned NPC ${_spawnedIndex} to map ${coords.mapId} (${coords.x};${coords.y}) at ${new Date()}`)
   MMO_Core["socket"].emitToAll("npcSpawn", world.getNpcByUniqueId(_generatedNpc.uniqueId));
 
-  return _generatedNpc.uniqueId;
+  return _spawnedIndex;
 }
-world.removeConnectedNpc = (uniqueId) => {
+world.removeConnectedNpcByIndex = (index) => {
+  if (!world.spawnedUniqueIds[index]) return;
+  world.removeConnectedNpcByUniqueId(world.spawnedUniqueIds[index]);
+}
+world.removeConnectedNpcByUniqueId = (uniqueId) => {
   const _parentInstance = world.getNpcInstance(uniqueId);
   if (!_parentInstance) return;
   const _index = _parentInstance.npcsOnMap.indexOf( world.getNpcByUniqueId(uniqueId) );
   const eventId = world.getNpcByUniqueId(uniqueId).id;
   world.npcTpTo(world.getNpcByUniqueId(uniqueId),-1,-1);
   world.getNpcInstance(uniqueId).npcsOnMap.splice(_index, 1);
+  world.spawnedUniqueIds.splice(_index, 1);
   MMO_Core.security.createLog(`[WORLD] Removed NPC ${uniqueId} at ${new Date()}`)
   MMO_Core["socket"].emitToAll("npcRemove", {
     eventId,
