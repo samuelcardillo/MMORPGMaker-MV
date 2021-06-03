@@ -292,6 +292,7 @@ world.startInstanceLifecycle = (instanceId) => {
 }
 
 world.npcCanPass = (npc, direction) => {
+  if (!npc || !direction) return false;
   const _coords = {
     x: npc.x,
     y: npc.y
@@ -315,6 +316,7 @@ world.npcCanPass = (npc, direction) => {
 };
 
 world.npcMoveStraight = (npc,direction,animSkip) => {
+  if (!npc) return
   // console.log('[WORLD] npcMoveStraight (1/2)', npc.uniqueId, { x: npc.x,y: npc.y }, {direction});
   if (world.npcCanPass(npc,direction)) {
     const _map = world.getNpcInstance(npc.uniqueId);
