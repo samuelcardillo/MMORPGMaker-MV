@@ -215,11 +215,12 @@ world.removeConnectedNpcByIndex = (index) => {
 world.removeConnectedNpcByUniqueId = (uniqueId) => {
   const _parentInstance = world.getNpcInstance(uniqueId);
   if (!_parentInstance) return;
-  const _index = _parentInstance.npcsOnMap.indexOf( world.getNpcByUniqueId(uniqueId) );
+  const _mapIndex = _parentInstance.npcsOnMap.indexOf( world.getNpcByUniqueId(uniqueId) );
+  const _spawnIndex = world.spawnedUniqueIds.indexOf( uniqueId );
   const eventId = world.getNpcByUniqueId(uniqueId).id;
   world.npcTpTo(world.getNpcByUniqueId(uniqueId),-1,-1);
-  world.getNpcInstance(uniqueId).npcsOnMap.splice(_index, 1);
-  world.spawnedUniqueIds.splice(_index, 1);
+  world.getNpcInstance(uniqueId).npcsOnMap.splice(_mapIndex, 1);
+  world.spawnedUniqueIds.splice(_spawnIndex, 1);
   MMO_Core.security.createLog(`[WORLD] Removed NPC ${uniqueId} at ${new Date()}`)
   MMO_Core["socket"].emitToAll("npcRemove", {
     eventId,

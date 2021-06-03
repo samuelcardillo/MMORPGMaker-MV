@@ -11,7 +11,7 @@ exports.initialize = function() {
             return MMO_Core.socket.modules.messages.sendToPlayer(player, "System", "The server has no spawnMap.", "error");
         }
 
-        const removedId = MMO_Core["gameworld"].removeNpc(args[1]);
+        const removedId = MMO_Core["gameworld"].removeConnectedNpcByIndex(args[1]);
 
         if (removedId) return MMO_Core.socket.modules.messages.sendToPlayer(initiator, "System", `You removed NPC ${removedId}`, "action");
     };
