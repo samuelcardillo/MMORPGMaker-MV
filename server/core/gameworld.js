@@ -153,10 +153,11 @@ world._makeConnectedNpc = (npc,instance,pageIndex) => {
   if (!npc || !instance) return;
   // Target selected or first page to assign helpers :
   const formatedPageIndex = (pageIndex && !isNaN(pageIndex)) ? parseInt(pageIndex) : 0;
+  const _instance = world.getInstanceById(instance.id);
   const _page = npc.pages && npc.pages[formatedPageIndex] || npc.pages[0];
   const _npc = Object.assign({}, npc); // Prevent rewrite existing when make
   return Object.assign(_npc, { // Add new properties
-    uniqueId: `@${instance.id}#${instance.connectedNpcs.length}?${npc.id}`, // Every NPC has to be clearly differentiable
+    uniqueId: `@${_instance.id}#${_instance.connectedNpcs.length}?${npc.id}`, // Every NPC has to be clearly differentiable
     eventId: npc.id, // Event "ID" client-side
     absId: null, // Help to resolve ABS logic (if and when any)
     lastActionTime: new Date('1970-01-01T00:00:00'),
@@ -295,7 +296,7 @@ world.startInstanceLifecycle = (instanceId) => {
 
     world.getInstanceById(instanceId).paused = false; // Flag as running
     // _instance.actionsOnMap.map(action => world.handleInstanceAction(action, _instance, currentTime)); // Play Actions
-    world.getInstanceById(instanceId).npcsOnMap.map(npc => npc && world.handleNpcTurn(npc, currentTime, 6000 - (1000 * (npc._moveFrequency + 1)))); // Animate NPCS
+    world.getInstanceById(instanceId).connectedNpcs.map(npc => npc && world.handleNpcTurn(npc, currentTime, 6000 - (1000 * (npc._moveFrequency + 1)))); // Animate NPCS
 
     if (!world.getInstanceById(instanceId).playersOnMap.length) { // If no players on map at tick :
       setTimeout(() => {
