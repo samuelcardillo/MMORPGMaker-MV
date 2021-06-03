@@ -14,12 +14,13 @@ exports.initialize = function() {
         _print("Spawned NPC List :");
 
         for (let index in idList) {
-            const uniqueId = idList[index]
-            const _npc = MMO_Core["gameworld"].getNpcByUniqueId(uniqueId);
-            const mapId = _npc.mapId;
-            const x = _npc.x;
-            const y = _npc.y;
-            _print(`[${index}] on Map ${mapId} at (X ${x};Y ${y})`);
+            const _npc = MMO_Core["gameworld"].getNpcByUniqueId(idList[index]);
+            if (_npc) {
+                const mapId = _npc.mapId;
+                const x = _npc.x;
+                const y = _npc.y;
+                _print(`[index: ${index}] ${idList[index]} on Map ${mapId} at (X ${x};Y ${y})`);
+            }
         }
     };
 };

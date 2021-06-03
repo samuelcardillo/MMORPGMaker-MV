@@ -18,7 +18,7 @@ function MMO_Core_Npcs() {
 
   /* npcModel : 
     ConnectedNpc: {
-      uniqueId: string, // `@${instance.id}#${instance.npcsOnMap.length}?${npc.id}` // Every NPC has to be clearly differentiable
+      uniqueId: string, // `@${instance.id}#${instance.connectedNpcs.length}?${npc.id}` // Every NPC has to be clearly differentiable
       eventId: number, // Event "ID" client-side
       absId: number || null, // Help to resolve PKD logic
       lastActionTime: Date,
@@ -88,7 +88,7 @@ function MMO_Core_Npcs() {
   });
 
   MMO_Core.socket.on("npcRemove",function(data){
-    if(!$gameMap || $gameMap._mapId !== data.mapId) return;
+    if(!MMO_Core_Npcs.findConnectedNpc(data.uniqueId)) return;
     MMO_Core_Npcs.removeNpc(data);
   });
 

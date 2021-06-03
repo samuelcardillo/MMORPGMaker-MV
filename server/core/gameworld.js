@@ -9,8 +9,8 @@ var exports = module.exports = {}
   - A connected NPC must include "<Sync>" in a comment in any page.
 
   - The Spawn map must have "<Summon>" inside its note
-  - DO NOT USE "<Sync>" on the summonable NPCs
-  - You will be able to summon an NPC from spawn map anywhere
+  - There must be only one spawn map
+  - Command to summon : /addNpc [eventId*] [mapId] [x] [y]
 
 *****************************/
 
@@ -22,20 +22,20 @@ world.spawnedUniqueIds = []; // Helper to find spawned NPCs without uniqueId
 
 // Global function
 world.getMapById         = (mapId) => world.gameMaps.find(map => map.id === mapId);
-world.findInstanceById   = (id) => world.instancedMaps.find(instance => instance.id === id);
+world.getInstanceById    = (id) => world.instancedMaps.find(instance => instance.id === id);
 world.getSummonMap       = () => world.gameMaps.find(map => map.isSummonMap);
 // Testing functions
 world.isMapInstanced     = (mapId) => world.instancedMaps.find(i => i.mapId === mapId);
 world.isSummonMap        = (map) => map.note && map.note.toUpperCase().includes("<SUMMON>");
 world.isMapInstanceable  = (map) => map.note && map.note.toUpperCase().includes("<SYNC>");
 // NPC helpers
+world.removeNpc       = (uniqueId) => world.getNpcByUniqueId(uniqueId) ? world.removeConnectedNpc( uniqueId ) : null;
 world.getNpcMapId     = (uniqueId) => world.npcFinder(uniqueId).mapId;
 world.getNpcIndex     = (uniqueId) => world.npcFinder(uniqueId).npcIndex;
 world.getNpcEventId   = (uniqueId) => world.npcFinder(uniqueId).eventId;
-world.getNpcInstance  = (uniqueId) => world.findInstanceById( world.getNpcMapId(uniqueId) );
-world.removeNpc       = (uniqueId) => world.getNpcByUniqueId(uniqueId) ? world.removeConnectedNpc( uniqueId ) : null;
-world.getNpcByUniqueId  = (uniqueId) => world.getNpcInstance(uniqueId).npcsOnMap[ world.getNpcIndex(uniqueId) ];
-world.getAllNpcsByInstance = (id) => world.findInstanceById(id) && world.findInstanceById(id).npcsOnMap || [];
+world.getNpcInstance  = (uniqueId) => world.getInstanceById( world.getNpcMapId(uniqueId) );
+world.getNpcByUniqueId     = (uniqueId) => world.getNpcInstance(uniqueId) && world.getNpcInstance(uniqueId).connectedNpcs.find(npc => npc && npc.uniqueId && npc.uniqueId === uniqueId) || {};
+world.getAllNpcsByInstance = (id) => world.getInstanceById(id) ? world.getInstanceById(id).connectedNpcs : [];
 
 world.initialize = () => {
   world.fetchTilesets();
@@ -79,7 +79,8 @@ world.getDatasFromGameFile = (gameMap, fileName) => {
 
 world.makeInstance = (map) => {
   // Assign needed props to make Instance :
-  return Object.assign(map, {  // an Instance is an extends of a GameMap
+  const _map = Object.assign({}, map); // Keep original map clean
+  return Object.assign(_map, {  // an Instance is an extends of a GameMap
     id: map.id,
     createdAt: new Date(),
     lastPlayerLeftAt: null, // Date
@@ -87,7 +88,7 @@ world.makeInstance = (map) => {
     permanent: false, // Make the instance never die
     pauseAfter: 30000, // When no more player, interrupt lifecycle after X ms
     paused: false,
-    npcsOnMap: [], // Array of Objects
+    connectedNpcs: [], // Array of Objects
     playersOnMap: [], // Array of String
     actionsOnMap: [], // Array of Objects -> Actions currently running in instance
     allTiles: world.provideMapTiles(map), // Generate the map's tiles informations
@@ -105,9 +106,10 @@ world.runInstance = (mapId) => {
 }
 
 world.killInstance = (mapId) => {
-  if (world.isMapInstanced(mapId) && !world.findInstanceById(mapId).playersOnMap.length) {
+  if (world.isMapInstanced(mapId) && !world.getInstanceById(mapId).playersOnMap.length) {
     // Remove instance from the up list if no more players on it
-    world.instancedMaps.splice(world.instancedMaps.indexOf(world.findInstanceById(mapId)), 1);
+    for (let _npc of world.getMapById(mapId).allNpcs) world.removeConnectedNpcByUniqueId(_npc.uniqueId);
+    world.instancedMaps.splice(world.instancedMaps.indexOf(world.getInstanceById(mapId)), 1);
     console.log('[WORLD] # Killed instance', mapId, 'at', new Date())
   }
 }
@@ -115,33 +117,33 @@ world.killInstance = (mapId) => {
 world.playerJoinInstance = (playerId,mapId) => {
   if (!world.isMapInstanceable(world.getMapById(mapId)) || world.isSummonMap(world.getMapById(mapId))) return;
   if (!world.isMapInstanced(mapId)) world.runInstance(mapId); // If instance not existing, run it before
-  if (world.findInstanceById(mapId).paused) world.startInstanceLifecycle(mapId); // If paused, restart
-  if (!world.findInstanceById(mapId)['playersOnMap'].includes(playerId)) {
-    world.findInstanceById(mapId).playersOnMap.push(playerId); // Add playerId to Array
-    console.log('[WORLD] playerJoinInstance', mapId, JSON.stringify(world.findInstanceById(mapId).playersOnMap) );
+  if (world.getInstanceById(mapId).paused) world.startInstanceLifecycle(mapId); // If paused, restart
+  if (!world.getInstanceById(mapId)['playersOnMap'].includes(playerId)) {
+    world.getInstanceById(mapId).playersOnMap.push(playerId); // Add playerId to Array
+    console.log('[WORLD] playerJoinInstance', mapId, JSON.stringify(world.getInstanceById(mapId).playersOnMap) );
   }
 }
 
 world.playerLeaveInstance = (playerId,mapId) => {
   if (!world.isMapInstanceable(world.getMapById(mapId))) return;
-  if (world.findInstanceById(mapId) && world.findInstanceById(mapId).playersOnMap.includes(playerId)) {
-    const _players = world.findInstanceById(mapId).playersOnMap;
-    world.findInstanceById(mapId).playersOnMap.splice(_players.indexOf(playerId), 1); // Remove playerId from Array
-    console.log('[WORLD] playerLeaveInstance', mapId, JSON.stringify(world.findInstanceById(mapId).playersOnMap) );
-    if (!world.findInstanceById(mapId).playersOnMap.length) world.findInstanceById(mapId).lastPlayerLeftAt = new Date();
-    if (!world.findInstanceById(mapId).permanent) {
-      setTimeout(() => world.killInstance(mapId), world.findInstanceById(mapId).dieAfter); // Kill the instance after X ms
+  if (world.getInstanceById(mapId) && world.getInstanceById(mapId).playersOnMap.includes(playerId)) {
+    const _players = world.getInstanceById(mapId).playersOnMap;
+    world.getInstanceById(mapId).playersOnMap.splice(_players.indexOf(playerId), 1); // Remove playerId from Array
+    console.log('[WORLD] playerLeaveInstance', mapId, JSON.stringify(world.getInstanceById(mapId).playersOnMap) );
+    if (!world.getInstanceById(mapId).playersOnMap.length) world.getInstanceById(mapId).lastPlayerLeftAt = new Date();
+    if (!world.getInstanceById(mapId).permanent) {
+      setTimeout(() => world.killInstance(mapId), world.getInstanceById(mapId).dieAfter); // Kill the instance after X ms
     }
   }
 }
 
 world.fetchNpcsFromMap = (map) => {
   if (!map || !world.isMapInstanced(map.id)) return;
-  for (let npc of world.findInstanceById(map.id).events.filter(event => JSON.stringify(event).includes('<Sync>'))) {
+  for (let npc of world.getInstanceById(map.id).events.filter(event => JSON.stringify(event).includes('<Sync>'))) {
     const _generatedNpc = world._makeConnectedNpc(npc,map);
     world.getMapById(map.id).allNpcs.push( world._makeConnectedNpc(npc,map,0,true) );
     if (_generatedNpc) {
-      world.findInstanceById(map.id).npcsOnMap.push( _generatedNpc );
+      world.getInstanceById(map.id).connectedNpcs.push( _generatedNpc );
       console.log('[WORLD] Added synced NPC ' + _generatedNpc.uniqueId + ' on map ' + map.id);
     }
   }
@@ -152,8 +154,9 @@ world._makeConnectedNpc = (npc,instance,pageIndex) => {
   // Target selected or first page to assign helpers :
   const formatedPageIndex = (pageIndex && !isNaN(pageIndex)) ? parseInt(pageIndex) : 0;
   const _page = npc.pages && npc.pages[formatedPageIndex] || npc.pages[0];
-  return Object.assign(npc, {
-    uniqueId: `@${instance.id}#${instance.npcsOnMap.length}?${npc.id}`, // Every NPC has to be clearly differentiable
+  const _npc = Object.assign({}, npc); // Prevent rewrite existing when make
+  return Object.assign(_npc, { // Add new properties
+    uniqueId: `@${instance.id}#${instance.connectedNpcs.length}?${npc.id}`, // Every NPC has to be clearly differentiable
     eventId: npc.id, // Event "ID" client-side
     absId: null, // Help to resolve ABS logic (if and when any)
     lastActionTime: new Date('1970-01-01T00:00:00'),
@@ -183,13 +186,13 @@ world.spawnNpc = (npcSummonId, coords, pageIndex) => {
   if (!coords || !coords.mapId || !coords.x || !coords.y || !world.getSummonMap()) return;
 
   const _npcToReplicate = world.getSummonMap().events.find(npc => npc && (npc.id === npcSummonId || (npc.summonId && npc.summonId === npcSummonId)));
-  const _targetInstance = world.findInstanceById(coords.mapId);
+  const _targetInstance = world.getInstanceById(coords.mapId);
   if (!_npcToReplicate || !_targetInstance) return;
   const _generatedNpc = world._makeConnectedNpc(_npcToReplicate,_targetInstance,pageIndex || 0);
   if (!_generatedNpc) return
   const uniqueIntegerId = 99999 + Math.floor(Math.random() * 99999); // Prevents event id conflicts
   Object.assign(_generatedNpc, {
-    uniqueId: `@${coords.mapId}#${world.findInstanceById(coords.mapId).npcsOnMap.length}?${uniqueIntegerId}`,
+    uniqueId: `@${coords.mapId}#${world.getInstanceById(coords.mapId).connectedNpcs.length}?${uniqueIntegerId}`,
     summonId: npcSummonId,
     id: uniqueIntegerId,
     eventId: uniqueIntegerId,
@@ -199,34 +202,41 @@ world.spawnNpc = (npcSummonId, coords, pageIndex) => {
 
   world.spawnedUniqueIds.push( _generatedNpc.uniqueId );
   const _spawnedIndex = world.spawnedUniqueIds.indexOf(_generatedNpc.uniqueId);
-  world.findInstanceById(coords.mapId).npcsOnMap.push( _generatedNpc );
+  world.getInstanceById(coords.mapId).connectedNpcs.push( _generatedNpc );
+  world.getMapById(coords.mapId).allNpcs.push( _generatedNpc );
   
   world.getNpcByUniqueId(_generatedNpc.uniqueId).x = coords.x || 1;
   world.getNpcByUniqueId(_generatedNpc.uniqueId).y = coords.y || 1;
   
-  MMO_Core.security.createLog(`[WORLD] Spawned NPC ${_spawnedIndex} to map ${coords.mapId} (${coords.x};${coords.y}) at ${new Date()}`)
+  MMO_Core.security.createLog(`[WORLD] Spawned NPC ${_generatedNpc.uniqueId} [index: ${_spawnedIndex}] to map ${coords.mapId} (${coords.x};${coords.y}) at ${new Date()}`)
   MMO_Core["socket"].emitToAll("npcSpawn", world.getNpcByUniqueId(_generatedNpc.uniqueId));
 
   return _spawnedIndex;
 }
-world.removeConnectedNpcByIndex = (index) => {
+world.disableNpc = (npc) => {
+  world.npcTpTo(npc,-1,-1); // visually hide npc
+  Object.assign(world.getNpcByUniqueId(npc.uniqueId), { disabled: true }); // Prevent turn execution
+}
+world.removeSpawnedNpcByIndex = (index) => {
   if (!world.spawnedUniqueIds[index]) return;
   world.removeConnectedNpcByUniqueId(world.spawnedUniqueIds[index]);
+  return world.spawnedUniqueIds[index];
 }
 world.removeConnectedNpcByUniqueId = (uniqueId) => {
+  if (!world.getNpcByUniqueId(uniqueId) || !world.getNpcInstance(uniqueId)) return;
   const _parentInstance = world.getNpcInstance(uniqueId);
-  if (!_parentInstance) return;
-  const _mapIndex = _parentInstance.npcsOnMap.indexOf( world.getNpcByUniqueId(uniqueId) );
-  const _spawnIndex = world.spawnedUniqueIds.indexOf( uniqueId );
-  const eventId = world.getNpcByUniqueId(uniqueId).id;
-  world.npcTpTo(world.getNpcByUniqueId(uniqueId),-1,-1);
-  world.getNpcInstance(uniqueId).npcsOnMap.splice(_mapIndex, 1);
-  world.spawnedUniqueIds.splice(_spawnIndex, 1);
-  MMO_Core.security.createLog(`[WORLD] Removed NPC ${uniqueId} at ${new Date()}`)
-  MMO_Core["socket"].emitToAll("npcRemove", {
-    eventId,
-    mapId: _parentInstance.id
-  });
+  const _nativeMap = world.getMapById(_parentInstance.id);
+  const _npc = world.getNpcByUniqueId(uniqueId);
+  const _spawnedIndex = world.spawnedUniqueIds.indexOf(uniqueId);
+
+  // Destroy NPC :
+  world.disableNpc(_npc); // Prevent tick to run this NPC
+  world.getNpcInstance(uniqueId).connectedNpcs.splice(_parentInstance.connectedNpcs.indexOf(_npc), 1);
+  world.getMapById(_nativeMap.id).allNpcs.splice(_nativeMap.allNpcs.indexOf(_npc), 1);
+  if (_spawnedIndex != -1) world.spawnedUniqueIds.splice(_spawnedIndex, 1, ""); // replace item with empty str to keep spawned index
+
+  MMO_Core.security.createLog(`[WORLD] Removed NPC ${uniqueId} [index: ${_spawnedIndex}] at ${new Date()}`)
+  MMO_Core["socket"].emitToAll("npcRemove", { uniqueId });
   return uniqueId;
 }
 
@@ -252,7 +262,10 @@ world.handleInstanceAction = (action,instance,currentTime) => {
 world.handleNpcTurn = (npc,currentTime,cooldown) => {
   // This function will read basic NPC behavior and mock it on
   // server-side then replicate it on every concerned player
-  if (!npc || !currentTime || !cooldown || !world.getNpcByUniqueId(npc.uniqueId)) return;
+  if (!npc || npc.disabled
+  || !currentTime || !cooldown || !npc.uniqueId
+  || !world.getNpcByUniqueId(npc.uniqueId)
+  ) return;
   
   // read NPCs infos (speed, rate, etc, ...)
   const delayedActionTime = currentTime.getTime() - npc.lastActionTime.getTime();
@@ -274,29 +287,28 @@ world.startInstanceLifecycle = (instanceId) => {
   const interval = 1000 / 60; // Tick 1 action every RPG Maker Frame (60f = 1s)
   const tick = setInterval(() => {
     const currentTime = new Date(); // Use precise tick time
-    const _instance = world.findInstanceById(instanceId); // Memorize state at tick time
 
-    if (!_instance) { // If no instance, interrupt lifecycle
+    if (!world.getInstanceById(instanceId)) { // If no instance, interrupt lifecycle
       clearInterval(tick);
       return;
     }
 
-    world.findInstanceById(instanceId).paused = false; // Flag as running
+    world.getInstanceById(instanceId).paused = false; // Flag as running
     // _instance.actionsOnMap.map(action => world.handleInstanceAction(action, _instance, currentTime)); // Play Actions
-    world.findInstanceById(instanceId).npcsOnMap.map(npc => world.handleNpcTurn(npc, currentTime, 6000 - (1000 * (npc._moveFrequency + 1)))); // Animate NPCS
+    world.getInstanceById(instanceId).npcsOnMap.map(npc => npc && world.handleNpcTurn(npc, currentTime, 6000 - (1000 * (npc._moveFrequency + 1)))); // Animate NPCS
 
-    if (!world.findInstanceById(instanceId).playersOnMap.length) { // If no players on map at tick :
+    if (!world.getInstanceById(instanceId).playersOnMap.length) { // If no players on map at tick :
       setTimeout(() => {
-        if (!world.findInstanceById(instanceId)) {
+        if (!world.getInstanceById(instanceId)) {
           // If instance is not loaded anymore :
           clearInterval(tick);
           return;
-        } else if (!world.findInstanceById(instanceId).playersOnMap.length) {
+        } else if (!world.getInstanceById(instanceId).playersOnMap.length) {
           // If instance alive && no more players in it
           clearInterval(tick); // Will suspend instance (not kill)
-          world.findInstanceById(instanceId).paused = true; // Flag paused
+          world.getInstanceById(instanceId).paused = true; // Flag paused
         }
-      }, world.findInstanceById(instanceId).pauseAfter); 
+      }, world.getInstanceById(instanceId).pauseAfter); 
     }
   }, interval);
 }
@@ -307,10 +319,10 @@ world.npcCanPass = (npc, direction) => {
     x: npc.x,
     y: npc.y
   };
-  const _mapId = world.getNpcMapId(npc.uniqueId)
+  const _mapId = world.getNpcMapId(npc.uniqueId);
   const x2 = world._roundXWithDirection(_mapId,_coords.x, direction);
   const y2 = world._roundYWithDirection(_mapId,_coords.y, direction);
-  if (!world._isValid(_mapId, x2, y2)) {
+  if (!world._isValid(_mapId, _coords.x, _coords.y) || !world._isValid(_mapId, x2, y2)) {
     // console.log(npc.uniqueId, '!world._isValid(_mapId, x2, y2)', _mapId, x2, y2)
     return false;
   }
@@ -407,7 +419,7 @@ world.provideMapTiles = (map) => {
 }
 world.mapTileFinder = (mapId,x,y) => {
   // console.log('mapTileFinder', mapId, x, y);
-  return world.findInstanceById(mapId).allTiles[x][y];
+  return world.getInstanceById(mapId).allTiles[x][y];
 }
 
 world._isValid = (mapId,targetX,targetY) => {
@@ -427,11 +439,11 @@ world._isPassable = (mapId,x,y,d) => {
 };
 
 world._roundX = function(mapId,x) {
-  const _map = world.findInstanceById(mapId);
+  const _map = world.getInstanceById(mapId);
   return (_map.scrollType === 2 || _map.scrollType === 3) ? x % _map.width : x;
 };
 world._roundY = function(mapId,y) {
-  const _map = world.findInstanceById(mapId);
+  const _map = world.getInstanceById(mapId);
   return (_map.scrollType === 2 || _map.scrollType === 3) ? y % _map.height : y;
 };
 world._xWithDirection = function(x, d) {
@@ -459,7 +471,7 @@ world._tilesetFlags = (mapId) => {
   }
 }
 world._tileId = (mapId,x,y,z) => {
-  const _map = world.findInstanceById(mapId);
+  const _map = world.getInstanceById(mapId);
   const width = _map.width;
   const height = _map.height;
   return _map.data[(z * height + y) * width + x] || 0;
