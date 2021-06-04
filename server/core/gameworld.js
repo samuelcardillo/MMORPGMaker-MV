@@ -173,8 +173,7 @@ world.fetchConnectedNpcs = (map) => {
 }
 world.getAllNpcsByMapId = (mapId) => {
   if (!mapId || !world.getMapById(mapId) || !world.getInstanceByMapId(mapId)) return;
-  [].concat(world.getMapById(mapId)).concat(world.getConnectedNpcs(mapId))
-  return [].concat(world.getMapById(mapId)).concat(world.getConnectedNpcs(mapId));
+  return [].concat(world.getMapById(mapId).events).concat(world.getConnectedNpcs(mapId));
 }
 
 world.makeConnectedNpc = (npc,instance,pageIndex,initiator) => {

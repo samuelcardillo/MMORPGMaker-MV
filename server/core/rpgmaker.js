@@ -123,5 +123,5 @@ maker._checkPassage = (mapId,x,y,bit) => {
 maker._isCollidedWithCharacters = (mapId,x,y) => {
   if (!MMO_Core["gameworld"].getMapById(mapId)) return; // return collide to prevent move
   const hasSameCoords = (_npc) => (_npc.x && _npc.y) ? (_npc.x === x && _npc.y === y) : (_npc._x === x && _npc._y === y)
-  return MMO_Core["gameworld"].getAllNpcsByMapId(mapId).find(npc => hasSameCoords(npc));
+  return MMO_Core["gameworld"].getAllNpcsByMapId(mapId).find(npc => npc && hasSameCoords(npc));
 }
