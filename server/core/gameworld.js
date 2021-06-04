@@ -34,8 +34,8 @@ world.getNpcMapId     = (uniqueId) => world.npcFinder(uniqueId).mapId;
 world.getNpcIndex     = (uniqueId) => world.npcFinder(uniqueId).npcIndex;
 world.getNpcEventId   = (uniqueId) => world.npcFinder(uniqueId).eventId;
 world.getNpcInstance  = (uniqueId) => world.getInstanceById( world.getNpcMapId(uniqueId) );
-world.getNpcByUniqueId     = (uniqueId) => world.getNpcInstance(uniqueId) && world.getNpcInstance(uniqueId).connectedNpcs.find(npc => npc && npc.uniqueId && npc.uniqueId === uniqueId);
-world.getAllNpcsByInstance = (id) => world.getInstanceById(id) ? world.getInstanceById(id).connectedNpcs : [];
+world.getNpcByUniqueId = (uniqueId) => world.getNpcInstance(uniqueId) && world.getNpcInstance(uniqueId).connectedNpcs.find(npc => npc && npc.uniqueId && npc.uniqueId === uniqueId);
+world.getConnectedNpcs = (mapId) => world.getInstanceById(mapId) && world.getInstanceById(mapId).connectedNpcs;
 
 world.initialize = () => {
   world.fetchTilesets();
@@ -53,7 +53,7 @@ world.fetchMaps = () => {
   console.log('[WORLD] Loading world maps ...');
   world.gameMaps = [];
   // use the file name as key in the loop, keeping only filename starting with "Map" :
-  for (let fileName of Object.keys(MMO_Core["gamedata"].data).filter(name => name.startsWith("Map"))) {
+  for (let fileName of Object.keys(MMO_Core["gamedata"].data).filter(name => name.startsWith("Map") && name !== "MapInfos")) {
     // Format map from game file and and to world
     world.gameMaps.push( world.getDatasFromGameFile(MMO_Core["gamedata"].data[fileName],fileName) ); 
     console.log(`[WORLD] - Loaded ${fileName}`);
@@ -72,7 +72,7 @@ world.getDatasFromGameFile = (gameMap, fileName) => {
     id: Number(fileName.slice(3)),
     mapId: Number(fileName.slice(3)),
     fileName,
-    allNpcs: [],
+    events: gameMap.events.map(event => event),
     isSummonMap: world.isSummonMap(gameMap),
   });
 }
@@ -108,7 +108,7 @@ world.runInstance = (mapId) => {
 world.killInstance = (mapId) => {
   if (world.isMapInstanced(mapId) && !world.getInstanceById(mapId).playersOnMap.length) {
     // Remove instance from the up list if no more players on it
-    for (let _npc of world.getMapById(mapId).allNpcs) world.removeConnectedNpcByUniqueId(_npc.uniqueId);
+    for (let _npc of world._getAllNpcs(mapId)) world.removeConnectedNpcByUniqueId(_npc.uniqueId);
     world.instancedMaps.splice(world.instancedMaps.indexOf(world.getInstanceById(mapId)), 1);
     console.log('[WORLD] # Killed instance', mapId, 'at', new Date())
   }
@@ -141,12 +141,16 @@ world.fetchNpcsFromMap = (map) => {
   if (!map || !world.isMapInstanced(map.id)) return;
   for (let npc of world.getInstanceById(map.id).events.filter(event => JSON.stringify(event).includes('<Sync>'))) {
     const _generatedNpc = world._makeConnectedNpc(npc,map);
-    world.getMapById(map.id).allNpcs.push( world._makeConnectedNpc(npc,map,0,true) );
     if (_generatedNpc) {
-      world.getInstanceById(map.id).connectedNpcs.push( _generatedNpc );
+      world.getConnectedNpcs(map.id).push( _generatedNpc );
       console.log('[WORLD] Added synced NPC ' + _generatedNpc.uniqueId + ' on map ' + map.id);
     }
   }
+}
+world._getAllNpcs = (mapId) => {
+  if (!mapId || !world.getMapById(mapId) || !world.getInstanceById(mapId)) return;
+  [].concat(world.getMapById(mapId)).concat(world.getConnectedNpcs(mapId))
+  return [].concat(world.getMapById(mapId)).concat(world.getConnectedNpcs(mapId));
 }
 
 world._makeConnectedNpc = (npc,instance,pageIndex) => {
@@ -193,7 +197,7 @@ world.spawnNpc = (npcSummonId, coords, pageIndex) => {
   if (!_generatedNpc) return
   const uniqueIntegerId = 99999 + Math.floor(Math.random() * 99999); // Prevents event id conflicts
   Object.assign(_generatedNpc, {
-    uniqueId: `@${coords.mapId}#${world.getInstanceById(coords.mapId).connectedNpcs.length}?${uniqueIntegerId}`,
+    uniqueId: `@${coords.mapId}#${world.getConnectedNpcs(coords.mapId).length}?${uniqueIntegerId}`,
     summonId: npcSummonId,
     id: uniqueIntegerId,
     eventId: uniqueIntegerId,
@@ -203,8 +207,7 @@ world.spawnNpc = (npcSummonId, coords, pageIndex) => {
 
   world.spawnedUniqueIds.push( _generatedNpc.uniqueId );
   const _spawnedIndex = world.spawnedUniqueIds.indexOf(_generatedNpc.uniqueId);
-  world.getInstanceById(coords.mapId).connectedNpcs.push( _generatedNpc );
-  world.getMapById(coords.mapId).allNpcs.push( _generatedNpc );
+  world.getConnectedNpcs(coords.mapId).push( _generatedNpc );
   
   world.getNpcByUniqueId(_generatedNpc.uniqueId).x = coords.x || 1;
   world.getNpcByUniqueId(_generatedNpc.uniqueId).y = coords.y || 1;
@@ -232,8 +235,7 @@ world.removeConnectedNpcByUniqueId = (uniqueId) => {
 
   // Destroy NPC :
   world.disableNpc(_npc); // Prevent tick to run this NPC
-  world.getNpcInstance(uniqueId).connectedNpcs.splice(_parentInstance.connectedNpcs.indexOf(_npc), 1);
-  world.getMapById(_nativeMap.id).allNpcs.splice(_nativeMap.allNpcs.indexOf(_npc), 1);
+  world.getConnectedNpcs(_parentInstance.id).splice(world.getConnectedNpcs(_parentInstance.id).indexOf(_npc), 1);
   if (_spawnedIndex != -1) world.spawnedUniqueIds.splice(_spawnedIndex, 1, ""); // replace item with empty str to keep spawned index
 
   MMO_Core.security.createLog(`[WORLD] Removed NPC ${uniqueId} [index: ${_spawnedIndex}] at ${new Date()}`)
@@ -296,7 +298,7 @@ world.startInstanceLifecycle = (instanceId) => {
 
     world.getInstanceById(instanceId).paused = false; // Flag as running
     // _instance.actionsOnMap.map(action => world.handleInstanceAction(action, _instance, currentTime)); // Play Actions
-    world.getInstanceById(instanceId).connectedNpcs.map(npc => npc && world.handleNpcTurn(npc, currentTime, 6000 - (1000 * (npc._moveFrequency + 1)))); // Animate NPCS
+    world.getConnectedNpcs(instanceId).map(npc => npc && world.handleNpcTurn(npc, currentTime, 6000 - (1000 * (npc._moveFrequency + 1)))); // Animate NPCS
 
     if (!world.getInstanceById(instanceId).playersOnMap.length) { // If no players on map at tick :
       setTimeout(() => {
@@ -505,9 +507,6 @@ world._checkPassage = (mapId,x,y,bit) => {
   return false;
 }
 world._isCollidedWithCharacters = (mapId,x,y) => {
-  if (!world.getMapById(mapId)) return true; // return collide to prevent move
-  for (let _npc of world.getMapById(mapId).allNpcs) {
-    if (_npc.x === x && _npc.y === y) return true;
-  }
-  return false;
+  if (!world.getMapById(mapId)) return; // return collide to prevent move
+  return world._getAllNpcs(mapId).find(npc => npc.x === x && npc.y === y);
 }
