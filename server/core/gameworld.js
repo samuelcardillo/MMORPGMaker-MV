@@ -1,18 +1,19 @@
-var exports = module.exports = {}
-  , world = exports;
-
 /*****************************
-      GAME WORLD 
-      by Axel Fiolle
+  GAME WORLD by Axel Fiolle
 
-  - A connected map must include "<Sync>" inside its note.
-  - A connected NPC must include "<Sync>" in a comment in any page.
+  - Will allow you to synchronize NPCs inter/actions through multiple clients
 
-  - The Spawn map must have "<Summon>" inside its note
-  - There must be only one spawn map
-  - Command to summon : /addNpc [eventId*] [mapId] [x] [y]
+  i. A connected map must include "<Sync>" inside its note.
+  i. A connected NPC must include "<Sync>" in a comment in any page.
+
+  i. The Spawn map must have "<Summon>" inside its note
+  i. There must be only one spawn map
+  i. Command to summon : /addNpc [eventId*] [mapId] [x] [y]
 
 *****************************/
+
+var exports = module.exports = {}
+  , world = exports;
 
 // World State :
 world.gameMaps         = []; // Formated exploitable files from gamedata
@@ -39,32 +40,35 @@ world.getNpcByUniqueId = (uniqueId) => world.getNpcInstance(uniqueId) && world.g
 world.getConnectedNpcs = (mapId) => world.getInstanceByMapId(mapId) && world.getInstanceByMapId(mapId).connectedNpcs;
 
 world.initialize = () => {
-  world.fetchTilesets();
-  world.fetchMaps(); // Load gamedata maps
-  world.fetchInstances(); // Filter, format and save online maps
-  console.log('[WORLD] # World is ready');
+  console.log("######################################");
+  console.log('[WORLD] GAME WORLD by Axel Fiolle')
+  world.fetchTilesets(); // Load collision informations
+  world.fetchMaps(); // Load MMO_Core.gamedata maps
+  console.log('[WORLD] GAME WORLD is ready !');
+  console.log("######################################");
 }
 
 world.fetchTilesets = () => {
   world.tileSets = MMO_Core["gamedata"].data['Tilesets'] || [];
-  console.log('[WORLD] # Tilesets Loaded')
+  console.log('[WORLD] Loaded Tilesets')
 }
 
+/*************************************************************************************** Maps Operations */
+
 world.fetchMaps = () => {
-  console.log('[WORLD] Loading world maps ...');
+  console.log('[WORLD] Loading world maps');
   world.gameMaps = [];
   // use the file name as key in the loop, keeping only filename starting with "Map" :
   for (let fileName of Object.keys(MMO_Core["gamedata"].data).filter(name => name.startsWith("Map") && name !== "MapInfos")) {
     // Format map from game file and and to world
-    world.gameMaps.push( world.getDatasFromGameFile(MMO_Core["gamedata"].data[fileName],fileName) ); 
-    console.log(`[WORLD] - Loaded ${fileName}`);
-  }
-}
+    const _gameMap = world.getDatasFromGameFile(MMO_Core["gamedata"].data[fileName],fileName);
+    const _isSummon = _gameMap.isSummonMap;
+    const _isSync = world.isMapInstanceable(_gameMap);
+    console.log(`[WORLD] ... ${fileName} ${_isSummon ? '<Summon>' : ''}${world.isMapInstanceable(_gameMap) ? '<Sync>' : ''}`);
 
-world.fetchInstances = () => {
-  // Only keep maps thate are instanceable :
-  world.instanceableMaps = world.gameMaps.filter(map => world.isMapInstanceable(map));
-  world.instanceableMaps.map(map => console.log(`[WORLD] - Online ${map.fileName}`));
+    world.gameMaps.push( _gameMap ); 
+    if (_isSync) world.instanceableMaps.push( _gameMap );
+  }
 }
 
 world.getDatasFromGameFile = (gameMap, fileName) => {
@@ -81,10 +85,11 @@ world._getMapIdByFileName = (fileName) => Number(fileName.slice(3));
 world.makeInstance = (map,initiator) => {
   // Assign needed props to make Instance :
   const _map = Object.assign({}, map); // Keep original map clean
+  const _time = new Date();
   return Object.assign(_map, {  // an Instance is an extends of a GameMap
-    uniqueId: `@${map.fileName}#${world.instancedMaps.length}?${map.mapId}`,
+    uniqueId: `@${map.fileName}#${world.instancedMaps.length}?${map.mapId}T${_time.getTime()}`,
     initiator: initiator || 'server', // playerId || 'server'
-    startedAt: new Date(),
+    startedAt: _time,
     lastPlayerLeftAt: null, // Date
     dieAfter: 60000,        // When no more players left, kill after X ms
     permanent: false,       // Make the instance never die
@@ -153,6 +158,8 @@ world.playerLeaveInstance = (playerId,mapId) => {
     }
   }
 }
+
+/*************************************************************************************** NPC Operations */
 
 world.fetchNpcsFromMap = (map) => {
   if (!map || !world.isMapInstanced(map.mapId)) return;
@@ -273,6 +280,52 @@ world.npcFinder = (uniqueId) => {
   }
 }
 
+world.npcMoveStraight = (npc,direction,animSkip) => {
+  if (!npc || !world.getNpcByUniqueId(npc.uniqueId)) return
+  // console.log('[WORLD] npcMoveStraight (1/2)', npc.uniqueId, { x: npc.x,y: npc.y }, {direction});
+  if (world.npcCanPass(npc,direction)) {
+    const _map = world.getNpcInstance(npc.uniqueId);
+    world.getNpcByUniqueId(npc.uniqueId).x = world._roundXWithDirection(_map.mapId, npc.x, direction);
+    world.getNpcByUniqueId(npc.uniqueId).y = world._roundYWithDirection(_map.mapId, npc.y, direction);
+    MMO_Core["socket"].emitToAll("npc_moving", {
+      uniqueId: npc.uniqueId,
+      mapId: _map.mapId,
+      id: npc.eventId,
+      moveSpeed: npc._moveSpeed,
+      moveFrequency: npc._moveFrequency,
+      direction: direction,
+      x: world.getNpcByUniqueId(npc.uniqueId).x,
+      y: world.getNpcByUniqueId(npc.uniqueId).y,
+      skip: animSkip || false,
+    });
+    /* console.log('[WORLD] npcMoveStraight (2/2)', npc.uniqueId, {
+      x: world.getNpcByUniqueId(npc.uniqueId).x,
+      y: world.getNpcByUniqueId(npc.uniqueId).y
+    }); */
+    return true;
+  } else return false;
+}
+world.npcTpTo = (npc,x,y) => {
+  if (!npc || !x || !y || !world.getNpcByUniqueId(npc.uniqueId))
+  world.getNpcByUniqueId(npc.uniqueId).x = x;
+  world.getNpcByUniqueId(npc.uniqueId).y = y;
+  MMO_Core["socket"].emitToAll("npc_moving", {
+    uniqueId: world.getNpcByUniqueId(npc.uniqueId).uniqueId,
+    mapId: world.getNpcByUniqueId(npc.uniqueId).mapId,
+    id: world.getNpcByUniqueId(npc.uniqueId).eventId,
+    x: world.getNpcByUniqueId(npc.uniqueId).x,
+    y: world.getNpcByUniqueId(npc.uniqueId).y,
+    skip: true,
+  });
+}
+
+world.npcMoveRandom = (npc) => {
+  const direction = 2 + Math.floor(Math.random() * 4) * 2;
+  return world.npcMoveStraight(npc, direction);
+};
+
+/*************************************************************************************** Instance Life Cycle Operations */
+
 world.handleInstanceAction = (action,instance,currentTime) => {
   // This function will interpret/mock a game script then emit 
   // an event to replicate it on every concerned player
@@ -353,71 +406,6 @@ world.startInstanceLifecycle = (mapId) => {
   }, interval);
 }
 
-world.npcCanPass = (npc, direction) => {
-  if (!npc || !direction) return false;
-  const _coords = {
-    x: npc.x,
-    y: npc.y
-  };
-  const _mapId = world.getNpcMapId(npc.uniqueId);
-  const x2 = world._roundXWithDirection(_mapId,_coords.x, direction);
-  const y2 = world._roundYWithDirection(_mapId,_coords.y, direction);
-  if (!world._isValid(_mapId, _coords.x, _coords.y) || !world._isValid(_mapId, x2, y2)) {
-    // console.log(npc.uniqueId, '!world._isValid(_mapId, x2, y2)', _mapId, x2, y2)
-    return false;
-  }
-  if (!world._isMapPassable(_mapId, _coords.x, _coords.y, direction)) {
-    // console.log(npc.uniqueId, '!world._isMapPassable(_mapId, _coords.x, _coords.y, direction)', _mapId, _coords.x, _coords.y, direction)
-    return false;
-  }
-  if (world._isCollidedWithCharacters(_mapId, x2, y2)) {
-    // console.log(npc.uniqueId, 'world._isCollidedWithCharacters(_mapId, x2, y2)', _mapId, x2, y2)
-    return false;
-  }
-  return true;
-};
-
-world.npcMoveStraight = (npc,direction,animSkip) => {
-  if (!npc || !world.getNpcByUniqueId(npc.uniqueId)) return
-  // console.log('[WORLD] npcMoveStraight (1/2)', npc.uniqueId, { x: npc.x,y: npc.y }, {direction});
-  if (world.npcCanPass(npc,direction)) {
-    const _map = world.getNpcInstance(npc.uniqueId);
-    world.getNpcByUniqueId(npc.uniqueId).x = world._roundXWithDirection(_map.mapId, npc.x, direction);
-    world.getNpcByUniqueId(npc.uniqueId).y = world._roundYWithDirection(_map.mapId, npc.y, direction);
-    MMO_Core["socket"].emitToAll("npc_moving", {
-      uniqueId: npc.uniqueId,
-      mapId: _map.mapId,
-      id: npc.eventId,
-      moveSpeed: npc._moveSpeed,
-      moveFrequency: npc._moveFrequency,
-      direction: direction,
-      x: world.getNpcByUniqueId(npc.uniqueId).x,
-      y: world.getNpcByUniqueId(npc.uniqueId).y,
-      skip: animSkip || false,
-    });
-    // console.log('[WORLD] npcMoveStraight (2/2)', npc.uniqueId, { x: world.getNpcByUniqueId(npc.uniqueId).x,y: world.getNpcByUniqueId(npc.uniqueId).y });
-    return true;
-  } else return false;
-}
-world.npcTpTo = (npc,x,y) => {
-  if (!npc || !x || !y || !world.getNpcByUniqueId(npc.uniqueId))
-  world.getNpcByUniqueId(npc.uniqueId).x = x;
-  world.getNpcByUniqueId(npc.uniqueId).y = y;
-  MMO_Core["socket"].emitToAll("npc_moving", {
-    uniqueId: world.getNpcByUniqueId(npc.uniqueId).uniqueId,
-    mapId: world.getNpcByUniqueId(npc.uniqueId).mapId,
-    id: world.getNpcByUniqueId(npc.uniqueId).eventId,
-    x: world.getNpcByUniqueId(npc.uniqueId).x,
-    y: world.getNpcByUniqueId(npc.uniqueId).y,
-    skip: true,
-  });
-}
-
-world.npcMoveRandom = (npc) => {
-  const direction = 2 + Math.floor(Math.random() * 4) * 2;
-  return world.npcMoveStraight(npc, direction);
-};
-
 world.getReverseDir = (direction) => {
   if (direction === 1) return 9;
   if (direction === 2) return 8;
@@ -429,6 +417,8 @@ world.getReverseDir = (direction) => {
   if (direction === 9) return 1;
   return false;
 }
+
+/*************************************************************************************** DataProviders */
 
 world.provideMapTiles = (map) => {
   const grid = [
@@ -462,6 +452,31 @@ world.mapTileFinder = (mapId,x,y) => {
   return world.getInstanceByMapId(mapId).allTiles[x][y];
 }
 
+/*************************************************************************************** RPG Maker Mocked Functions */
+
+world.npcCanPass = (npc, direction) => {
+  if (!npc || !direction) return false;
+  const _coords = {
+    x: npc.x,
+    y: npc.y
+  };
+  const _mapId = world.getNpcMapId(npc.uniqueId);
+  const x2 = world._roundXWithDirection(_mapId,_coords.x, direction);
+  const y2 = world._roundYWithDirection(_mapId,_coords.y, direction);
+  if (!world._isValid(_mapId, _coords.x, _coords.y) || !world._isValid(_mapId, x2, y2)) {
+    // console.log(npc.uniqueId, '!world._isValid(_mapId, x2, y2)', _mapId, x2, y2)
+    return false;
+  }
+  if (!world._isMapPassable(_mapId, _coords.x, _coords.y, direction)) {
+    // console.log(npc.uniqueId, '!world._isMapPassable(_mapId, _coords.x, _coords.y, direction)', _mapId, _coords.x, _coords.y, direction)
+    return false;
+  }
+  if (world._isCollidedWithCharacters(_mapId, x2, y2)) {
+    // console.log(npc.uniqueId, 'world._isCollidedWithCharacters(_mapId, x2, y2)', _mapId, x2, y2)
+    return false;
+  }
+  return true;
+};
 world._isValid = (mapId,targetX,targetY) => {
   if (targetX < 0 || targetY < 0) return false;
   const _map = world.getMapById(mapId);
