@@ -262,13 +262,16 @@ world.handleInstanceAction = (action,instance,currentTime) => {
   return;
 }
 
-world.handleNpcTurn = (npc,currentTime,cooldown) => {
+world.handleNpcTurn = (npc,_currentTime,_cooldown) => {
   // This function will read basic NPC behavior and mock it on
   // server-side then replicate it on every concerned player
   if (!npc || npc.disabled
-  || !currentTime || !cooldown || !npc.uniqueId
+  || !npc.uniqueId
   || !world.getNpcByUniqueId(npc.uniqueId)
   ) return;
+
+  const currentTime = _currentTime || new Date()
+      , cooldown = _cooldown || Infinity;
   
   // read NPCs infos (speed, rate, etc, ...)
   const delayedActionTime = currentTime.getTime() - npc.lastActionTime.getTime();
@@ -297,8 +300,12 @@ world.startInstanceLifecycle = (instanceId) => {
     }
 
     world.getInstanceById(instanceId).paused = false; // Flag as running
-    // _instance.actionsOnMap.map(action => world.handleInstanceAction(action, _instance, currentTime)); // Play Actions
-    world.getConnectedNpcs(instanceId).map(npc => npc && world.handleNpcTurn(npc, currentTime, 6000 - (1000 * (npc._moveFrequency + 1)))); // Animate NPCS
+    world.getConnectedNpcs(instanceId).map(npc => { // Animate NPCS :
+      const moveCooldown = npc._moveFrequency === 5
+        ? interval + 5500 - (1000 * npc._moveFrequency)
+        : interval + 5500 - (1000 * npc._moveFrequency) + Math.floor(Math.random() * 2250)
+      npc && world.handleNpcTurn(npc, currentTime, moveCooldown)
+    });
 
     if (!world.getInstanceById(instanceId).playersOnMap.length) { // If no players on map at tick :
       setTimeout(() => {
@@ -508,5 +515,6 @@ world._checkPassage = (mapId,x,y,bit) => {
 }
 world._isCollidedWithCharacters = (mapId,x,y) => {
   if (!world.getMapById(mapId)) return; // return collide to prevent move
-  return world._getAllNpcs(mapId).find(npc => npc.x === x && npc.y === y);
+  const hasSameCoords = (_npc) => (_npc.x && _npc.y) ? (_npc.x === x && _npc.y === y) : (_npc._x === x && _npc._y === y)
+  return world._getAllNpcs(mapId).find(npc => hasSameCoords(npc));
 }
