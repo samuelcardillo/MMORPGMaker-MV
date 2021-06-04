@@ -62,17 +62,16 @@ world.fetchMaps = () => {
   // use the file name as key in the loop, keeping only filename starting with "Map" :
   for (let fileName of Object.keys(MMO_Core["gamedata"].data).filter(name => name.startsWith("Map") && name !== "MapInfos")) {
     // Format map from game file and and to world
-    const _gameMap = world.getDatasFromGameFile(MMO_Core["gamedata"].data[fileName],fileName);
+    const _gameMap = world.getMapFromGameData(MMO_Core["gamedata"].data[fileName],fileName);
     const _isSummon = _gameMap.isSummonMap;
     const _isSync = world.isMapInstanceable(_gameMap);
     console.log(`[WORLD] ... ${fileName} ${_isSummon ? '<Summon>' : ''}${world.isMapInstanceable(_gameMap) ? '<Sync>' : ''}`);
-
     world.gameMaps.push( _gameMap ); 
     if (_isSync) world.instanceableMaps.push( _gameMap );
   }
 }
 
-world.getDatasFromGameFile = (gameMap, fileName) => {
+world.getMapFromGameData = (gameMap, fileName) => {
   // a GameMap is a raw map file + some additional useful datas
   return Object.assign(gameMap, {
     mapId: world.getMapIdByFileName(fileName),
@@ -173,7 +172,10 @@ world.fetchConnectedNpcs = (map) => {
 }
 world.getAllNpcsByMapId = (mapId) => {
   if (!mapId || !world.getMapById(mapId) || !world.getInstanceByMapId(mapId)) return;
-  return [].concat(world.getMapById(mapId).events).concat(world.getConnectedNpcs(mapId));
+  return ( // Concat multiple arrays into one :
+    [].concat(world.getConnectedNpcs(mapId))
+      .concat(world.getMapById(mapId).events) // add static events
+  ).filter(event => !!event); // remove null events
 }
 
 world.makeConnectedNpc = (npc,instance,pageIndex,initiator) => {
@@ -269,7 +271,7 @@ world.removeConnectedNpcByUniqueId = (uniqueId) => {
 world.npcMoveStraight = (npc,direction,animSkip) => {
   if (!npc || !world.getNpcByUniqueId(npc.uniqueId)) return
   // console.log('[WORLD] npcMoveStraight (1/2)', npc.uniqueId, { x: npc.x,y: npc.y }, {direction});
-  if (MMO_Core["rpgmaker"]._npcCanPass(npc,direction)) {
+  if (MMO_Core["rpgmaker"]._canPass(npc,direction)) {
     const _map = world.getNpcInstance(npc.uniqueId);
     world.getNpcByUniqueId(npc.uniqueId).x = MMO_Core["rpgmaker"]._roundXWithDirection(_map.mapId, npc.x, direction);
     world.getNpcByUniqueId(npc.uniqueId).y = MMO_Core["rpgmaker"]._roundYWithDirection(_map.mapId, npc.y, direction);

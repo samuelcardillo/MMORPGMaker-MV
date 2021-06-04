@@ -5,25 +5,26 @@
 var exports = module.exports = {}
   , maker = exports;
 
-maker._npcCanPass = (npc, direction) => {
-  if (!npc || !direction) return false;
+maker._canPass = (initiator, direction) => {
+  if (!initiator || !direction) return false;
   const _coords = {
-    x: npc.x,
-    y: npc.y
+    x: initiator.x,
+    y: initiator.y
   };
-  const _mapId = MMO_Core["gameworld"].getNpcMapId(npc.uniqueId);
+  const _mapId = MMO_Core["gameworld"].getNpcMapId(initiator.uniqueId);
   const x2 = maker._roundXWithDirection(_mapId,_coords.x, direction);
   const y2 = maker._roundYWithDirection(_mapId,_coords.y, direction);
   if (!maker._isValid(_mapId, _coords.x, _coords.y) || !maker._isValid(_mapId, x2, y2)) {
-    // console.log(npc.uniqueId, '!maker._isValid(_mapId, x2, y2)', _mapId, x2, y2)
+    // console.log(initiator.uniqueId, '!maker._isValid(_mapId, x2, y2)', _mapId, x2, y2)
     return false;
   }
+  if (initiator._through) return true;
   if (!maker._isMapPassable(_mapId, _coords.x, _coords.y, direction)) {
-    // console.log(npc.uniqueId, '!maker._isMapPassable(_mapId, _coords.x, _coords.y, direction)', _mapId, _coords.x, _coords.y, direction)
+    // console.log(initiator.uniqueId, '!maker._isMapPassable(_mapId, _coords.x, _coords.y, direction)', _mapId, _coords.x, _coords.y, direction)
     return false;
   }
-  if (maker._isCollidedWithCharacters(_mapId, x2, y2)) {
-    // console.log(npc.uniqueId, 'maker._isCollidedWithCharacters(_mapId, x2, y2)', _mapId, x2, y2)
+  if (maker._isCollidedWithCharacters(_mapId, x2, y2, initiator)) {
+    // console.log(initiator.uniqueId, 'maker._isCollidedWithCharacters(_mapId, x2, y2)', _mapId, x2, y2)
     return false;
   }
   return true;
@@ -120,8 +121,10 @@ maker._checkPassage = (mapId,x,y,bit) => {
   }
   return false;
 }
-maker._isCollidedWithCharacters = (mapId,x,y) => {
-  if (!MMO_Core["gameworld"].getMapById(mapId)) return; // return collide to prevent move
-  const hasSameCoords = (_npc) => (_npc.x && _npc.y) ? (_npc.x === x && _npc.y === y) : (_npc._x === x && _npc._y === y)
-  return MMO_Core["gameworld"].getAllNpcsByMapId(mapId).find(npc => npc && hasSameCoords(npc));
+maker._isCollidedWithCharacters = (mapId,x,y,initiator) => {
+  //MMO_Core.socket.modules.player.subs.player.getPlayer()
+  if (!MMO_Core["gameworld"].getMapById(mapId)) return; // prevent .find() on null
+  const hasSameCoords = (_event) => (_event.x && _event.y) ? (_event.x === x && _event.y === y) : (_event._x === x && _event._y === y)
+  const isOriginalElement = (_event) => initiator && _event.id === initiator.id;
+  return MMO_Core["gameworld"].getAllNpcsByMapId(mapId).find(npc => npc && !npc._through && hasSameCoords(npc) && !isOriginalElement(npc));
 }
