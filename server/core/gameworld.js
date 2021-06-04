@@ -76,7 +76,6 @@ world.getDatasFromGameFile = (gameMap, fileName) => {
   return Object.assign(gameMap, {
     mapId: world._getMapIdByFileName(fileName),
     fileName,
-    events: gameMap.events.map(event => event),
     isSummonMap: world.isSummonMap(gameMap),
   });
 }
@@ -215,7 +214,7 @@ world.spawnNpc = (npcSummonId, coords, pageIndex) => {
   // coords = { mapId, x, y }
   if (!coords || !coords.mapId || !coords.x || !coords.y || !world.getSummonMap()) return;
 
-  const _npcToReplicate = world.getSummonMap().events.find(npc => npc && (npc.eventId === npcSummonId || (npc.summonId && npc.summonId === npcSummonId)));
+  const _npcToReplicate = world.getSummonMap().events.find(npc => npc && (npc.id === npcSummonId || (npc.summonId && npc.summonId === npcSummonId)));
   const _targetInstance = world.getInstanceByMapId(coords.mapId);
   if (!_npcToReplicate || !_targetInstance) return;
   const _generatedNpc = world._makeConnectedNpc(_npcToReplicate,_targetInstance,pageIndex || 0);
