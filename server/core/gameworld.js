@@ -34,7 +34,7 @@ world.getNpcMapId     = (uniqueId) => world.npcFinder(uniqueId).mapId;
 world.getNpcIndex     = (uniqueId) => world.npcFinder(uniqueId).npcIndex;
 world.getNpcEventId   = (uniqueId) => world.npcFinder(uniqueId).eventId;
 world.getNpcInstance  = (uniqueId) => world.getInstanceById( world.getNpcMapId(uniqueId) );
-world.getNpcByUniqueId     = (uniqueId) => world.getNpcInstance(uniqueId) && world.getNpcInstance(uniqueId).connectedNpcs.find(npc => npc && npc.uniqueId && npc.uniqueId === uniqueId) || {};
+world.getNpcByUniqueId     = (uniqueId) => world.getNpcInstance(uniqueId) && world.getNpcInstance(uniqueId).connectedNpcs.find(npc => npc && npc.uniqueId && npc.uniqueId === uniqueId);
 world.getAllNpcsByInstance = (id) => world.getInstanceById(id) ? world.getInstanceById(id).connectedNpcs : [];
 
 world.initialize = () => {
