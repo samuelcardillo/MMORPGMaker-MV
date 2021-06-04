@@ -37,6 +37,7 @@ MMO_Core = {
     security: require("./core/security"),
     socket: require("./core/socket"),
     routes: require("./core/routes"),
+    rpgmaker: require("./core/rpgmaker"),
     gameworld: require('./core/gameworld')
 };
 

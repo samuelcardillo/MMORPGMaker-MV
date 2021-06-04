@@ -75,12 +75,12 @@ world.fetchMaps = () => {
 world.getDatasFromGameFile = (gameMap, fileName) => {
   // a GameMap is a raw map file + some additional useful datas
   return Object.assign(gameMap, {
-    mapId: world._getMapIdByFileName(fileName),
+    mapId: world.getMapIdByFileName(fileName),
     fileName,
     isSummonMap: world.isSummonMap(gameMap),
   });
 }
-world._getMapIdByFileName = (fileName) => Number(fileName.slice(3));
+world.getMapIdByFileName = (fileName) => Number(fileName.slice(3));
 
 world.makeInstance = (map,initiator) => {
   // Assign needed props to make Instance :
@@ -177,7 +177,7 @@ world.getAllNpcsByMapId = (mapId) => {
   return [].concat(world.getMapById(mapId)).concat(world.getConnectedNpcs(mapId));
 }
 
-world.makeConnectedNpc = (npc,instance,pageIndex) => {
+world.makeConnectedNpc = (npc,instance,pageIndex,initiator) => {
   if (!npc || !instance) return;
   // Target selected or first page to assign helpers :
   const formatedPageIndex = (pageIndex && !isNaN(pageIndex)) ? parseInt(pageIndex) : 0;
@@ -186,6 +186,7 @@ world.makeConnectedNpc = (npc,instance,pageIndex) => {
   const _npc = Object.assign({}, npc); // Prevent rewrite existing when make
   return Object.assign(_npc, { // Add new properties
     uniqueId: `@${_instance.mapId}#${_instance.connectedNpcs.length}?${npc.id}`, // Every NPC has to be clearly differentiable
+    initiator: initiator || 'server',
     eventId: npc.id, // Event "ID" client-side
     absId: null, // Help to resolve ABS logic (if and when any)
     lastActionTime: new Date(),
@@ -218,7 +219,7 @@ world.spawnNpc = (npcSummonId, coords, pageIndex, initiator) => {
   const _npcToReplicate = world.getSummonMap().events.find(npc => npc && (npc.id === npcSummonId || (npc.summonId && npc.summonId === npcSummonId)));
   const _targetInstance = world.getInstanceByMapId(coords.mapId);
   if (!_npcToReplicate || !_targetInstance) return;
-  const _generatedNpc = world.makeConnectedNpc(_npcToReplicate,_targetInstance,pageIndex || 0);
+  const _generatedNpc = world.makeConnectedNpc(_npcToReplicate,_targetInstance,pageIndex,initiator);
   if (!_generatedNpc) return
   const uniqueIntegerId = 99999 + Math.floor(Math.random() * 99999); // Prevents event id conflicts
   Object.assign(_generatedNpc, {
@@ -237,7 +238,7 @@ world.spawnNpc = (npcSummonId, coords, pageIndex, initiator) => {
   world.getNpcByUniqueId(_generatedNpc.uniqueId).x = coords.x || 1;
   world.getNpcByUniqueId(_generatedNpc.uniqueId).y = coords.y || 1;
   
-  MMO_Core.security.createLog(`[WORLD] Spawned NPC ${_generatedNpc.uniqueId} [index: ${_spawnedIndex}] to map ${coords.mapId} (${coords.x};${coords.y}) at ${new Date()}`)
+  MMO_Core.security.createLog(`[WORLD] Spawned NPC ${_generatedNpc.uniqueId} (${coords.x};${coords.y}) by "${_generatedNpc.initiator}" at ${new Date()}`)
   MMO_Core["socket"].emitToAll("npcSpawn", world.getNpcByUniqueId(_generatedNpc.uniqueId));
 
   return _spawnedIndex;
@@ -262,30 +263,18 @@ world.removeConnectedNpcByUniqueId = (uniqueId) => {
   world.getConnectedNpcs(_parentInstance.mapId).splice(world.getConnectedNpcs(_parentInstance.mapId).indexOf(_npc), 1);
   if (_spawnedIndex != -1) world.spawnedUniqueIds.splice(_spawnedIndex, 1, ""); // replace item with empty str to keep spawned index
 
-  MMO_Core.security.createLog(`[WORLD] Removed NPC ${uniqueId} [index: ${_spawnedIndex}] at ${new Date()}`)
+  console.log(`[WORLD] Removed NPC ${uniqueId} at ${new Date()}`)
   MMO_Core["socket"].emitToAll("npcRemove", { uniqueId });
   return uniqueId;
-}
-
-world.npcFinder = (uniqueId) => {
-  try {
-    return {
-      mapId: parseInt(uniqueId.split('@')[1].split('#')[0]),
-      npcIndex: parseInt(uniqueId.split('#')[1].split('?')[0]),
-      eventId: parseInt(uniqueId.split('?')[1]),
-    };
-  } catch (_) {
-    return { mapId: -1, npcIndex: -1, eventId: -1 };
-  }
 }
 
 world.npcMoveStraight = (npc,direction,animSkip) => {
   if (!npc || !world.getNpcByUniqueId(npc.uniqueId)) return
   // console.log('[WORLD] npcMoveStraight (1/2)', npc.uniqueId, { x: npc.x,y: npc.y }, {direction});
-  if (world._npcCanPass(npc,direction)) {
+  if (MMO_Core["rpgmaker"]._npcCanPass(npc,direction)) {
     const _map = world.getNpcInstance(npc.uniqueId);
-    world.getNpcByUniqueId(npc.uniqueId).x = world._roundXWithDirection(_map.mapId, npc.x, direction);
-    world.getNpcByUniqueId(npc.uniqueId).y = world._roundYWithDirection(_map.mapId, npc.y, direction);
+    world.getNpcByUniqueId(npc.uniqueId).x = MMO_Core["rpgmaker"]._roundXWithDirection(_map.mapId, npc.x, direction);
+    world.getNpcByUniqueId(npc.uniqueId).y = MMO_Core["rpgmaker"]._roundYWithDirection(_map.mapId, npc.y, direction);
     MMO_Core["socket"].emitToAll("npc_moving", {
       uniqueId: npc.uniqueId,
       mapId: _map.mapId,
@@ -405,18 +394,6 @@ world.startInstanceLifecycle = (mapId) => {
   }, interval);
 }
 
-world.getReverseDir = (direction) => {
-  if (direction === 1) return 9;
-  if (direction === 2) return 8;
-  if (direction === 3) return 7;
-  if (direction === 4) return 6;
-  if (direction === 6) return 4;
-  if (direction === 7) return 3;
-  if (direction === 8) return 2;
-  if (direction === 9) return 1;
-  return false;
-}
-
 /*************************************************************************************** DataProviders */
 
 world.provideMapTiles = (map) => {
@@ -451,114 +428,14 @@ world.mapTileFinder = (mapId,x,y) => {
   return world.getInstanceByMapId(mapId).allTiles[x][y];
 }
 
-/*************************************************************************************** RPG Maker Mocked Functions */
-
-world._npcCanPass = (npc, direction) => {
-  if (!npc || !direction) return false;
-  const _coords = {
-    x: npc.x,
-    y: npc.y
-  };
-  const _mapId = world.getNpcMapId(npc.uniqueId);
-  const x2 = world._roundXWithDirection(_mapId,_coords.x, direction);
-  const y2 = world._roundYWithDirection(_mapId,_coords.y, direction);
-  if (!world._isValid(_mapId, _coords.x, _coords.y) || !world._isValid(_mapId, x2, y2)) {
-    // console.log(npc.uniqueId, '!world._isValid(_mapId, x2, y2)', _mapId, x2, y2)
-    return false;
+world.npcFinder = (uniqueId) => {
+  try {
+    return {
+      mapId: parseInt(uniqueId.split('@')[1].split('#')[0]),
+      npcIndex: parseInt(uniqueId.split('#')[1].split('?')[0]),
+      eventId: parseInt(uniqueId.split('?')[1]),
+    };
+  } catch (_) {
+    return { mapId: -1, npcIndex: -1, eventId: -1 };
   }
-  if (!world._isMapPassable(_mapId, _coords.x, _coords.y, direction)) {
-    // console.log(npc.uniqueId, '!world._isMapPassable(_mapId, _coords.x, _coords.y, direction)', _mapId, _coords.x, _coords.y, direction)
-    return false;
-  }
-  if (world._isCollidedWithCharacters(_mapId, x2, y2)) {
-    // console.log(npc.uniqueId, 'world._isCollidedWithCharacters(_mapId, x2, y2)', _mapId, x2, y2)
-    return false;
-  }
-  return true;
-};
-world._isValid = (mapId,targetX,targetY) => {
-  if (targetX < 0 || targetY < 0) return false;
-  const _map = world.getMapById(mapId);
-  if (targetX >= _map.width || targetY >= _map.height) return false;
-  return true;
-}
-world._isMapPassable = (mapId,x,y,d) => {
-  const x2 = world._roundXWithDirection(mapId,x, d);
-  const y2 = world._roundYWithDirection(mapId,y, d);
-  const d2 = world.getReverseDir(d);
-  return world._isPassable(mapId,x, y, d) && world._isPassable(mapId,x2, y2, d2);
-}
-world._isPassable = (mapId,x,y,d) => {
-  return world._checkPassage(mapId, x, y, (1 << (d / 2 - 1)) & 0x0f);
-};
-
-world._roundX = function(mapId,x) {
-  const _map = world.getInstanceByMapId(mapId);
-  return (_map.scrollType === 2 || _map.scrollType === 3) ? x % _map.width : x;
-};
-world._roundY = function(mapId,y) {
-  const _map = world.getInstanceByMapId(mapId);
-  return (_map.scrollType === 2 || _map.scrollType === 3) ? y % _map.height : y;
-};
-world._xWithDirection = function(x, d) {
-  return x + (d === 6 ? 1 : d === 4 ? -1 : 0);
-};
-world._yWithDirection = function(y, d) {
-  return y + (d === 2 ? 1 : d === 8 ? -1 : 0);
-};
-world._roundXWithDirection = function(mapId, x, d) {
-  return world._roundX(mapId, x + (d === 6 ? 1 : d === 4 ? -1 : 0));
-};
-world._roundYWithDirection = function(mapId, y, d) {
-  return world._roundY(mapId, y + (d === 2 ? 1 : d === 8 ? -1 : 0));
-};
-
-world.__tilesetId = (mapId,x,y) => {
-  return world._layeredTiles(mapId, x, y);
-}
-world._tilesetFlags = (mapId) => {
-  const tileset = world.tileSets[world.getMapById(mapId).tilesetId];
-  if (tileset) {
-    return tileset.flags;
-  } else {
-    return [];
-  }
-}
-world._tileId = (mapId,x,y,z) => {
-  const _map = world.getInstanceByMapId(mapId);
-  const width = _map.width;
-  const height = _map.height;
-  return _map.data[(z * height + y) * width + x] || 0;
-}
-world._layeredTiles = (mapId,x,y) => {
-  const tiles = [];
-  for (let i = 0; i < 4; i++) {
-      tiles.push(world._tileId(mapId, x, y, 3 - i));
-  }
-  return tiles;
-}
-world._checkPassage = (mapId,x,y,bit) => {
-  const flags = world._tilesetFlags(mapId);
-  const tiles = world.mapTileFinder(mapId,x,y);
-  for (const tile of tiles) {
-    const flag = flags[tile];
-    if ((flag & 0x10) !== 0) {
-      // [*] No effect on passage
-      continue;
-    }
-    if ((flag & bit) === 0) {
-      // [o] Passable
-      return true;
-    }
-    if ((flag & bit) === bit) {
-      // [x] Impassable
-      return false;
-    }
-  }
-  return false;
-}
-world._isCollidedWithCharacters = (mapId,x,y) => {
-  if (!world.getMapById(mapId)) return; // return collide to prevent move
-  const hasSameCoords = (_npc) => (_npc.x && _npc.y) ? (_npc.x === x && _npc.y === y) : (_npc._x === x && _npc._y === y)
-  return world.getAllNpcsByMapId(mapId).find(npc => hasSameCoords(npc));
 }
