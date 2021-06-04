@@ -20,7 +20,7 @@ exports.initialize = function() {
                 x: parseInt(args[4]) || initiator.playerData.x,
                 y: parseInt(args[5]) || initiator.playerData.y,
             }
-            const pageIndex = args[5] ? parseInt(args[5]) : 0;        
+            const pageIndex = args[6] ? parseInt(args[6]) : 0;        
             const summonedId = MMO_Core["gameworld"].spawnNpc(summonId, coords, pageIndex, initiator);
             return MMO_Core.socket.modules.messages.sendToPlayer(initiator, "System", `Spawned NPC [index: ${summonedId}]`, "action");
         }
