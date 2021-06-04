@@ -247,8 +247,7 @@ world.disableNpc = (npc) => {
 }
 world.removeSpawnedNpcByIndex = (index) => {
   if (!world.spawnedUniqueIds[index]) return;
-  world.removeConnectedNpcByUniqueId(world.spawnedUniqueIds[index]);
-  return world.spawnedUniqueIds[index];
+  return world.removeConnectedNpcByUniqueId(world.spawnedUniqueIds[index]);
 }
 world.removeConnectedNpcByUniqueId = (uniqueId) => {
   if (!world.getNpcByUniqueId(uniqueId) || !world.getNpcInstance(uniqueId)) return;
