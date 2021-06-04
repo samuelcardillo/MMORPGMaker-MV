@@ -56,11 +56,11 @@ maker._isPassable = (mapId,x,y,d) => {
 };
 
 maker._roundX = function(mapId,x) {
-  const _map = MMO_Core["gameworld"].getInstanceByMapId(mapId);
+  const _map = MMO_Core["gameworld"].getMapById(mapId);
   return (_map.scrollType === 2 || _map.scrollType === 3) ? x % _map.width : x;
 };
 maker._roundY = function(mapId,y) {
-  const _map = MMO_Core["gameworld"].getInstanceByMapId(mapId);
+  const _map = MMO_Core["gameworld"].getMapById(mapId);
   return (_map.scrollType === 2 || _map.scrollType === 3) ? y % _map.height : y;
 };
 maker._xWithDirection = function(x, d) {
@@ -88,7 +88,7 @@ maker._tilesetFlags = (mapId) => {
   }
 }
 maker._tileId = (mapId,x,y,z) => {
-  const _map = MMO_Core["gameworld"].getInstanceByMapId(mapId);
+  const _map = MMO_Core["gameworld"].getMapById(mapId);
   const width = _map.width;
   const height = _map.height;
   return _map.data[(z * height + y) * width + x] || 0;
