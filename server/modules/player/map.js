@@ -80,5 +80,16 @@ exports.initialize = function() {
 
             client.broadcast.to("map-" + client.playerData.mapId).emit("refresh_players_on_map", { playerId: client.id, playerData: client.playerData });
         });
+
+        client.on("start_interact_npc", function(npc) {
+            if (npc && npc.uniqueId) world.setNpcBusyStatus(uniqueId,{
+                id: client.playerData.id,
+                type: "player",
+                since: new Date()
+            });
+        });
+        client.on("stop_interact_npc", function(npc) {
+            if (npc && npc.uniqueId) world.setNpcBusyStatus(uniqueId,false);
+        });
     });
 };

@@ -167,6 +167,7 @@ world._makeConnectedNpc = (npc,instance,pageIndex) => {
     lastActionTime: new Date('1970-01-01T00:00:00'),
     lastMoveTime: new Date('1970-01-01T00:00:00'),
     summonable: false,
+    busy: false, // { id: string | int, type: string, since: Date } | false
     mapId: instance.id,
     // _ helpers
     _conditions: _page.conditions,
@@ -262,10 +263,19 @@ world.handleInstanceAction = (action,instance,currentTime) => {
   return;
 }
 
+world.setNpcBusyStatus = (uniqueId,initiator) => {
+  if (!uniqueId || !world.getNpcByUniqueId(uniqueId)) return;
+  world.getNpcByUniqueId(uniqueId).busy = initiator || false;
+}
+world.toggleNpcBusyStatus = (uniqueId,status) => {
+  if (!uniqueId) return;
+  world.setNpcBusyStatus(uniqueId, status || !world.getNpcByUniqueId(uniqueId).busy);
+}
+
 world.handleNpcTurn = (npc,_currentTime,_cooldown) => {
   // This function will read basic NPC behavior and mock it on
   // server-side then replicate it on every concerned player
-  if (!npc || npc.disabled
+  if (!npc || npc.disabled || npc.busy
   || !npc.uniqueId
   || !world.getNpcByUniqueId(npc.uniqueId)
   ) return;
