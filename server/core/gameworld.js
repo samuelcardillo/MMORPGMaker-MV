@@ -164,8 +164,8 @@ world._makeConnectedNpc = (npc,instance,pageIndex) => {
     uniqueId: `@${_instance.id}#${_instance.connectedNpcs.length}?${npc.id}`, // Every NPC has to be clearly differentiable
     eventId: npc.id, // Event "ID" client-side
     absId: null, // Help to resolve ABS logic (if and when any)
-    lastActionTime: new Date('1970-01-01T00:00:00'),
-    lastMoveTime: new Date('1970-01-01T00:00:00'),
+    lastActionTime: new Date(),
+    lastMoveTime: new Date(),
     summonable: false,
     busy: false, // { id: string | int, type: string, since: Date } | false
     mapId: instance.id,
@@ -311,9 +311,12 @@ world.startInstanceLifecycle = (instanceId) => {
 
     world.getInstanceById(instanceId).paused = false; // Flag as running
     world.getConnectedNpcs(instanceId).map(npc => { // Animate NPCS :
+      const moveDuration = npc._moveSpeed < 5
+        ? 650 - (npc._moveSpeed * 100)
+        : 350 - (npc._moveSpeed * 50)
       const moveCooldown = npc._moveFrequency === 5
-        ? interval + 5500 - (1000 * npc._moveFrequency)
-        : interval + 5500 - (1000 * npc._moveFrequency) + Math.floor(Math.random() * 2250)
+        ? interval + moveDuration + 5000 - (1000 * npc._moveFrequency)
+        : interval + moveDuration + 5000 - (1000 * npc._moveFrequency) + Math.floor(Math.random() * 2250)
       npc && world.handleNpcTurn(npc, currentTime, moveCooldown)
     });
 
