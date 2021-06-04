@@ -142,7 +142,7 @@ world.playerJoinInstance = (playerId,mapId) => {
   if (world.getInstanceByMapId(mapId).paused) world.startInstanceLifecycle(mapId); // If paused, restart
   if (!world.getInstanceByMapId(mapId)['playersOnMap'].includes(playerId)) {
     world.getInstanceByMapId(mapId).playersOnMap.push(playerId); // Add playerId to Array
-    console.log('[WORLD] playerJoinInstance', mapId, JSON.stringify(world.getInstanceByMapId(mapId).playersOnMap) );
+    console.log('[WORLD] playerJoinInstance', world.getInstanceByMapId(mapId).uniqueId);
   }
 }
 
@@ -238,7 +238,7 @@ world.spawnNpc = (npcSummonId, coords, pageIndex, initiator) => {
   world.getNpcByUniqueId(_generatedNpc.uniqueId).x = coords.x || 1;
   world.getNpcByUniqueId(_generatedNpc.uniqueId).y = coords.y || 1;
   
-  MMO_Core.security.createLog(`[WORLD] Spawned NPC ${_generatedNpc.uniqueId} (${coords.x};${coords.y}) by "${_generatedNpc.initiator}" at ${new Date()}`)
+  MMO_Core["security"].createLog(`[WORLD] Spawned NPC ${_generatedNpc.uniqueId} (${coords.x};${coords.y}) by "${_generatedNpc.initiator}"`)
   MMO_Core["socket"].emitToAll("npcSpawn", world.getNpcByUniqueId(_generatedNpc.uniqueId));
 
   return _spawnedIndex;
@@ -254,7 +254,6 @@ world.removeSpawnedNpcByIndex = (index) => {
 world.removeConnectedNpcByUniqueId = (uniqueId) => {
   if (!world.getNpcByUniqueId(uniqueId) || !world.getNpcInstance(uniqueId)) return;
   const _parentInstance = world.getNpcInstance(uniqueId);
-  const _nativeMap = world.getMapById(_parentInstance.mapId);
   const _npc = world.getNpcByUniqueId(uniqueId);
   const _spawnedIndex = world.spawnedUniqueIds.indexOf(uniqueId);
 
