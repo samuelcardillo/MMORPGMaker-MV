@@ -12,6 +12,7 @@ exports.initialize = function() {
     }
 
     const mode = args[1];
+    const _print = (string) => MMO_Core.socket.modules.messages.sendToPlayer(initiator, "System", string, "action");
 
     if (mode === "add" || mode === "spawn" || mode === "a" || mode === "s") {
       const summonId = parseInt(args[2]);
@@ -21,15 +22,15 @@ exports.initialize = function() {
         y: parseInt(args[5]) || initiator.playerData.y,
       }
       const pageIndex = args[6] ? parseInt(args[6]) : 0;
-      const summonedId = MMO_Core["gameworld"].spawnNpc(summonId, coords, pageIndex, initiator);
-      return MMO_Core.socket.modules.messages.sendToPlayer(initiator, "System", `Spawned NPC [index: ${summonedId}]`, "action");
+      const summonedId = MMO_Core["gameworld"].spawnNpc(summonId, coords, pageIndex, initiator.playerData.id);
+
+      return _print(`Spawned NPC [index: ${summonedId}]`);
     }
-    else if (mode === "remove" || mode === "delete" || mode === "rm" || mode == "del") {
+    else if (mode === "remove" || mode === "delete" || mode === "rm" || mode === "del") {
       const removedId = MMO_Core["gameworld"].removeSpawnedNpcByIndex(args[2]);
-      if (removedId) return MMO_Core.socket.modules.messages.sendToPlayer(initiator, "System", `You removed NPC ${removedId}`, "action");
+      if (removedId) _print(`You removed NPC ${removedId}`);
     }
     else {
-      const _print = (string) => MMO_Core.socket.modules.messages.sendToPlayer(initiator, "System", string, "action")
       const idList = MMO_Core["gameworld"].spawnedUniqueIds;
       _print("Spawned NPC List :");
       for (let index in idList) {
