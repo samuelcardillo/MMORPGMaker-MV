@@ -94,12 +94,12 @@ world.makeNode = (object) => {
     actionUniqueId,
     assetUniqueId,
   };
-  if (playerId) {
+  if (playerId || npcUniqueId) {
     Object.assign(_node, {
-      mapId: object.mapId,
-      x: object.x,
-      y: object.y,
-    })
+      mapId: object.mapId || 1,
+      x: object.x || 0,
+      y: object.y || 0,
+    });
   }
   const removeNull = (obj) => Object.fromEntries(Object.entries(obj).filter(([key, value]) => value != null));
   return removeNull(_node);
@@ -109,7 +109,14 @@ world.removeNode = (node) => {
   return world.nodes.splice( world.nodes.indexOf(world.getNode(node.uniqueId)) , 1);
 }
 world.mutateNode = (node, props) => {
-  if (!node || !node.uniqueId) return;
+  if (!node || !node.uniqueId || !world.getNode(node.uniqueId)) return;
+  for (const key of Object.keys(props)) { // Prevent assigning protected or not existing keys :
+    const protected = ["uniqueId","type","playerId","instanceUniqueId","npcUniqueId","actionUniqueId","assetUniqueId"];
+    if (protected.includes(key) || !Object.keys(world.getNode(node.uniqueId)).find(k => k === key) ) {
+      MMO_Core["security"].createLog(`Invalid Key "${key}" assignation on Node ${node.uniqueId}`, 'error');
+      return;
+    }
+  }
   return Object.assign(world.getNode(node.uniqueId), props);
 }
 
@@ -146,7 +153,7 @@ world.makeInstance = (map,initiator) => {
   const _map = Object.assign({}, map); // Keep original map clean
   const _time = new Date();
   return Object.assign(_map, {  // an Instance is an extends of a GameMap
-    uniqueId: `@${map.fileName}#${world.instancedMaps.length}?${map.mapId}T${_time.getTime()}`,
+    uniqueId: `${map.fileName}#${world.instancedMaps.length}@${_time.getTime()}`,
     initiator: initiator || 'server', // playerId || 'server'
     startedAt: _time,
     lastPlayerLeftAt: null, // Date
@@ -259,7 +266,7 @@ world.makeConnectedNpc = (npc,instance,pageIndex,initiator) => {
   const _page = npc.pages && npc.pages[formatedPageIndex] || npc.pages[0];
   const _npc = Object.assign({}, npc); // Prevent rewrite existing when make
   return Object.assign(_npc, { // Add new properties
-    uniqueId: `@${_instance.fileName}#${_instance.connectedNpcs.length}?${npc.id}`, // Every NPC has to be clearly differentiable
+    uniqueId: `Npc${npc.id}#${_instance.connectedNpcs.length}@${_instance.mapId}`, // Every NPC has to be clearly differentiable
     initiator: initiator || 'server',
     eventId: npc.id, // Event "ID" client-side
     absId: null, // Help to resolve ABS logic (if and when any)
@@ -298,12 +305,12 @@ world.spawnNpc = (npcSummonId, coords, pageIndex, initiator) => {
   if (!_generatedNpc) return
   const uniqueIntegerId = 99999 + Math.floor(Math.random() * 99999); // Prevents event id conflicts
   Object.assign(_generatedNpc, {
-    uniqueId: `@${_targetInstance.fileName}#${world.getConnectedNpcs(coords.mapId).length}?${uniqueIntegerId}`,
+    uniqueId: `Npc${uniqueIntegerId}#${world.getConnectedNpcs(coords.mapId).length}@${coords.mapId}`,
     summonId: npcSummonId,
     id: uniqueIntegerId,
     eventId: uniqueIntegerId,
     summonable: true,
-    mapId: coords.mapId
+    mapId: coords.mapId,
   });
 
   world.attachNode( _generatedNpc );
@@ -352,6 +359,10 @@ world.npcMoveStraight = (npc,direction,animSkip) => {
     const _map = world.getNpcInstance(npc.uniqueId);
     world.getNpcByUniqueId(npc.uniqueId).x = MMO_Core["rpgmaker"]._roundXWithDirection(_map.mapId, npc.x, direction);
     world.getNpcByUniqueId(npc.uniqueId).y = MMO_Core["rpgmaker"]._roundYWithDirection(_map.mapId, npc.y, direction);
+    world.mutateNode(world.getNodeBy('npcUniqueId', npc.uniqueId), {
+      x: world.getNpcByUniqueId(npc.uniqueId).x,
+      y: world.getNpcByUniqueId(npc.uniqueId).y
+    });
     MMO_Core["socket"].emitToAll("npc_moving", {
       uniqueId: npc.uniqueId,
       mapId: _map.mapId,
@@ -374,6 +385,7 @@ world.npcMoveTo = (npc,x,y) => {
   if (!npc || !x || !y || !world.getNpcByUniqueId(npc.uniqueId))
   world.getNpcByUniqueId(npc.uniqueId).x = x;
   world.getNpcByUniqueId(npc.uniqueId).y = y;
+  world.mutateNode(world.getNodeBy('npcUniqueId', npc.uniqueId), {x,y});
   MMO_Core["socket"].emitToAll("npc_moving", {
     uniqueId: world.getNpcByUniqueId(npc.uniqueId).uniqueId,
     mapId: world.getNpcByUniqueId(npc.uniqueId).mapId,
@@ -506,11 +518,12 @@ world.mapTileFinder = (mapId,x,y) => {
 }
 
 world.npcFinder = (uniqueId) => {
+  // `Npc${uniqueIntegerId}#${world.getConnectedNpcs(coords.mapId).length}@${coords.mapId}`
   try {
     return {
-      mapId: world.getMapIdByFileName( uniqueId.split('@')[1].split('#')[0] ),
-      npcIndex: parseInt(uniqueId.split('#')[1].split('?')[0]),
-      eventId: parseInt(uniqueId.split('?')[1]),
+      eventId: parseInt(uniqueId.split('Npc')[1].split('#')[0]),
+      npcIndex: parseInt(uniqueId.split('#')[1].split('@')[0]),
+      mapId: parseInt(uniqueId.split('@')[1]),
     };
   } catch (_) {
     return { mapId: -1, npcIndex: -1, eventId: -1 };
