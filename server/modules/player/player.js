@@ -119,6 +119,12 @@ exports.initialize = function() {
             client.playerData.y = payload.y;
             client.playerData.mapId = payload.mapId;
 
+            MMO_Core["gameworld"].mutateNode(MMO_Core["gameworld"].getNodeBy('playerId', client.playerData.id), {
+                x: client.playerData.x,
+                y: client.playerData.y,
+                mapId: client.playerData.mapId
+            });
+
             client.broadcast.to(client.lastMap).emit("player_moving", payload);
         });
 

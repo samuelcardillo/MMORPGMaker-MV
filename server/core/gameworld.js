@@ -16,6 +16,7 @@ var exports = module.exports = {}
   , world = exports;
 
 // World State :
+world.nodes            = []; // Nodes will track every connected entity
 world.gameMaps         = []; // Formated exploitable files from gamedata
 world.instanceableMaps = []; // Formated maps to track players and npcs
 world.instancedMaps    = []; // Maps that are currently up and synced
@@ -23,6 +24,8 @@ world.tileSets         = []; // Needed to test collisions
 world.spawnedUniqueIds = []; // Helper to find spawned NPCs without uniqueId
 
 // Global helpers
+world.getNode            = (uniqueId) => world.nodes.find(node => node.uniqueId === uniqueId);
+world.getNodeBy          = (name,prop) => world.nodes.find(node => node[name] === prop);
 world.getMapById         = (mapId) => world.gameMaps.find(map => map.mapId === mapId);
 world.getInstanceByMapId = (mapId) => world.instancedMaps.find(instance => instance.mapId === mapId);
 world.getSummonMap       = () => world.gameMaps.find(map => map.isSummonMap);
@@ -54,6 +57,62 @@ world.fetchTilesets = () => {
   console.log('[WORLD] Loaded Tilesets')
 }
 
+/*************************************************************************************** Nodes Operations */
+
+world.attachNode = (object,isPlayer) => {
+  let _node = null;
+  if (isPlayer) {
+    _node = world.makeNode({
+      nodeType: 'player',
+      playerId: object.id,
+      x: object.x,
+      y: object.y,
+      mapId: object.mapId
+    });
+  }
+  else _node = world.makeNode(object);
+
+  if (_node) return world.nodes.push( _node );
+}
+world.makeNode = (object) => {
+  if (!object || !object.nodeType) return;
+  if (!object.uniqueId && !object.playerId) return
+  const playerId = object.playerId || null;
+  const objectUniqueId = object.uniqueId || null;
+  const instanceUniqueId = object.nodeType === "instance" ? objectUniqueId : null;
+  const npcUniqueId = object.nodeType === "npc" ? objectUniqueId : null;
+  const actionUniqueId = object.nodeType === "action" ? objectUniqueId : null;
+  const assetUniqueId = object.nodeType === "asset" ? objectUniqueId : null;
+  const uniqueIntegerId = 99999 + Math.floor(Math.random() * 99999);
+  const uniqueId = `#${uniqueIntegerId}T${new Date().getTime()}`;
+  const _node = {
+    uniqueId,
+    type: object.nodeType,
+    playerId,
+    instanceUniqueId,
+    npcUniqueId,
+    actionUniqueId,
+    assetUniqueId,
+  };
+  if (playerId) {
+    Object.assign(_node, {
+      mapId: object.mapId,
+      x: object.x,
+      y: object.y,
+    })
+  }
+  const removeNull = (obj) => Object.fromEntries(Object.entries(obj).filter(([key, value]) => value != null));
+  return removeNull(_node);
+}
+world.removeNode = (node) => {
+  if (!node || !node.uniqueId) return;
+  return world.nodes.splice( world.nodes.indexOf(world.getNode(node.uniqueId)) , 1);
+}
+world.mutateNode = (node, props) => {
+  if (!node || !node.uniqueId) return;
+  return Object.assign(world.getNode(node.uniqueId), props);
+}
+
 /*************************************************************************************** Maps Operations */
 
 world.fetchMaps = () => {
@@ -77,6 +136,7 @@ world.getMapFromGameData = (gameMap, fileName) => {
     mapId: world.getMapIdByFileName(fileName),
     fileName,
     isSummonMap: world.isSummonMap(gameMap),
+    nodeType: 'map',
   });
 }
 world.getMapIdByFileName = (fileName) => Number(fileName.slice(3));
@@ -98,6 +158,7 @@ world.makeInstance = (map,initiator) => {
     playersOnMap: [],       // Array of String
     actionsOnMap: [],       // Array of Objects -> Actions currently running in instance
     allTiles: world.provideMapTiles(map), // Generate the map's tiles informations
+    nodeType: 'instance'
   });
 }
 
@@ -106,6 +167,7 @@ world.runInstance = (mapId,playerId) => {
   if (_map && world.isMapInstanceable(_map) && !world.isMapInstanced(mapId)) {
     const _makeInstance = world.makeInstance(_map,playerId);
     world.instancedMaps.push( _makeInstance );
+    world.attachNode( _makeInstance );
     console.log('[WORLD] # Started instance', mapId, { // Output useful informations
       uniqueId: _makeInstance.uniqueId,
       initiator: _makeInstance.initiator,
@@ -121,6 +183,7 @@ world.killInstance = (mapId) => {
     // Clean instance if no more players on it
     for (let _npc of world.getAllNpcsByMapId(mapId)) world.removeConnectedNpcByUniqueId(_npc.uniqueId);
     const index = world.instancedMaps.indexOf(world.getInstanceByMapId(mapId));
+    const _node = world.getNodeBy('instanceUniqueId',world.instancedMaps[index].uniqueId);
     const _cleanedInstance = { // Keep useful datas
       uniqueId: world.instancedMaps[index].uniqueId,
       initiator: world.instancedMaps[index].initiator,
@@ -131,6 +194,7 @@ world.killInstance = (mapId) => {
     }
     Object.keys(world.instancedMaps[index]).map(key => delete world.instancedMaps[index][key]); // Clean useless datas
     Object.assign(world.instancedMaps[index], _cleanedInstance); // Assign cleaned instance in state
+    world.removeNode( _node );
     console.log('[WORLD] # Killed instance', mapId, world.instancedMaps[index]); // Output useful informations
   }
 }
@@ -166,6 +230,7 @@ world.fetchConnectedNpcs = (map) => {
     const _generatedNpc = world.makeConnectedNpc(npc,map);
     if (_generatedNpc) {
       world.getConnectedNpcs(map.mapId).push( _generatedNpc );
+      world.attachNode( _generatedNpc );
       console.log('[WORLD] Added synced NPC ' + _generatedNpc.uniqueId + ' on map ' + map.mapId);
     }
   }
@@ -186,7 +251,7 @@ world.makeConnectedNpc = (npc,instance,pageIndex,initiator) => {
   const _page = npc.pages && npc.pages[formatedPageIndex] || npc.pages[0];
   const _npc = Object.assign({}, npc); // Prevent rewrite existing when make
   return Object.assign(_npc, { // Add new properties
-    uniqueId: `@${_instance.mapId}#${_instance.connectedNpcs.length}?${npc.id}`, // Every NPC has to be clearly differentiable
+    uniqueId: `@${_instance.fileName}#${_instance.connectedNpcs.length}?${npc.id}`, // Every NPC has to be clearly differentiable
     initiator: initiator || 'server',
     eventId: npc.id, // Event "ID" client-side
     absId: null, // Help to resolve ABS logic (if and when any)
@@ -195,6 +260,7 @@ world.makeConnectedNpc = (npc,instance,pageIndex,initiator) => {
     summonable: false,
     busy: false, // { id: string | int, type: string, since: Date } | false
     mapId: instance.mapId,
+    nodeType: 'npc',
     // _ helpers
     _conditions: _page.conditions,
     _directionFix: _page.directionFix,
@@ -224,7 +290,7 @@ world.spawnNpc = (npcSummonId, coords, pageIndex, initiator) => {
   if (!_generatedNpc) return
   const uniqueIntegerId = 99999 + Math.floor(Math.random() * 99999); // Prevents event id conflicts
   Object.assign(_generatedNpc, {
-    uniqueId: `@${coords.mapId}#${world.getConnectedNpcs(coords.mapId).length}?${uniqueIntegerId}`,
+    uniqueId: `@${_targetInstance.fileName}#${world.getConnectedNpcs(coords.mapId).length}?${uniqueIntegerId}`,
     summonId: npcSummonId,
     id: uniqueIntegerId,
     eventId: uniqueIntegerId,
@@ -232,6 +298,7 @@ world.spawnNpc = (npcSummonId, coords, pageIndex, initiator) => {
     mapId: coords.mapId
   });
 
+  world.attachNode( _generatedNpc );
   world.spawnedUniqueIds.push( _generatedNpc.uniqueId );
   const _spawnedIndex = world.spawnedUniqueIds.indexOf(_generatedNpc.uniqueId);
   world.getConnectedNpcs(coords.mapId).push( _generatedNpc );
@@ -256,12 +323,14 @@ world.removeConnectedNpcByUniqueId = (uniqueId) => {
   if (!world.getNpcByUniqueId(uniqueId) || !world.getNpcInstance(uniqueId)) return;
   const _parentInstance = world.getNpcInstance(uniqueId);
   const _npc = world.getNpcByUniqueId(uniqueId);
+  const _node = world.getNodeBy('npcUniqueId', _npc.uniqueId);
   const _spawnedIndex = world.spawnedUniqueIds.indexOf(uniqueId);
 
   // Destroy NPC :
   world.disableNpc(_npc); // Prevent tick to run this NPC
   world.getConnectedNpcs(_parentInstance.mapId).splice(world.getConnectedNpcs(_parentInstance.mapId).indexOf(_npc), 1);
   if (_spawnedIndex != -1) world.spawnedUniqueIds.splice(_spawnedIndex, 1, ""); // replace item with empty str to keep spawned index
+  world.removeNode( _node );
 
   console.log(`[WORLD] Removed NPC ${uniqueId} at ${new Date()}`)
   MMO_Core["socket"].emitToAll("npcRemove", { uniqueId });
@@ -431,7 +500,7 @@ world.mapTileFinder = (mapId,x,y) => {
 world.npcFinder = (uniqueId) => {
   try {
     return {
-      mapId: parseInt(uniqueId.split('@')[1].split('#')[0]),
+      mapId: world.getMapIdByFileName( uniqueId.split('@')[1].split('#')[0] ),
       npcIndex: parseInt(uniqueId.split('#')[1].split('?')[0]),
       eventId: parseInt(uniqueId.split('?')[1]),
     };
