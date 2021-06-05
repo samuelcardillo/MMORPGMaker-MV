@@ -11,3 +11,5 @@ server/tokens.json
 *.log
 
 tokens.json
+
+.DS_Store
