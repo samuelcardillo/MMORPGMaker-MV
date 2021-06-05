@@ -406,7 +406,7 @@
   function eraseConnectedEvent(uniqueId) {
     for (let event of this._events.filter(event => event && event._eventData && event._eventData.uniqueId === uniqueId)) {
       const index = this._events.indexOf(event);
-      this._events[index] && this._events[index].erase();
+      this._events[index] && this._events[index].page() && this._events[index].list().push({"code":108,"indent":0,"parameters":["<Name: >"]}) && this._events[index].erase();
     }
   }
  
