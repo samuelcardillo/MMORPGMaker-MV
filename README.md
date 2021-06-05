@@ -65,6 +65,7 @@ I joined the project in September 2020 and made the MZ version a few weeks later
 -Are you a maker ? [Read the maker documentation](https://github.com/samuelcardillo/MMORPGMaker-MV/wiki#makers-documentation)
 
 ### Current functionalities
+- Administrator command to add and remove synchronised NPCs
 - Synchronised NPC random movements
 - Synchronised player movements
 - Synchronised skins
@@ -84,6 +85,14 @@ I joined the project in September 2020 and made the MZ version a few weeks later
 - Respawn system
 - In-game chat
 - Registration page
+
+---
+
+This repack includes Creative Commons graphics by : 
+ - Avery
+ - Chalkdust
+ - hidenone
+ - whtdragon
 
 ---
 
