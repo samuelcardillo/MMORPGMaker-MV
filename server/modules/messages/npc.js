@@ -13,6 +13,7 @@ exports.initialize = function() {
 
     const mode = args[1];
     const _print = (string) => MMO_Core.socket.modules.messages.sendToPlayer(initiator, "System", string, "action");
+    const _error = (string) => MMO_Core.socket.modules.messages.sendToPlayer(initiator, "System", string, "error");
 
     if (mode === "add" || mode === "spawn" || mode === "summon" || mode === "a" || mode === "s") {
       const summonId = parseInt(args[2]);
@@ -22,29 +23,34 @@ exports.initialize = function() {
         y: parseInt(args[5]) || initiator.playerData.y,
       }
       const pageIndex = args[6] ? parseInt(args[6]) : 0;
-      const summonedId = MMO_Core["gameworld"].spawnNpc(summonId, coords, pageIndex, initiator.playerData.id);
+      const summonedId = MMO_Core["gameworld"].spawnNpc(summonId, coords, pageIndex, initiator.playerData.id).toString();
 
-      return _print(`Spawned NPC [index: ${summonedId}]`);
-    }
+      if (summonedId) _print(`Spawned NPC [index: ${summonedId}]`);
+      else _error(`NPC not found [index ${args[2]}]`);
+    } 
     else if (mode === "remove" || mode === "delete" || mode === "rm" || mode === "del") {
-      const removedId = MMO_Core["gameworld"].removeSpawnedNpcByIndex(args[2]);
-      if (removedId) _print(`You removed NPC ${removedId}`);
-    }
+      const removedUniqueId = MMO_Core["gameworld"].removeSpawnedNpcByIndex(args[2]);
+
+      if (removedUniqueId) _print(`You removed ${removedUniqueId} [index: ${args[2]}]`);
+      else _error(`NPC not found [index ${args[2]}]`);
+    } 
     else {
       const idList = MMO_Core["gameworld"].spawnedUniqueIds;
-      _print("Spawned NPC List :");
-      console.log("/npc => [");
-      for (let index in idList) {
-        const _npc = MMO_Core["gameworld"].getNpcByUniqueId(idList[index]);
-        if (_npc) {
-          const mapId = _npc.mapId;
-          const x = _npc.x;
-          const y = _npc.y;
-          _print(`[index: ${index}] ${idList[index]} on Map ${mapId} at (X ${x};Y ${y})`);
-          console.log(_npc);
+      if (idList && idList.length) {
+        _print("/npc = (index, coordinates, uniqueId) =>");
+        console.log("/npc => [");
+        for (let index in idList) {
+          const _npc = MMO_Core["gameworld"].getNpcByUniqueId(idList[index]);
+          if (_npc) {
+            const mapId = _npc.mapId;
+            const x = _npc.x;
+            const y = _npc.y;
+            _print(`[${index}] (${mapId},${x},${y}) ${idList[index]}`);
+            console.log(_npc);
+          }
         }
-      }
-      console.log("]");
+        console.log("]");
+      } else _error("/npc = (index, coordinates, uniqueId) => NONE");
     }
   };
 };
