@@ -43,30 +43,30 @@ function MMO_Core_Npcs() {
   */
 
   // helpers :
-  MMO_Core_Npcs.findNpcBy         = (name,prop) => prop && name && $gameMap && $gameMap._events && $gameMap._events.find(event => event && event[name] && event[name] === prop);
   MMO_Core_Npcs.findConnectedNpc  = (npc) => npc && MMO_Core_Npcs.findNpcBy("uniqueId",npc.uniqueId);
   MMO_Core_Npcs.findMapNpc        = (npc) => npc && MMO_Core_Npcs.findNpcBy("_eventId",npc.eventId);
   MMO_Core_Npcs.isNpcFromGameMap  = (npc) => npc && JSON.stringify(npc).includes('<Sync>');
+
+  MMO_Core_Npcs.findNpcBy = (name,prop) => {
+    if (!$gameMap || !name || !prop) return
+    return $gameMap._events.find(event => event && event._eventData && event._eventData[name] && event._eventData[name] === prop);
+  }
   
   MMO_Core_Npcs.addNpc = (data) => {
     const spriteName = data._image.characterName;
     const spriteDir = data._image.characterIndex;
     
-    MMO_Core_Npcs.Npcs[data.id] = $gameMap.createNormalEventAt(spriteName, spriteDir, data.x, data.y, 2, 0, true, data.pages);
+    MMO_Core_Npcs.Npcs[data.id] = $gameMap.createNormalEventAt(spriteName, spriteDir, data.x, data.y, 2, 0, true, data.pages, data.uniqueId);
     MMO_Core_Npcs.Npcs[data.id].setPosition(data.x, data.y);
     // console.log('MMO_Core_Npcs.Npcs[data.id]', MMO_Core_Npcs.Npcs[data.id])
-  }
-
-  MMO_Core_Npcs.removeNpc = (npc) => {
-    if (npc.eventId && MMO_Core_Npcs.findMapNpc(npc)) $gameMap.eraseEvent(npc.eventId);
-    if (npc.uniqueId && MMO_Core_Npcs.findConnectedNpc(npc)) $gameMap.eraseConnectedEvent(npc.uniqueId);
   }
 
   MMO_Core.socket.on("npcsFetched", async (data) => {
     if (data.playerId !== MMO_Core_Player.Player["id"]) return;
     else data.npcs.map(npc => {
-      MMO_Core_Npcs.removeNpc(npc);
-      MMO_Core_Npcs.addNpc(npc)
+      if ($gameMap._events[npc.eventId]) $gameMap.eraseEvent(npc.eventId);
+      if (MMO_Core_Npcs.findConnectedNpc(npc)) $gameMap.eraseConnectedEvent(npc.uniqueId);
+      MMO_Core_Npcs.addNpc(npc);
     });
   });
 
@@ -84,12 +84,12 @@ function MMO_Core_Npcs() {
   MMO_Core.socket.on("npcLooted",function(data){
     if(!$gameMap || $gameMap._mapId !== data.mapId) return;
     if (!MMO_Core_Npcs.Npcs[data.uniqueId]) return;
-    MMO_Core_Npcs.removeNpc(data);
+    $gameMap.eraseConnectedEvent(npc.uniqueId);
   });
 
   MMO_Core.socket.on("npcRemove",function(data){
     if(!MMO_Core_Npcs.findConnectedNpc(data.uniqueId)) return;
-    MMO_Core_Npcs.removeNpc(data);
+    $gameMap.eraseConnectedEvent(npc.uniqueId);
   });
 
   MMO_Core.socket.on('npc_moving', function(data){

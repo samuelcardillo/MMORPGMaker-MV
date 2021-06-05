@@ -355,11 +355,12 @@
      return this.createNormalEventAt($gameActors.actor(actorId).characterName(), $gameActors.actor(actorId).characterIndex(), x, y, d, scriptOrCommonEventId, temporary);
    }
  
-   function createNormalEventAt(characterName, characterIndex, x, y, d, scriptOrCommonEventId, temporary, _pages) {
+   function createNormalEventAt(characterName, characterIndex, x, y, d, scriptOrCommonEventId, temporary, _pages, uniqueId, selectedPage) {
      var eventData = new CustomEventData();
      eventData.page.image.direction = d;
      eventData.page.image.characterName = characterName;
      eventData.page.image.characterIndex = characterIndex;
+     if (uniqueId) eventData.uniqueId = uniqueId;
      if (_pages && _pages[0]) {
       Object.assign(eventData.page.conditions, _pages[0].conditions);
       Object.assign(eventData.page.list, _pages[0].list);
@@ -403,7 +404,10 @@
   }
 
   function eraseConnectedEvent(uniqueId) {
-    this._events.find(_e => _e.uniqueId === uniqueId).erase();
+    for (let event of this._events.filter(event => event && event._eventData && event._eventData.uniqueId === uniqueId)) {
+      const index = this._events.indexOf(event);
+      this._events[index] && this._events[index].erase();
+    }
   }
  
    function createTriggerEventAt(x, y, scriptOrCommonEventId, temporary) {
