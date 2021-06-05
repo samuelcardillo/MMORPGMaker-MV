@@ -168,7 +168,7 @@ world.runInstance = (mapId,playerId) => {
     const _makeInstance = world.makeInstance(_map,playerId);
     world.instancedMaps.push( _makeInstance );
     world.attachNode( _makeInstance );
-    console.log('[WORLD] # Started instance', mapId, { // Output useful informations
+    console.log('[WORLD] # Started instance', _makeInstance.uniqueId, { // Output useful informations
       uniqueId: _makeInstance.uniqueId,
       initiator: _makeInstance.initiator,
       startedAt: _makeInstance.startedAt,
@@ -195,7 +195,7 @@ world.killInstance = (mapId) => {
     Object.keys(world.instancedMaps[index]).map(key => delete world.instancedMaps[index][key]); // Clean useless datas
     Object.assign(world.instancedMaps[index], _cleanedInstance); // Assign cleaned instance in state
     world.removeNode( _node );
-    console.log('[WORLD] # Killed instance', mapId, world.instancedMaps[index]); // Output useful informations
+    console.log('[WORLD] # Killed instance', _cleanedInstance.uniqueId, world.instancedMaps[index]); // Output useful informations
   }
 }
 
