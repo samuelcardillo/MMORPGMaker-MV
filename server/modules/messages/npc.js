@@ -14,7 +14,7 @@ exports.initialize = function() {
     const mode = args[1];
     const _print = (string) => MMO_Core.socket.modules.messages.sendToPlayer(initiator, "System", string, "action");
 
-    if (mode === "add" || mode === "spawn" || mode === "a" || mode === "s") {
+    if (mode === "add" || mode === "spawn" || mode === "summon" || mode === "a" || mode === "s") {
       const summonId = parseInt(args[2]);
       const coords = {
         mapId: parseInt(args[3]) || initiator.playerData.mapId,
@@ -33,6 +33,7 @@ exports.initialize = function() {
     else {
       const idList = MMO_Core["gameworld"].spawnedUniqueIds;
       _print("Spawned NPC List :");
+      console.log("/npc => [");
       for (let index in idList) {
         const _npc = MMO_Core["gameworld"].getNpcByUniqueId(idList[index]);
         if (_npc) {
@@ -40,8 +41,10 @@ exports.initialize = function() {
           const x = _npc.x;
           const y = _npc.y;
           _print(`[index: ${index}] ${idList[index]} on Map ${mapId} at (X ${x};Y ${y})`);
+          console.log(_npc);
         }
       }
+      console.log("]");
     }
   };
 };

@@ -14,8 +14,16 @@ exports.initialize = function() {
     const _print = (string) => MMO_Core.socket.modules.messages.sendToPlayer(initiator, "System", string, "action");
     const nodes = await MMO_Core["gameworld"].nodes;
     if (nodes && nodes.length) {
-      for (let node of nodes) console.log(node);
-      _print(`Printed to server console`);
+      _print('Nodes :');
+      console.log('/nodes => [');
+      for (let node of nodes) {
+        const mapId = node.mapId ? node.mapId + " " : "";
+        const x = node.x ? node.x + " " : "";
+        const y = node.y ? node.y + " " : "";
+        _print(`${mapId}${x}${y}${node.playerId || node.uniqueId}`);
+        console.log(node);
+      }
+      console.log(']');
     }
 
   };
