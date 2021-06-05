@@ -242,6 +242,14 @@ world.getAllNpcsByMapId = (mapId) => {
       .concat(world.getMapById(mapId).events) // add static events
   ).filter(event => !!event); // remove null events
 }
+world.getAllPlayersByMapId = (mapId) => {
+  if (!mapId) return;
+  return world.nodes.filter(node => !!node.playerId && node.mapId === mapId);
+}
+world.getAllEntitiesByMapId = (mapId) => {
+  if (!mapId) return;
+  return [].concat(world.getAllPlayersByMapId(mapId)).concat(world.getAllNpcsByMapId(mapId));
+}
 
 world.makeConnectedNpc = (npc,instance,pageIndex,initiator) => {
   if (!npc || !instance) return;

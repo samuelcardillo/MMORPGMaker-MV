@@ -124,7 +124,7 @@ maker._checkPassage = (mapId,x,y,bit) => {
 maker._isCollidedWithCharacters = (mapId,x,y,initiator) => {
   //MMO_Core.socket.modules.player.subs.player.getPlayer()
   if (!MMO_Core["gameworld"].getMapById(mapId)) return; // prevent .find() on null
-  const hasSameCoords = (_event) => (_event.x && _event.y) ? (_event.x === x && _event.y === y) : (_event._x === x && _event._y === y)
+  const hasSameCoords = (_event) => _event.x && _event.y && _event.x === x && _event.y === y;
   const isOriginalElement = (_event) => initiator && _event.id === initiator.id;
-  return MMO_Core["gameworld"].getAllNpcsByMapId(mapId).find(npc => npc && !npc._through && hasSameCoords(npc) && !isOriginalElement(npc));
+  return MMO_Core["gameworld"].getAllEntitiesByMapId(mapId).find(obj => obj && !obj._through && hasSameCoords(obj) && !isOriginalElement(obj));
 }
