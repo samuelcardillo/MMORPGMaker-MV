@@ -50,11 +50,12 @@ I joined the project in September 2020 and made the MZ version a few weeks later
 
 7. Congratulations ! You can now play, develop, improve, overcome and do your stuff :) 
 
-### Keep the game up to date for your players
+### Keep the game up to date on players browser
 
-1. Work on your game
-2. Once you're done, edit the `version.json` file at the project's root folder
-3. Upload/Update your game on a website
+1. Deploy your game
+2. Edit your game...
+3. Once you're done, change the `CacheOverride` gameVersion parameter in the plugin manager
+4. Upload/Update your game on a website
 
 ---
 
