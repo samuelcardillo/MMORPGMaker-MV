@@ -47,8 +47,8 @@ exports.initialize = function() {
                 client.broadcast.to("map-" + playerData.mapId).emit("refresh_players_position", client.id);
             }
 
-            const npcs = world.getConnectedNpcs(parseInt(client.playerData.mapId));
-            if (npcs.length) client.emit("npcsFetched", {playerId: client.playerData.id, npcs})
+            const npcs = await world.getConnectedNpcs(parseInt(client.playerData.mapId));
+            if (npcs && npcs.length) client.emit("npcsFetched", {playerId: client.playerData.id, npcs});
 
             MMO_Core.security.createLog(client.playerData.username + " joined " + client.lastMap);
         });
