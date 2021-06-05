@@ -17,10 +17,11 @@ exports.initialize = function() {
       _print('Nodes :');
       console.log('/nodes => [');
       for (let node of nodes) {
-        const mapId = node.mapId ? node.mapId + " " : "";
-        const x = node.x ? node.x + " " : "";
-        const y = node.y ? node.y + " " : "";
-        _print(`${mapId}${x}${y}${node.playerId || node.uniqueId}`);
+        const mapId = node.mapId >= 0 ? node.mapId.toString() : "";
+        const x = node.x >= 0 ? node.x.toString() : "";
+        const y = node.y >= 0 ? node.y.toString() : "";
+        const coords = mapId && x && y && ` [${mapId},${x},${y}] ` || '';
+        _print(`${coords}${node.playerId || node.uniqueId}`);
         console.log(node);
       }
       console.log(']');
