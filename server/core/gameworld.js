@@ -94,6 +94,11 @@ world.makeNode = (object) => {
     actionUniqueId,
     assetUniqueId,
   };
+  if (!playerId) {
+    Object.assign(_node, {
+      initiator: object.initiator || 'server'
+    });
+  }
   if (playerId || npcUniqueId) {
     Object.assign(_node, {
       mapId: object.mapId || 1,
@@ -235,7 +240,7 @@ world.fetchConnectedNpcs = (map) => {
   if (!map || !world.isMapInstanced(map.mapId)) return;
   for (let npc of world.getInstanceByMapId(map.mapId).events.filter(event => JSON.stringify(event).includes('<Sync>'))) {
     const _generatedNpc = world.makeConnectedNpc(npc,map);
-    if (_generatedNpc) {
+    if (_generatedNpc && world.isConnectableNpc( _generatedNpc )) {
       world.getConnectedNpcs(map.mapId).push( _generatedNpc );
       world.attachNode( _generatedNpc );
       console.log('[WORLD] Added synced NPC ' + _generatedNpc.uniqueId + ' on map ' + map.mapId);
@@ -256,6 +261,10 @@ world.getAllPlayersByMapId = (mapId) => {
 world.getAllEntitiesByMapId = (mapId) => {
   if (!mapId) return;
   return [].concat(world.getAllPlayersByMapId(mapId)).concat(world.getAllNpcsByMapId(mapId));
+}
+
+world.isConnectableNpc = (npc) => {
+  return JSON.stringify(npc).includes('<Sync>') && npc._moveType === 1;
 }
 
 world.makeConnectedNpc = (npc,instance,pageIndex,initiator) => {
@@ -328,7 +337,7 @@ world.spawnNpc = (npcSummonId, coords, pageIndex, initiator) => {
 }
 world.disableNpc = (npc) => {
   world.npcMoveTo(npc,-1,-1); // visually hide npc
-  Object.assign(world.getNpcByUniqueId(npc.uniqueId), { disabled: true }); // Prevent turn execution
+  Object.assign(world.getNpcByUniqueId(npc.uniqueId), { busy: true }); // Prevent turn execution
 }
 world.removeSpawnedNpcByIndex = (index) => {
   if (!world.spawnedUniqueIds[index]) return;
@@ -422,7 +431,7 @@ world.toggleNpcBusyStatus = (uniqueId,status) => {
 world.handleNpcTurn = (npc,_currentTime,_cooldown) => {
   // This function will read basic NPC behavior and mock it on
   // server-side then replicate it on every concerned player
-  if (!npc || npc.disabled || npc.busy
+  if (!npc || npc.busy
   || !npc.uniqueId
   || !world.getNpcByUniqueId(npc.uniqueId)
   ) return;
