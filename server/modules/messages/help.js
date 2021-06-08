@@ -12,6 +12,9 @@ exports.initialize = function(io) {
 
         if (initiator.permission > 50) {
             MMO_Core.socket.modules.messages.sendToPlayer(initiator, "System", "/kick [username]", "action");
+            MMO_Core.socket.modules.messages.sendToPlayer(initiator, "System", "/npc add [eventId] [mapId] [x] [y]", "action");
+            MMO_Core.socket.modules.messages.sendToPlayer(initiator, "System", "/npc remove [index]", "action");
+            MMO_Core.socket.modules.messages.sendToPlayer(initiator, "System", "/nodes", "action");
         }
     };
 };

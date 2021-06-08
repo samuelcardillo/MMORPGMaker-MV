@@ -141,12 +141,14 @@ exports.generatePassword = function(length) {
     return password;
 };
 
-exports.createLog = function(message) {
-    if (exports.debugVerbose <= 1) {
+exports.createLog = function(message,type) {
+    if (exports.debugVerbose <= 1 || !message) {
         return;
     }
 
-    console.log(message);
+    if (type === 'error') console.error(message);
+    else if (type === 'warn') console.warn(message);
+    else console.log(message);
 
     if (exports.debugVerbose >= 3) {
         const fullDate = new Date();

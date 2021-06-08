@@ -174,7 +174,6 @@ function MMO_Core_Player() {
     }
     
     MMO_Core.socket.emit("map_joined", MMO_Core_Player.getPlayerPos());
-    MMO_Core.socket.emit("npcs_fetch", MMO_Core_Player.getPlayerPos().mapId);
     MMO_Core_Player.savePlayerStats();
   }
 

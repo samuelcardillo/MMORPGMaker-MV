@@ -59,6 +59,9 @@ exports.initialize = function() {
                 return;
             }
 
+            MMO_Core["gameworld"].removeNode( MMO_Core["gameworld"].getNodeBy("playerId", client.playerData.id) );
+            MMO_Core["gameworld"].playerLeaveInstance(client.playerData.id, parseInt(client.playerData.mapId));
+
             // ANTI-CHEAT : Deleting some entries before saving the character.
             delete (client.playerData.permission); // Avoid permission elevation exploit
             delete (client.playerData.id); // Avoid account-spoofing
@@ -97,6 +100,7 @@ function loginSuccess(client, details) {
     // Then we continue
     client.emit("login_success", { msg: details });
     client.playerData = details;
+    MMO_Core["gameworld"].attachNode(client.playerData, true);
     MMO_Core.security.createLog(client.playerData.username + " connected to the game");
 }
 

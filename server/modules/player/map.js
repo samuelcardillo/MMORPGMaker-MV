@@ -1,6 +1,7 @@
 /* global MMO_Core */
 exports.initialize = function() {
     const io = MMO_Core.socket.socketConnection;
+    const world = MMO_Core["gameworld"];
 
     io.on("connect", function(client) {
         // Handle players joining a map
@@ -14,6 +15,7 @@ exports.initialize = function() {
                     client.broadcast.to(client.lastMap).emit("map_exited", client.id);
                 }
                 client.leave(client.lastMap);
+                world.playerLeaveInstance(client.playerData.id, parseInt(client.playerData.mapId));
 
                 MMO_Core.security.createLog(client.playerData.username + " left " + client.lastMap);
             }
@@ -38,11 +40,15 @@ exports.initialize = function() {
 
             client.join("map-" + playerData.mapId);
             client.lastMap = "map-" + playerData.mapId;
+            world.playerJoinInstance(client.playerData.id, parseInt(client.playerData.mapId));
 
             if (MMO_Core.database.SERVER_CONFIG.offlineMaps[client.lastMap] === undefined) {
                 client.broadcast.to("map-" + playerData.mapId).emit("map_joined", { id: client.id, playerData: playerData });
                 client.broadcast.to("map-" + playerData.mapId).emit("refresh_players_position", client.id);
             }
+
+            const npcs = await world.getConnectedNpcs(parseInt(client.playerData.mapId));
+            if (npcs && npcs.length) client.emit("npcsFetched", {playerId: client.playerData.id, npcs});
 
             MMO_Core.security.createLog(client.playerData.username + " joined " + client.lastMap);
         });
@@ -73,6 +79,17 @@ exports.initialize = function() {
             }
 
             client.broadcast.to("map-" + client.playerData.mapId).emit("refresh_players_on_map", { playerId: client.id, playerData: client.playerData });
+        });
+
+        client.on("start_interact_npc", function(npc) {
+            if (npc && npc.uniqueId) world.setNpcBusyStatus(uniqueId,{
+                id: client.playerData.id,
+                type: "player",
+                since: new Date()
+            });
+        });
+        client.on("stop_interact_npc", function(npc) {
+            if (npc && npc.uniqueId) world.setNpcBusyStatus(uniqueId,false);
         });
     });
 };
