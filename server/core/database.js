@@ -407,7 +407,10 @@ exports.saveConfig = function() {
 
 // eslint-disable-next-line no-global-assign
 onConnect = function(callback) {
-    r.connect({ host: "localhost", port: 28015 }, function(err, connection) {
+    r.connect({
+        host: process.env.RETHINKDB_HOST ?? "localhost",
+        port: parseInt(process.env.RETHINKDB_PORT) || 28015
+    }, function(err, connection) {
         if (err) {
             throw err;
         }

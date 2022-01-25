@@ -13,3 +13,4 @@ server/tokens.json
 tokens.json
 
 .DS_Store
+.env

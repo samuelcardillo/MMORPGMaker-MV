@@ -1,4 +1,5 @@
 /* global MMO_Core */
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const path = require("path");
@@ -38,7 +39,7 @@ MMO_Core = {
     socket: require("./core/socket"),
     routes: require("./core/routes"),
     rpgmaker: require("./core/rpgmaker"),
-    gameworld: require('./core/gameworld')
+    gameworld: require("./core/gameworld")
 };
 
 try {
@@ -49,7 +50,7 @@ try {
 
             MMO_Core.socket.initialize(io, MMO_Core.database.SERVER_CONFIG); // Initalizing the socket-side of the server
             MMO_Core.routes.initialize(app, MMO_Core.database.SERVER_CONFIG, () => { // Initializing the RESTFUL API
-                MMO_Core["gameworld"].initialize(); // Initializing world environment 
+                MMO_Core.gameworld.initialize(); // Initializing world environment
             });
         });
     });
