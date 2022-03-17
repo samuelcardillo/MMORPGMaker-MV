@@ -25,8 +25,11 @@ app.use(function(req, res, next) { // CORS (read : https://developer.mozilla.org
     next();
 });
 
+app.use("/data", express.static(path.join(__dirname, "..", "data")));
+
 console.log("######################################");
 console.log("# MMORPG Maker MV - Samuel Lespes Cardillo");
+console.log("# MMORPG Maker MZ - Axel Andaroth");
 console.log("# Check GitHub for updates");
 console.log("######################################");
 
