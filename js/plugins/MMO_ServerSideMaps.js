@@ -12,9 +12,9 @@
  */
 
 (function() {
-  DataManager.loadDataFile = function(name, src) {
+  DataManager.loadDataFile = function(name, src, realmIp) {
     const xhr = new XMLHttpRequest();
-    const prefix = (/^Map/.test(src)) ? MMO_Core.Parameters['Server Location'] : '';
+    const prefix = (/^Map/.test(src)) ? realmIp : '';
     const url = prefix + "data/" + src;
     window[name] = null;
     xhr.open("GET", url);
