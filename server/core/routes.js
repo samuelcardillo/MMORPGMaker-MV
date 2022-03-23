@@ -7,6 +7,7 @@ exports.initialize = function(app, serverConfig, callback) {
 
         // Add all the routes you want here
         app.use("/api/auth", require("../routes/auth"));
+        app.use("/api/map", require("../routes/map"));
 
         // Routes for the admin system
         app.use("/api/admin/auth", require("../routes/admin/auth"));
