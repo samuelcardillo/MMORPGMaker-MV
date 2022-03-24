@@ -8,7 +8,7 @@
 
   i. The Spawn map must have "<Summon>" inside its note
   i. There must be only one spawn map
-  i. Command to summon : /addNpc [eventId*] [mapId] [x] [y]
+  i. Command to summon : /npc add [eventId*] [mapId] [x] [y]
 
 *****************************/
 
