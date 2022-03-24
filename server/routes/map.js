@@ -1,14 +1,10 @@
 const router = require("express").Router();
 const fs = require("fs");
 
-router.get("/:mapId", function(req, res) {
-  if (req.params.mapId) {
+router.get("/:name", function(req, res) {
+  if (req.params.name) {
     const correctedPath = `${__dirname}/../../data`;
-    const mapId = // format the number
-      Number(req.params.mapId) <= 9 ? "00" + Number(req.params.mapId)
-      : Number(req.params.mapId) <= 99 ? "0" + Number(req.params.mapId)
-      : req.params.mapId
-    const fileName = `${correctedPath}/Map${mapId}.json`; // format the name
+    const fileName = `${correctedPath}/${req.params.name}`; // format the name
     fs.readFile(fileName, "utf8", function(_err, contents) { // open map
       if (_err) res.status(404).send()
       try {
