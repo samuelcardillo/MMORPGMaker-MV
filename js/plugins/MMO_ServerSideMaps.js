@@ -15,7 +15,7 @@
   DataManager.loadDataFile = function(name, src, realmIp = MMO_Core.Parameters['Server Location']) {
     const xhr = new XMLHttpRequest();
     const prefix = /^Map/.test(src) // if is a Map file
-      ? realmIp + "/api/data/map/" // ask API
+      ? realmIp + "api/map/" // ask API
       : "data/" // else ask to client
     const url = prefix + src;
     window[name] = null;
