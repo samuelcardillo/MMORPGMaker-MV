@@ -50,6 +50,8 @@ I joined the project in September 2020 and made the MZ version a few weeks later
 
 7. Congratulations ! You can now play, develop, improve, overcome and do your stuff :) 
 
+8. When you deploy your game, update line 103 in `register.html`, set your own server (domain name + port, ex : http://mynew.mmo:8097/ ) to let users register
+
 ### Keep the game up to date on players browser
 
 1. Deploy your game
