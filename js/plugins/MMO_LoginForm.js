@@ -203,9 +203,15 @@ function LoginForm() {
     let payload = { username: document.getElementById("inputUsername").value }
     payload.password = document.getElementById("inputPassword").value;
 
-    if (payload.username.length < 4 || payload.username.length >= 25) return this.displayError("Invalid username !");
-    if(payload.username.includes(" ")) return this.displayError("No spaces !");
-    if(!payload.username.match(/^(?=[a-zA-Z0-9\s]{2,25}$)(?=[a-zA-Z0-9\s])(?:([\w\s*?])\1?(?!\1))+$/)) return this.displayError("No special characters.");
+        if (payload.username.length <= 0) {
+            return this.displayError("You must provide a username!");
+        }
+        if (payload.username.includes(" ")) {
+            return this.displayError("Spaces are forbidden in username.");
+        }
+        if (!payload.username.match(/^(?=[a-zA-Z0-9\s]{2,25}$)(?=[a-zA-Z\s])(?:([\w\s*?])\1?(?!\1))+$/)) {
+            return this.displayError("You can't have special characters in your username.");
+        }
 
     MMO_Core.socket.on("login_success", function(data){
       if (data.err) return that.displayError("Error : " + data.err);

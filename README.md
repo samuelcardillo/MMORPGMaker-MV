@@ -32,7 +32,8 @@ I joined the project in September 2020 and made the MZ version a few weeks later
 
 **Disclaimer :** *The following files are already contained in the project.*
 
-- Orange Custom Events : http://download.hudell.com/OrangeCustomEvents.js
+- Orange Custom Events : https://raw.githubusercontent.com/samuelcardillo/MMORPGMaker-MV/master/js/plugins/OrangeCustomEvents.js (By Hudell - www.hudell.com)
+- Orange Custom Event Creator : https://raw.githubusercontent.com/samuelcardillo/MMORPGMaker-MV/master/js/plugins/OrangeCustomEventCreator.js (By Hudell - www.hudell.com)
 
 ### Launch steps
 
@@ -60,6 +61,10 @@ I joined the project in September 2020 and made the MZ version a few weeks later
 4. Upload/Update your game on a website
 
 ---
+
+### Contribution
+
+This is an open source project supported by the community. We are always looking for more developers to help building MMOMV/MZ! Feel free to push commits and [join the community Discord](https://discord.gg/GVqyAwp). **Beware: Commits that modify the core of RPG Maker MV/MZ are not accepted.**
 
 ### Documentation 
 
