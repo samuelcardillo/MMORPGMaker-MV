@@ -20,8 +20,8 @@ Yes, please go on the MZ branch of this project: https://github.com/samuelcardil
 
 **Disclaimer :** *All the files are already contained in the project.*
 
-- Orange Custom Events : http://download.hudell.com/OrangeCustomEvents.js
-- Orange Custom Event Creator : http://download.hudell.com/OrangeCustomEventCreator.js
+- Orange Custom Events : https://raw.githubusercontent.com/samuelcardillo/MMORPGMaker-MV/master/js/plugins/OrangeCustomEvents.js (By Hudell - www.hudell.com)
+- Orange Custom Event Creator : https://raw.githubusercontent.com/samuelcardillo/MMORPGMaker-MV/master/js/plugins/OrangeCustomEventCreator.js (By Hudell - www.hudell.com)
 
 ### Launch steps
 1. `git clone` the repo
