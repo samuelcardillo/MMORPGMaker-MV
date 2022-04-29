@@ -1,7 +1,7 @@
 {
   "private": true,
   "dependencies": {
-    "async": "^3.1.0",
+    "async": "^3.2.2",
     "body-parser": "^1.15.1",
     "crypto": "^1.0.1",
     "dotenv": "^16.0.0",
