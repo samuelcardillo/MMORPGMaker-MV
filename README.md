@@ -32,8 +32,9 @@ I joined the project in September 2020 and made the MZ version a few weeks later
 
 **Disclaimer :** *The following files are already contained in the project.*
 
-- Orange Custom Events : https://raw.githubusercontent.com/samuelcardillo/MMORPGMaker-MV/master/js/plugins/OrangeCustomEvents.js (By Hudell - www.hudell.com)
-- Orange Custom Event Creator : https://raw.githubusercontent.com/samuelcardillo/MMORPGMaker-MV/master/js/plugins/OrangeCustomEventCreator.js (By Hudell - www.hudell.com)
+- Orange Custom Events : https://raw.githubusercontent.com/samuelcardillo/MMORPGMaker-MV/master/js/plugins/OrangeCustomEvents.js
+- Orange Custom Event Creator : https://raw.githubusercontent.com/samuelcardillo/MMORPGMaker-MV/master/js/plugins/OrangeCustomEventCreator.js 
+(Both by Hudell)
 
 ### Launch steps
 
