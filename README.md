@@ -40,7 +40,7 @@ I joined the project in September 2020 and made the MZ version a few weeks later
 
 2. Check that you're on to the `MMOMZ/develop` branch
 
-3. Install [NodeJS](https://nodejs.org/en/) *we recommend using version 16 or higher*
+3. Install [NodeJS](https://nodejs.org/en/) *(we recommend using version 16 or higher)*
 
 4. Install [RethinkDB](https://rethinkdb.com/docs/install/)
 
