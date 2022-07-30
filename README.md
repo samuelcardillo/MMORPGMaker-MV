@@ -1,5 +1,5 @@
-# (MMO)RPG Maker MZ 
-###  **Disclaimer :** *You have to own both RPG Maker MV and MZ licenses in order to use this repack !*
+# (MMO)RPG Maker MV
+###  **Disclaimer :** *You have to own RPG Maker MV licenses in order to use this repack !*
 ---
 
 ## Summary
@@ -21,10 +21,9 @@ I joined the project in September 2020 and made the MZ version a few weeks later
 
 ## How to use ? 
 
-1. Watch [the MV tutorial video](https://www.youtube.com/watch?v=TcAmU2bdKvE) to learn the basics
-2. Then take a look at [the MZ tutorial](https://www.youtube.com/watch?v=VhUWKwOxv5Q) :
+1. Watch [the MV tutorial video](https://www.youtube.com/watch?v=TcAmU2bdKvE) to learn the basics: 
 
-[![Watch the tutorial](https://img.youtube.com/vi/4V4YhMcNRng/0.jpg)](https://www.youtube.com/watch?v=VhUWKwOxv5Q) 
+[![Watch the tutorial](https://img.youtube.com/vi/TcAmU2bdKvE/0.jpg)](https://www.youtube.com/watch?v=TcAmU2bdKvE) 
 
 *Note : It's not needed to touch any package file anymore*
 
