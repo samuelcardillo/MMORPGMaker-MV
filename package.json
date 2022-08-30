@@ -2,8 +2,10 @@
     "name": "rmmz-game",
     "main": "index.html",
     "chromium-args": "--force-color-profile=srgb",
+    "js-flags": "--expose-gc",
     "window": {
         "title": "Project1",
+        "toolbar": false,
         "width": 816,
         "height": 624,
         "position": "center",
