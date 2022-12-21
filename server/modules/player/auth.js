@@ -100,7 +100,7 @@ function loginSuccess(client, details) {
     // Then we continue
     client.emit("login_success", { msg: details });
     client.playerData = details;
-    MMO_Core["gameworld"].attachNode(client.playerData, true);
+    MMO_Core["gameworld"].attachNode(client.playerData, true, client.id, walletId);
     MMO_Core.security.createLog(client.playerData.username + " connected to the game");
 }
 
