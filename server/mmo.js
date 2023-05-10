@@ -42,7 +42,8 @@ MMO_Core = {
     socket: require("./core/socket"),
     routes: require("./core/routes"),
     rpgmaker: require("./core/rpgmaker"),
-    gameworld: require("./core/gameworld")
+    gameworld: require("./core/gameworld"),
+    discord: require("./core/discord")
 };
 
 try {
