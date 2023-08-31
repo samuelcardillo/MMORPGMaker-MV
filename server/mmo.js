@@ -4,7 +4,17 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const path = require("path");
 const app = express();
+
+// No SSL
 const server = require("http").createServer(app);
+
+// SSL
+// const options = {
+//     key: fs.readFileSync(process.env.KEY),
+//     cert: fs.readFileSync(process.env.CERT),
+//   };
+// const server = require("https").createServer(options, app);
+
 const io = require("socket.io").listen(server, { log: false });
 
 /*****************************
@@ -25,7 +35,8 @@ app.use(function(req, res, next) { // CORS (read : https://developer.mozilla.org
     next();
 });
 
-app.use("/data", express.static(path.join(__dirname, "..", "data")));
+// If you don't need external host
+// app.use("/data", express.static(path.join(__dirname, "../game", "data")));
 
 console.log("######################################");
 console.log("# MMORPG Maker MV - Samuel Lespes Cardillo");
@@ -43,7 +54,8 @@ MMO_Core = {
     routes: require("./core/routes"),
     rpgmaker: require("./core/rpgmaker"),
     gameworld: require("./core/gameworld"),
-    discord: require("./core/discord")
+    // Enable this to use discord function
+    discord: require("./core/discord"),
 };
 
 try {
