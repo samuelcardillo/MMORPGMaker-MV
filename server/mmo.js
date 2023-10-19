@@ -55,7 +55,7 @@ MMO_Core = {
     rpgmaker: require("./core/rpgmaker"),
     gameworld: require("./core/gameworld"),
     // Enable this to use discord function
-    discord: require("./core/discord"),
+    // discord: require("./core/discord"),
 };
 
 try {
