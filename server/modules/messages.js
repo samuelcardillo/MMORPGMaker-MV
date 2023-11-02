@@ -10,6 +10,7 @@ exports.initialize = function() {
     const COLOR_ACTION = "#ffff00";
     const COLOR_GLOBAL = "#009933";
     const COLOR_NORMAL = "#F8F8F8";
+    const COLOR_DISCORD = "#7289DA";
 
     MMO_Core.socket.loadModules("messages", true).then(() => {
         console.log("[I] Sub modules of messages loaded.");
@@ -47,11 +48,21 @@ exports.initialize = function() {
             payload.senderId = senderId;
         }
 
+        MMO_Core.discord.sendMess(username, message);
         io.in(map).emit("new_message", payload);
     };
 
     exports.sendToAll = function(username, message, messageType) {
         let color = COLOR_GLOBAL;
+        if (messageType === "error") {
+            color = COLOR_ERROR;
+        }
+        MMO_Core.discord.sendMess(username, message);
+        io.emit("new_message", { username: username, msg: message, color: color });
+    };
+
+    exports.sendFromDiscord = function(username, message, messageType) {
+        let color = COLOR_DISCORD;
         if (messageType === "error") {
             color = COLOR_ERROR;
         }

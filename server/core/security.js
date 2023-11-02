@@ -154,7 +154,7 @@ exports.createLog = function(message,type) {
         const fullDate = new Date();
         const todayDate = `${fullDate.getFullYear()}-${fullDate.getMonth()}-${fullDate.getDate()}`;
 
-        fs.appendFile(`${todayDate}.log`, `${fullDate.toISOString()} : ${message}\r\n`, function(err) {
+        fs.appendFile(`./logs/${todayDate}.log`, `${fullDate.toISOString()} : ${message}\r\n`, function(err) {
             if (err) {
                 throw err;
             }

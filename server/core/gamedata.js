@@ -4,7 +4,7 @@ const fs = require("fs");
       PUBLIC FUNCTIONS
 *****************************/
 
-exports.path = "../../";
+exports.path = "../../game/";
 exports.loaded = false;
 exports.data = {};
 

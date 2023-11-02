@@ -4,6 +4,7 @@
     "async": "^3.2.2",
     "body-parser": "^1.15.1",
     "crypto": "^1.0.1",
+    "discord.js": "^14.11.0",
     "dotenv": "^16.0.0",
     "eslint": "^7.0.0",
     "eslint-config-standard": "^14.1.1",

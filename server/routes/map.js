@@ -3,7 +3,7 @@ const fs = require("fs");
 
 router.get("/:name", function(req, res) {
   if (req.params.name) {
-    const correctedPath = `${__dirname}/../../data`;
+    const correctedPath = `${__dirname}/../../game/data`;
     const fileName = `${correctedPath}/${req.params.name}`; // format the name
     fs.readFile(fileName, "utf8", function(_err, contents) { // open map
       if (_err) res.status(404).send()
